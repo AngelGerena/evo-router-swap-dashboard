@@ -1,0 +1,145 @@
+/* ============================================================================
+   EVO Swap Request — field tool styling
+   Design direction: a one-handed field instrument, not a desktop dashboard.
+   Summit teal/navy identity; generous thumb targets; the PDF reader is the
+   signature element — it turns dense SOPs into a vertical swipe, never sideways.
+   ============================================================================ */
+:root{
+  --navy:#0b2545; --navy-2:#123c69; --teal:#0fa3a3; --teal-deep:#0f766e;
+  --ink:#16202e; --muted:#5b6b80; --line:#e2e8f1; --bg:#eef2f7; --card:#fff;
+  --good:#166534; --good-bg:#e6f4ea; --bad:#b91c1c; --bad-bg:#fdeaea;
+  --warn:#b45309; --warn-bg:#fdf2dd;
+  --r:16px; --shadow:0 10px 30px rgba(15,40,75,.10);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{display:flex;justify-content:center}
+.phone{width:100%;max-width:560px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;padding:0 16px calc(28px + var(--safe-b))}
+
+/* ---- header ---- */
+.top{padding:18px 4px 14px}
+.brand{display:flex;align-items:center;gap:12px}
+.wave{width:40px;height:40px;border-radius:11px;flex:none;
+  background:radial-gradient(circle at 30% 30%, var(--teal), var(--teal-deep) 70%);
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.25)}
+.kick{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.gate-note{margin-top:12px;background:var(--navy);color:#dce9f7;font-size:12.5px;font-weight:600;
+  padding:9px 13px;border-radius:11px;line-height:1.45}
+
+/* ---- step rail ---- */
+.rail{display:flex;gap:6px;margin:14px 0 16px}
+.rail-step{flex:1;border:0;background:var(--card);color:var(--muted);font:inherit;font-weight:700;font-size:12.5px;
+  padding:10px 6px;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
+  box-shadow:var(--shadow);transition:.18s}
+.rail-step span{width:20px;height:20px;border-radius:50%;background:var(--line);color:var(--muted);
+  display:grid;place-items:center;font-size:11px}
+.rail-step.is-active{color:var(--navy)}
+.rail-step.is-active span{background:var(--teal);color:#fff}
+.rail-step.done span{background:var(--good);color:#fff}
+
+/* ---- steps ---- */
+.step{display:none;animation:rise .22s ease}
+.step.is-active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lead{color:var(--muted);font-size:14.5px;line-height:1.55;margin:2px 4px 16px}
+
+/* ---- resources ---- */
+.res-label,.read-head .h,.res-head{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 4px 9px}
+.res-card{width:100%;text-align:left;border:0;background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);
+  padding:15px 16px;margin-bottom:10px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:.16s}
+.res-card:active{transform:scale(.985)}
+.res-ic{width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;
+  background:var(--good-bg);color:var(--teal-deep);font-weight:800;font-size:15px}
+.res-card.seen .res-ic{background:var(--navy);color:#fff}
+.res-card b{display:block;font-size:14.5px;letter-spacing:-.01em}
+.res-card em{display:block;font-style:normal;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.4}
+.res-card .chev{margin-left:auto;color:var(--muted);font-size:18px}
+.res-card .seen-tag{margin-left:auto;font-size:11px;font-weight:800;color:var(--good)}
+
+/* ---- checklist ---- */
+.checks{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:10px}
+.checks li{display:flex;align-items:center;gap:10px;background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);padding:6px 8px 6px 6px}
+.check{flex:1;display:flex;align-items:center;gap:13px;padding:10px;cursor:pointer}
+.check input{position:absolute;opacity:0;width:0;height:0}
+.box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:.15s}
+.box::after{content:"✓";color:#fff;font-weight:900;font-size:15px;opacity:0;transform:scale(.5);transition:.15s}
+.check input:checked + .box{background:var(--good);border-color:var(--good)}
+.check input:checked + .box::after{opacity:1;transform:scale(1)}
+.check input:focus-visible + .box{outline:3px solid var(--teal);outline-offset:2px}
+.ctext b{font-size:14.5px;letter-spacing:-.01em}
+.ctext em{display:block;font-style:normal;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.4}
+.mini{align-self:stretch;border:0;background:var(--bg);color:var(--navy);font:inherit;font-weight:800;font-size:12px;
+  padding:0 14px;border-radius:11px;cursor:pointer;margin:6px}
+
+/* ---- readings ---- */
+.readings{background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);padding:16px;margin-bottom:18px}
+.read-head{font-weight:800;font-size:15px;display:flex;align-items:center;gap:9px}
+.read-head span{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;background:var(--warn-bg);color:var(--warn);padding:3px 8px;border-radius:999px;font-weight:800}
+.read-sub{color:var(--muted);font-size:12.5px;margin:6px 0 13px;line-height:1.45}
+.read-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.read-grid label{font-size:11.5px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.read-grid input{font:inherit;font-weight:700;color:var(--ink);font-family:"Spline Sans Mono",monospace;
+  padding:11px;border:1.5px solid var(--line);border-radius:11px;width:100%;text-align:center}
+.read-grid input:focus{outline:0;border-color:var(--teal)}
+.read-flag{margin-top:12px;font-size:12.5px;font-weight:700;padding:9px 12px;border-radius:10px;line-height:1.4}
+.read-flag.ok{background:var(--good-bg);color:var(--good)}
+.read-flag.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* ---- form ---- */
+.form label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:12px}
+.form input,.form select,.form textarea{display:block;width:100%;margin-top:7px;font:inherit;font-weight:600;color:var(--ink);
+  padding:13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card)}
+.form input:focus,.form select:focus,.form textarea:focus{outline:0;border-color:var(--teal)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.divider{display:flex;align-items:center;gap:12px;margin:6px 0 14px;color:var(--muted)}
+.divider::before,.divider::after{content:"";height:1px;background:var(--line);flex:1}
+.divider span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.micro{font-size:12px;color:var(--muted);line-height:1.45;margin:-4px 0 14px}
+.micro.center{text-align:center;margin-top:12px}
+
+/* ---- buttons ---- */
+.primary{width:100%;border:0;background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:#fff;font:inherit;
+  font-weight:800;font-size:16px;padding:16px;border-radius:14px;cursor:pointer;box-shadow:0 8px 20px rgba(15,118,110,.28);transition:.16s}
+.primary:active{transform:translateY(1px)}
+.primary:disabled{background:var(--line);color:#9aa7b6;box-shadow:none;cursor:not-allowed}
+.submit{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+.lock-hint{text-align:center;color:var(--muted);font-size:12.5px;margin-top:10px}
+.lock-hint.clear{color:var(--good);font-weight:700}
+
+/* ---- result ---- */
+.result-card{background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);padding:26px 22px;text-align:center}
+.result-card .seal{width:62px;height:62px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-size:30px}
+.result-card.ok .seal{background:var(--good-bg);color:var(--good)}
+.result-card.err .seal{background:var(--bad-bg);color:var(--bad)}
+.result-card h2{margin:0 0 8px;font-size:20px}
+.result-card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 6px}
+.result-card .routed{margin-top:14px;font-weight:800;color:var(--navy)}
+.result-card .again{margin-top:20px;background:var(--bg);color:var(--navy);border:0;font:inherit;font-weight:800;padding:13px 20px;border-radius:12px;cursor:pointer}
+
+/* ============================================================================
+   PDF READER — the signature element.
+   Pages render to width-fit canvases stacked vertically. Pure top-to-bottom
+   swipe. Never horizontal. Works the same on any phone, tablet, or desktop.
+   ============================================================================ */
+.reader[hidden]{display:none!important}
+.reader{position:fixed;inset:0;background:#0a1626;z-index:50;display:flex;flex-direction:column;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.reader-bar{display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 12px;
+  background:rgba(11,37,69,.96);backdrop-filter:blur(8px);color:#fff;position:sticky;top:0;z-index:2}
+.reader-close{width:38px;height:38px;border-radius:10px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:17px;cursor:pointer;flex:none}
+.reader-title{font-weight:800;font-size:14.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reader-page{font-size:12px;color:#9fb6d4;font-family:"Spline Sans Mono",monospace;flex:none}
+.reader-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 10px 40px;scroll-behavior:smooth}
+.reader-scroll canvas{display:block;width:100%;height:auto;margin:0 auto 14px;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.reader-loading{color:#9fb6d4;text-align:center;padding:40px;font-weight:700}
+
+/* ---- desktop niceties ---- */
+@media(min-width:600px){
+  .phone{margin-top:18px;margin-bottom:18px;min-height:auto;border-radius:24px;box-shadow:0 30px 80px rgba(15,40,75,.18);padding-top:6px}
+  body{align-items:flex-start;padding:0 16px}
+  .reader-scroll{padding:20px}
+  .reader-scroll canvas{max-width:820px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>EVO Swap Decision — Summit Broadband</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css" />
+<style>
+  body{align-items:center;min-height:100vh}
+  .decide{max-width:440px;width:100%;padding:24px 16px}
+  .dcard{background:#fff;box-shadow:var(--shadow);border-radius:18px;padding:26px 22px;text-align:center}
+  .dcard .seal{width:64px;height:64px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;font-size:32px}
+  .dcard.ok .seal{background:var(--good-bg);color:var(--good)}
+  .dcard.deny .seal{background:var(--bad-bg);color:var(--bad)}
+  .dcard.err .seal{background:var(--warn-bg);color:var(--warn)}
+  .dcard h2{margin:0 0 10px;font-size:21px}
+  .dcard p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:6px 0}
+  .dcard .meta{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font-weight:800;color:var(--navy)}
+  .confirm{display:flex;gap:12px;margin-top:20px}
+  .confirm button{flex:1;border:0;font:inherit;font-weight:800;font-size:15px;padding:15px;border-radius:13px;cursor:pointer;color:#fff}
+  .confirm .yes{background:var(--good)} .confirm .no{background:var(--bad)}
+  .spin{color:var(--muted);font-weight:700;padding:30px}
+  .note{width:100%;margin-top:14px;font:inherit;padding:12px;border:1.5px solid var(--line);border-radius:11px;resize:vertical}
+</style>
+</head>
+<body>
+<div class="decide">
+  <div class="top" style="text-align:center">
+    <div class="kick">Summit Broadband · Field Operations</div>
+    <h1 style="margin-top:2px">EVO Swap Decision</h1>
+  </div>
+  <div class="dcard" id="card"><div class="spin">Checking link…</div></div>
+</div>
+<script src="config.js"></script>
+<script>
+const CFG = window.EVO_CONFIG;
+const params = new URLSearchParams(location.search);
+const token = params.get("t");
+const action = params.get("a"); // approve | deny
+const card = document.getElementById("card");
+
+function render(html, cls=""){ card.className = "dcard " + cls; card.innerHTML = html; }
+
+if (!token || !["approve","deny"].includes(action)) {
+  render(`<div class="seal">!</div><h2>Invalid link</h2><p>This approval link is missing or malformed.</p>`, "err");
+} else {
+  // Confirm step so a tap-preview in email doesn't auto-decide.
+  const verb = action === "approve" ? "Approve" : "Deny";
+  render(`
+    <div class="seal">${action==="approve"?"✓":"✕"}</div>
+    <h2>${verb} this swap?</h2>
+    <p>Confirm to record your decision. This unlocks (or stops) the tech's job.</p>
+    <textarea class="note" id="note" rows="2" placeholder="${action==="deny"?"Reason (recommended)":"Note (optional)"}"></textarea>
+    <div class="confirm">
+      <button class="no" onclick="history.length>1?history.back():window.close()">Cancel</button>
+      <button class="${action==="approve"?"yes":"no"}" id="go">${verb}</button>
+    </div>`, action==="approve"?"ok":"deny");
+
+  document.getElementById("go").addEventListener("click", submit);
+}
+
+async function submit(){
+  render(`<div class="spin">Recording your decision…</div>`);
+  const note = (document.getElementById("note")?.value || "").trim() || null;
+  try{
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/decide`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", apikey: CFG.SUPABASE_ANON_KEY },
+      body: JSON.stringify({ t: token, a: action, note })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "Could not record decision");
+    const approved = data.status === "approved";
+    render(`
+      <div class="seal">${approved?"✓":"✕"}</div>
+      <h2>Swap ${approved?"approved":"denied"}</h2>
+      <p>${approved?"The tech is cleared to proceed.":"The tech has been told to hold."}</p>
+      <div class="meta">${data.customer} · acct ${data.account}<br>Decided by ${data.decided_by}</div>`,
+      approved?"ok":"deny");
+  }catch(err){
+    render(`<div class="seal">!</div><h2>Couldn't record it</h2><p>${err.message}</p>
+      <p>Open the dashboard to decide manually.</p>`, "err");
+  }
+}
+</script>
+</body>
+</html>

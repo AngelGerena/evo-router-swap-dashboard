@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EVO Swap Control — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--navy:#0b2545;--navy2:#123c69;--teal:#0f766e;--ink:#16202e;--muted:#5b6b80;
+  --line:#e2e8f1;--bg:#eef2f7;--card:#fff;--good:#166534;--good-bg:#e6f4ea;
+  --bad:#b91c1c;--bad-bg:#fdeaea;--warn:#b45309;--warn-bg:#fdf2dd;--shadow:0 10px 30px rgba(15,40,75,.08)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif}
+.shell{width:min(1340px,calc(100% - 32px));margin:22px auto 60px}
+.hero{background:linear-gradient(135deg,var(--navy),var(--navy2) 60%,var(--teal));color:#fff;
+  border-radius:20px;padding:24px 26px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.hero .kick{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.82;font-weight:700}
+.hero h1{margin:6px 0 0;font-size:26px}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;font:inherit;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer}
+.btn.light{background:#fff;color:var(--navy)} .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.gate{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:40px;max-width:420px;margin:60px auto;text-align:center}
+.gate input{width:100%;margin:14px 0;padding:13px;border:1.5px solid var(--line);border-radius:12px;font:inherit}
+.gate .btn{width:100%;background:var(--navy);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0}
+.kpi{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+.kpi span{color:var(--muted);font-weight:700;font-size:12.5px}
+.kpi b{display:block;font-size:32px;margin-top:5px}
+.kpi.bad b{color:var(--bad)} .kpi.warn b{color:var(--warn)} .kpi.good b{color:var(--good)}
+.panel{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
+.phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.phead h2{margin:0;font-size:17px}
+.phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.wrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:12px}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-weight:800;font-size:11.5px;white-space:nowrap}
+.b-pending{background:var(--warn-bg);color:var(--warn)} .b-approved{background:var(--good-bg);color:var(--good)}
+.b-denied{background:var(--bad-bg);color:var(--bad)} .b-escalated{background:#e7e9fb;color:#4338ca}
+.risk{font-weight:800;font-size:11.5px;padding:3px 9px;border-radius:999px}
+.r-ok{background:var(--good-bg);color:var(--good)} .r-watch{background:var(--warn-bg);color:var(--warn)} .r-high{background:var(--bad-bg);color:var(--bad)}
+.mono{font-family:"Spline Sans Mono",monospace}
+.muted{color:var(--muted)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.filters input,.filters select{padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;background:#fff}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- gate -->
+<div class="gate" id="gate">
+  <div class="kick" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800">Summit Broadband</div>
+  <h2 style="margin:8px 0 0">EVO Swap Control — Admin</h2>
+  <p class="muted" style="font-size:14px">Enter your admin access token to view the queue and analytics.</p>
+  <input type="password" id="adminToken" placeholder="Admin access token" />
+  <button class="btn" onclick="loadAll()">Open dashboard</button>
+  <p class="muted" id="gateErr" style="color:var(--bad);font-size:13px;min-height:18px"></p>
+</div>
+
+<!-- dashboard -->
+<div class="shell" id="dash" hidden>
+  <div class="hero">
+    <div><div class="kick">Summit Broadband · Field Operations</div><h1>EVO Swap Control</h1></div>
+    <div class="acts">
+      <button class="btn ghost" onclick="loadAll()">Refresh</button>
+      <button class="btn light" onclick="exportXlsx()">Export report (XLSX)</button>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="panel">
+    <div class="phead"><h2>Live queue & history</h2><span class="sub" id="rowCount"></span></div>
+    <div class="filters">
+      <input id="search" placeholder="Search tech, customer, account, serial…" oninput="renderTable()">
+      <select id="fStatus" onchange="renderTable()">
+        <option value="all">All statuses</option><option value="pending">Pending</option>
+        <option value="approved">Approved</option><option value="denied">Denied</option><option value="escalated">Escalated</option>
+      </select>
+      <select id="fMarket" onchange="renderTable()"><option value="all">All markets</option></select>
+    </div>
+    <div class="wrap">
+      <table id="mainTable"><thead><tr>
+        <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
+        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="phead">
+      <h2>Technician behavior</h2>
+      <span class="sub">Flags techs who swap often but skip the basics — the "swap to swap" pattern</span>
+    </div>
+    <div class="wrap" style="max-height:460px">
+      <table id="techTable"><thead><tr>
+        <th>Technician</th><th>Swaps</th><th>Approved</th><th>Denied</th><th>Pending</th>
+        <th>Opened a resource</th><th>Fast submits (&lt;45s)</th><th>Avg time</th><th>Markets</th><th>Signal</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const CFG = window.EVO_CONFIG;
+let DATA = null, TOKEN = "";
+
+async function loadAll(){
+  TOKEN = document.getElementById("adminToken").value.trim() || TOKEN;
+  if(!TOKEN){ document.getElementById("gateErr").textContent="Enter your token."; return; }
+  try{
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/admin-data`, { headers:{ "x-admin-token":TOKEN } });
+    if(res.status===401){ document.getElementById("gateErr").textContent="Invalid token."; return; }
+    DATA = await res.json();
+    document.getElementById("gate").hidden = true;
+    document.getElementById("dash").hidden = false;
+    fillMarketFilter();
+    renderKpis(); renderTable(); renderTechs();
+  }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
+}
+
+function fillMarketFilter(){
+  const sel = document.getElementById("fMarket");
+  const codes = [...new Set(DATA.rows.map(r=>r.market_code))];
+  sel.innerHTML = '<option value="all">All markets</option>' + codes.map(c=>`<option>${c}</option>`).join("");
+}
+
+function renderKpis(){
+  const r = DATA.rows;
+  const pending = r.filter(x=>x.status==="pending"||x.status==="escalated").length;
+  const approved = r.filter(x=>x.status==="approved").length;
+  const denied = r.filter(x=>x.status==="denied").length;
+  const techs = new Set(r.map(x=>x.tech_name.toLowerCase())).size;
+  const highRisk = DATA.techStats.filter(t=>t.risk==="high").length;
+  document.getElementById("kpis").innerHTML = `
+    ${kpi("Total requests", r.length)}
+    ${kpi("Awaiting decision", pending, "warn")}
+    ${kpi("Approved", approved, "good")}
+    ${kpi("Denied", denied, "bad")}
+    ${kpi("High-signal techs", highRisk, highRisk?"bad":"good")}`;
+}
+const kpi=(l,v,c="")=>`<div class="kpi ${c}"><span>${l}</span><b>${v}</b></div>`;
+
+function renderTable(){
+  const q = (document.getElementById("search").value||"").toLowerCase();
+  const st = document.getElementById("fStatus").value;
+  const mk = document.getElementById("fMarket").value;
+  const rows = DATA.rows.filter(r=>{
+    const text = [r.tech_name,r.customer_first,r.customer_last,r.account_number,r.evo_serial_mac,r.removed_from_acct].join(" ").toLowerCase();
+    return (!q||text.includes(q)) && (st==="all"||r.status===st) && (mk==="all"||r.market_code===mk);
+  });
+  document.getElementById("rowCount").textContent = `${rows.length} of ${DATA.rows.length}`;
+  const tb = document.querySelector("#mainTable tbody");
+  tb.innerHTML = rows.length ? rows.map(r=>{
+    const cl = r.checklist||{};
+    const opened = (cl.resources_opened?.length)||0;
+    return `<tr>
+      <td class="mono muted">${fmt(r.submitted_at)}</td>
+      <td><span class="badge b-${r.status}">${r.status}</span></td>
+      <td>${esc(r.tech_name)}</td>
+      <td class="mono">${esc(r.market_code)}</td>
+      <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
+      <td class="mono">${esc(r.account_number)}</td>
+      <td class="mono">${esc(r.evo_serial_mac)}</td>
+      <td class="mono">${esc(r.removed_from_acct)}</td>
+      <td class="mono">${cl.ont_light_ont??"—"}</td>
+      <td>${opened?opened+" opened":'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
+      <td class="muted">${esc(r.decided_by_email||"—")}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="11" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+}
+
+function renderTechs(){
+  const tb = document.querySelector("#techTable tbody");
+  tb.innerHTML = DATA.techStats.map(t=>`
+    <tr>
+      <td><b>${esc(t.tech)}</b></td>
+      <td class="mono">${t.total}</td><td class="mono">${t.approved}</td>
+      <td class="mono">${t.denied}</td><td class="mono">${t.pending}</td>
+      <td class="mono">${t.resourceRate}%</td>
+      <td class="mono">${t.fastRate}%</td>
+      <td class="mono">${t.avgSecs!=null?t.avgSecs+"s":"—"}</td>
+      <td class="mono muted">${t.markets.join(", ")}</td>
+      <td><span class="risk r-${t.risk}">${t.risk==="high"?"High":t.risk==="watch"?"Watch":"OK"}</span></td>
+    </tr>`).join("") || `<tr><td colspan="10" class="muted" style="text-align:center;padding:26px">No data yet.</td></tr>`;
+}
+
+function exportXlsx(){
+  const wb = XLSX.utils.book_new();
+  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Reason","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Decision Note"];
+  const reqRows = DATA.rows.map(r=>{const c=r.checklist||{};return [
+    fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,
+    r.evo_serial_mac,r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
+    yn(c.router_relocated),yn(c.dual_ssid_attempted),yn(c.no_parallel_networks),
+    (c.resources_opened||[]).join("; "),c.time_to_submit_secs??"",r.decided_by_email||"",r.decided_at?fmt(r.decided_at):"",r.decision_note||""
+  ];});
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([reqHeaders,...reqRows]), "Swap Requests");
+
+  const techHeaders=["Technician","Total Swaps","Approved","Denied","Pending","Resource Open Rate %","Fast Submit Rate %","Avg Time (s)","Markets","Signal"];
+  const techRows=DATA.techStats.map(t=>[t.tech,t.total,t.approved,t.denied,t.pending,t.resourceRate,t.fastRate,t.avgSecs??"",t.markets.join("; "),t.risk]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([techHeaders,...techRows]), "Technician Behavior");
+
+  // 4558 Orlando return tracking — units owed back
+  const retHeaders=["EVO S/N or MAC","Removed From Acct","Tech","Market","Submitted","Status"];
+  const retRows=DATA.rows.map(r=>[r.evo_serial_mac,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([retHeaders,...retRows]), "Return to 4558 Orlando");
+
+  XLSX.writeFile(wb, `EVO_Swap_Control_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const yn=b=>b?"Yes":"No";
+const fmt=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
+document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key==="Enter")loadAll();});
+</script>
+</body>
+</html>
