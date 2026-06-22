@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<link rel="stylesheet" href="app.css?v=20260620c" />
+<link rel="stylesheet" href="app.css?v=20260622d" />
 </head>
 <body>
 <div class="phone">
@@ -81,9 +81,9 @@
       <div class="read-head">ONT light readings <span>required</span></div>
       <p class="read-sub">SOP range: -14 to -19.5 dB. No more than -1 dB loss NID → ONT. Just type the number — we add the minus for you.</p>
       <div class="read-grid">
-        <label>NID (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
-        <label>ONT (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_ont" placeholder="e.g. -17.2"></label>
-        <label>Health score<input type="text" inputmode="numeric" id="r_health" placeholder="e.g. 95"></label>
+        <label>NID/FCPA CLOSET (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
+        <label>ONT | 1490/1550 or 1577 (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_ont" placeholder="e.g. -17.2"></label>
+        <label>Frontline Health Score<input type="text" inputmode="numeric" id="r_health" placeholder="e.g. 95"></label>
       </div>
       <div id="readingFlag" class="read-flag" hidden></div>
     </div>
@@ -151,6 +151,6 @@
 </div>
 
 <script src="config.v4.js"></script>
-<script src="app.v6.js"></script>
+<script src="app.v6.js?v=20260622d"></script>
 </body>
 </html>

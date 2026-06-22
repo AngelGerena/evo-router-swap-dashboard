@@ -251,25 +251,71 @@ $("#reqForm").addEventListener("submit", async (e) => {
 
 function showResult(ok, data) {
   const card = $("#resultCard");
-  if (ok) {
-    card.className = "result-card ok";
-    card.innerHTML = `
-      <div class="seal">✓</div>
-      <h2>Request sent</h2>
-      <p>The job is gated until a manager decides. They've been pinged now.</p>
-      <div class="routed">Routed to ${data.routed_to || "your market manager"}</div>
-      <p style="margin-top:14px">Keep this screen handy. You'll be cleared the moment it's approved.</p>
-      <button class="again" onclick="location.reload()">New request</button>`;
-  } else {
+  if (!ok) {
     card.className = "result-card err";
     card.innerHTML = `
       <div class="seal">!</div>
       <h2>Didn't send</h2>
-      <p>${data.error || "Something went wrong."}</p>
+      <p>${escHtml(data.error || "Something went wrong.")}</p>
       <button class="again" onclick="history.back()">Go back</button>`;
+    goStep(3);
+    return;
   }
+  card.className = "result-card ok pending";
+  card.innerHTML = `
+    <div class="seal" id="rSeal">✓</div>
+    <h2 id="rTitle">Request sent</h2>
+    <p id="rMsg">The job is gated until a manager decides — they've been pinged now.</p>
+    <div class="routed">Routed to ${escHtml(data.routed_to || "your market manager")}</div>
+    <div class="await" id="rAwait"><span class="dot"></span> Waiting on their decision… this screen updates by itself.</div>
+    <button class="again" onclick="location.reload()">New request</button>`;
   goStep(3);
+  if (data.id) startDecisionPoll(data.id);
 }
+
+let _pollTimer = null, _pollStop = null;
+function startDecisionPoll(id) {
+  if (_pollTimer) clearInterval(_pollTimer);
+  if (_pollStop) clearTimeout(_pollStop);
+  const check = async () => {
+    try {
+      const r = await fetch(`${CFG.FUNCTIONS_BASE}/request-status?id=${encodeURIComponent(id)}`, {
+        headers: { apikey: CFG.SUPABASE_ANON_KEY },
+      });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d.status === "approved" || d.status === "denied") {
+        clearInterval(_pollTimer); _pollTimer = null;
+        if (_pollStop) { clearTimeout(_pollStop); _pollStop = null; }
+        renderDecision(d);
+      }
+    } catch (e) { /* keep polling */ }
+  };
+  check();
+  _pollTimer = setInterval(check, 12000);
+  _pollStop = setTimeout(() => { if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; } }, 45 * 60 * 1000);
+}
+
+function renderDecision(d) {
+  const card = $("#resultCard");
+  const approved = d.status === "approved";
+  const note = (d.note || "").trim();
+  card.className = "result-card decided " + (approved ? "ok" : "err");
+  card.innerHTML = `
+    <div class="seal big">${approved ? "✓" : "✕"}</div>
+    <h2>${approved ? "Approved — you're cleared" : "Denied — do not swap"}</h2>
+    <p>${approved
+        ? "Your manager approved this swap. You're good to proceed."
+        : "Your manager denied this swap. Hold off and follow their note below."}</p>
+    ${note ? `<div class="mgrnote ${approved ? "good" : "bad"}"><span class="mgrnote-h">${approved ? "Why it was approved" : "Manager's note / instruction"}</span>${escHtml(note)}</div>` : ""}
+    ${d.by ? `<div class="routed">Decided by ${escHtml(d.by)}</div>` : ""}
+    <button class="again" onclick="location.reload()">New request</button>`;
+}
+
+function escHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 
 // ---- tutorial slide deck ---------------------------------------------------
 const tutorial = $("#tutorial");
