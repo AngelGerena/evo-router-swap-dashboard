@@ -64,9 +64,11 @@ function renderResources() {
     b.addEventListener("click", () => openResource(b.dataset.res, b))
   );
 }
-// "Guide" buttons inside the checklist
+// "Guide" buttons inside the checklist (data-page deep-links straight to a page)
 $$("[data-open]").forEach((b) =>
-  b.addEventListener("click", () => openResource(b.dataset.open))
+  b.addEventListener("click", () =>
+    openResource(b.dataset.open, null, b.dataset.page ? parseInt(b.dataset.page, 10) : null)
+  )
 );
 
 function markSeen(id) {
@@ -84,7 +86,7 @@ function markSeen(id) {
 const reader = $("#reader"), readerScroll = $("#readerScroll");
 let currentPdf = null;
 
-async function openResource(id, cardEl) {
+async function openResource(id, cardEl, targetPage) {
   const res = CFG.RESOURCES.find((r) => r.id === id);
   if (!res) return;
   markSeen(id);
@@ -95,7 +97,8 @@ async function openResource(id, cardEl) {
   if (typeof pdfjsLib === "undefined") {
     readerScroll.innerHTML =
       `<div class="reader-loading">Opening the PDF directly…</div>`;
-    window.open(res.file, "_blank");
+    // Native PDF viewers honor #page=N to jump straight to the section.
+    window.open(res.file + (targetPage ? "#page=" + targetPage : ""), "_blank");
     return;
   }
   readerScroll.innerHTML = '<div class="reader-loading">Loading…</div>';
@@ -104,7 +107,8 @@ async function openResource(id, cardEl) {
     const pdf = await pdfjsLib.getDocument(res.file).promise;
     currentPdf = pdf;
     readerScroll.innerHTML = "";
-    $("#readerPage").textContent = `${pdf.numPages} pages`;
+    const gotoPage = targetPage && targetPage >= 1 && targetPage <= pdf.numPages ? targetPage : null;
+    $("#readerPage").textContent = gotoPage ? `Page ${gotoPage} of ${pdf.numPages}` : `${pdf.numPages} pages`;
     // Render at device width for crispness; cap for performance.
     const targetW = Math.min(readerScroll.clientWidth - 20, 900);
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -114,8 +118,21 @@ async function openResource(id, cardEl) {
       const vp = page.getViewport({ scale });
       const canvas = document.createElement("canvas");
       canvas.width = vp.width; canvas.height = vp.height;
+      canvas.dataset.page = i;
       readerScroll.appendChild(canvas);
       page.render({ canvasContext: canvas.getContext("2d"), viewport: vp });
+    }
+    // Jump to the deep-linked page; retry past any layout-settle delay.
+    if (gotoPage) {
+      const jump = () => {
+        const tc = readerScroll.querySelector(`canvas[data-page="${gotoPage}"]`);
+        // .reader-scroll has scroll-behavior:smooth in CSS, which cancels a
+        // programmatic jump mid-render. Force an instant scroll for the jump.
+        if (tc) { readerScroll.style.scrollBehavior = "auto"; readerScroll.scrollTop = tc.offsetTop; }
+      };
+      requestAnimationFrame(jump);
+      setTimeout(jump, 120);
+      setTimeout(jump, 400);
     }
   } catch (e) {
     readerScroll.innerHTML =
@@ -252,6 +269,63 @@ function showResult(ok, data) {
       <button class="again" onclick="history.back()">Go back</button>`;
   }
   goStep(3);
+}
+
+// ---- tutorial slide deck ---------------------------------------------------
+const tutorial = $("#tutorial");
+if (tutorial) {
+  const TUTORIAL = [
+    { ic: "▶", badge: "EVO Swap Request", title: "How it works",
+      body: "Every swap needs approval from Anthony or Peterson — no exceptions. Here’s the whole flow in about a minute." },
+    { ic: "1", badge: "Step 1", title: "Run the basics first",
+      body: "Most “swaps” are fixed without one. Relocate the router centrally, attempt a Dual-SSID split for legacy devices, and confirm there’s no second/old network. Tap any Guide to open the SOP at the right page." },
+    { ic: "2", badge: "Step 2", title: "Checklist + ONT readings",
+      body: "Tick all three boxes, then enter your NID and ONT light readings. SOP range is −14 to −19.5 dB, with no more than 1 dB loss NID→ONT. The request button stays locked until the basics and ONT reading are in." },
+    { ic: "3", badge: "Step 3", title: "Submit the request",
+      body: "Add the customer, account / job #, the EVO serial or MAC being removed and its account, your market, and your name — then tap Request approval. Every removed EVO returns to 4558 in Orlando with its account #." },
+    { ic: "⚡", badge: "After you submit", title: "A manager decides — fast",
+      body: "Your market’s manager is pinged instantly and approves or denies in one tap. You’ll see a confirmation; the job stays gated until they decide. No answer in 30 minutes auto-escalates to the backstop." },
+    { ic: "✓", badge: "That’s it", title: "Basics → gate → approved",
+      body: "Run the basics, finish the checklist, submit. Reopen this anytime from the “How it works” button." },
+  ];
+  const tutStage = $("#tutStage"), tutDots = $("#tutDots"), tutPrev = $("#tutPrev"), tutNext = $("#tutNext");
+  let tutIdx = 0;
+  const renderTut = () => {
+    const s = TUTORIAL[tutIdx];
+    tutStage.innerHTML =
+      `<div class="tut-slide"><div class="tut-ic">${s.ic}</div>` +
+      `<div class="tut-badge">${s.badge}</div><h2>${s.title}</h2><p>${s.body}</p></div>`;
+    tutDots.innerHTML = TUTORIAL.map((_, i) => `<span class="tut-dot ${i === tutIdx ? "on" : ""}"></span>`).join("");
+    tutPrev.disabled = tutIdx === 0;
+    tutNext.textContent = tutIdx === TUTORIAL.length - 1 ? "Done" : "Next ›";
+  };
+  const openTut = () => { tutIdx = 0; renderTut(); tutorial.hidden = false; document.body.style.overflow = "hidden"; };
+  const closeTut = () => { tutorial.hidden = true; document.body.style.overflow = ""; };
+  const go = (d) => {
+    const n = tutIdx + d;
+    if (n < 0) return;
+    if (n >= TUTORIAL.length) { closeTut(); return; }
+    tutIdx = n; renderTut();
+  };
+  $("#tutBtn").addEventListener("click", openTut);
+  $("#tutClose").addEventListener("click", closeTut);
+  tutPrev.addEventListener("click", () => go(-1));
+  tutNext.addEventListener("click", () => go(1));
+  // swipe (mobile)
+  let tx = null;
+  tutStage.addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  tutStage.addEventListener("touchend", (e) => {
+    if (tx == null) return;
+    const dx = e.changedTouches[0].clientX - tx; tx = null;
+    if (dx < -45) go(1); else if (dx > 45) go(-1);
+  });
+  // keyboard
+  document.addEventListener("keydown", (e) => {
+    if (tutorial.hidden) return;
+    if (e.key === "ArrowRight") go(1);
+    else if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "Escape") closeTut();
+  });
 }
 
 // ---- init ------------------------------------------------------------------

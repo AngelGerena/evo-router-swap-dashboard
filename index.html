@@ -23,7 +23,8 @@
       </div>
     </div>
     <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
-    <div style="text-align:right;font-size:10px;color:#9aa7b6;margin-top:4px;font-family:monospace">build v6-fix</div>
+    <button class="tut-launch" id="tutBtn" type="button"><span class="tut-launch-ic">▶</span> How it works — 60-second tutorial</button>
+    <div style="text-align:right;font-size:10px;color:#9aa7b6;margin-top:4px;font-family:monospace">build v7-tutorial</div>
   </header>
 
   <!-- ===== Step rail ===== -->
@@ -56,7 +57,7 @@
           <span class="box" aria-hidden="true"></span>
           <span class="ctext"><b>Router relocated centrally</b><em>Moved to a central spot, wired where possible</em></span>
         </label>
-        <button class="mini" data-open="install_sop">Guide</button>
+        <button class="mini" data-open="install_sop" data-page="2">Guide</button>
       </li>
       <li>
         <label class="check">
@@ -64,7 +65,7 @@
           <span class="box" aria-hidden="true"></span>
           <span class="ctext"><b>Dual SSID split attempted</b><em>WPA2 "-2" network for legacy devices, printers, OTT</em></span>
         </label>
-        <button class="mini" data-open="dual_ssid">Guide</button>
+        <button class="mini" data-open="dual_ssid" data-page="2">Guide</button>
       </li>
       <li>
         <label class="check">
@@ -72,7 +73,7 @@
           <span class="box" aria-hidden="true"></span>
           <span class="ctext"><b>No parallel networks</b><em>Confirmed there's no second/old network in the home</em></span>
         </label>
-        <button class="mini" data-open="install_sop">Guide</button>
+        <button class="mini" data-open="dual_ssid" data-page="10">Guide</button>
       </li>
     </ul>
 
@@ -133,6 +134,20 @@
     <div class="reader-page" id="readerPage"></div>
   </div>
   <div class="reader-scroll" id="readerScroll"></div>
+</div>
+
+<!-- ===== Tutorial slide deck ===== -->
+<div class="tutorial" id="tutorial" hidden role="dialog" aria-modal="true" aria-label="How it works tutorial">
+  <div class="tut-bar">
+    <div class="tut-brand"><span class="tut-wave"></span> EVO Swap Request</div>
+    <button class="tut-close" id="tutClose" type="button" aria-label="Close tutorial">✕</button>
+  </div>
+  <div class="tut-stage" id="tutStage"></div>
+  <div class="tut-foot">
+    <button class="tut-back" id="tutPrev" type="button">‹ Back</button>
+    <div class="tut-dots" id="tutDots"></div>
+    <button class="tut-next" id="tutNext" type="button">Next ›</button>
+  </div>
 </div>
 
 <script src="config.v4.js"></script>
