@@ -65,8 +65,9 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
   <div class="hero">
     <div><div class="kick">Summit Broadband · Field Operations</div><h1>EVO Swap Control</h1></div>
     <div class="acts">
+      <span id="roleTag" style="align-self:center;font-weight:800;font-size:12px;opacity:.9;padding:0 4px"></span>
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
-      <button class="btn light" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters (e.g. filter to Approved for an approved-only report).">Export report (XLSX)</button>
+      <button class="btn light" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters (e.g. filter to Approved for an approved-only report).">Export report (XLSX)</button>
     </div>
   </div>
 
@@ -118,9 +119,18 @@ async function loadAll(){
     DATA = await res.json();
     document.getElementById("gate").hidden = true;
     document.getElementById("dash").hidden = false;
+    applyRole();
     fillMarketFilter();
     renderKpis(); renderTable(); renderTechs();
   }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
+}
+
+function applyRole(){
+  const isOwner = DATA.role === "owner";
+  const exp = document.getElementById("exportBtn");
+  if (exp) exp.style.display = isOwner ? "" : "none";
+  const tag = document.getElementById("roleTag");
+  if (tag) tag.textContent = isOwner ? "Owner" : "Manager \u00b7 read-only";
 }
 
 function fillMarketFilter(){
@@ -195,6 +205,7 @@ function renderTechs(){
 }
 
 function exportXlsx(){
+  if (!DATA || DATA.role !== "owner") { alert("Reports are available to the owner account only."); return; }
   const wb = XLSX.utils.book_new();
   const rows = getFilteredRows();
   const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
