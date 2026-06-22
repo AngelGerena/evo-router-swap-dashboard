@@ -51,18 +51,30 @@ if (!token || !["approve","deny"].includes(action)) {
     <div class="seal">${action==="approve"?"✓":"✕"}</div>
     <h2>${verb} this swap?</h2>
     <p>Confirm to record your decision. This unlocks (or stops) the tech's job.</p>
-    <textarea class="note" id="note" rows="2" placeholder="${action==="deny"?"Reason (recommended)":"Note (optional)"}"></textarea>
+    <label style="display:block;text-align:left;font-weight:800;font-size:13px;margin:8px 2px 6px;color:var(--navy)">Your reasoning (required)</label>
+    <textarea class="note" id="note" rows="3" placeholder="Why are you ${action==="approve"?"approving":"denying"} this swap?"></textarea>
+    <div id="noteErr" style="display:none;color:var(--bad);font-size:12.5px;font-weight:700;text-align:left;margin:7px 2px 0"></div>
     <div class="confirm">
       <button class="no" onclick="history.length>1?history.back():window.close()">Cancel</button>
       <button class="${action==="approve"?"yes":"no"}" id="go">${verb}</button>
     </div>`, action==="approve"?"ok":"deny");
 
-  document.getElementById("go").addEventListener("click", submit);
+  document.getElementById("go").addEventListener("click", onGo);
 }
 
-async function submit(){
+function onGo(){
+  const note = (document.getElementById("note")?.value || "").trim();
+  if (!note) {
+    const e = document.getElementById("noteErr");
+    if (e) { e.textContent = "Please add your reasoning before you can " + (action==="approve"?"approve":"deny") + " this swap."; e.style.display = "block"; }
+    document.getElementById("note")?.focus();
+    return;
+  }
+  submit(note);
+}
+
+async function submit(note){
   render(`<div class="spin">Recording your decision…</div>`);
-  const note = (document.getElementById("note")?.value || "").trim() || null;
   try{
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/decide`, {
       method:"POST",

@@ -66,7 +66,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div><div class="kick">Summit Broadband · Field Operations</div><h1>EVO Swap Control</h1></div>
     <div class="acts">
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
-      <button class="btn light" onclick="exportXlsx()">Export report (XLSX)</button>
+      <button class="btn light" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters (e.g. filter to Approved for an approved-only report).">Export report (XLSX)</button>
     </div>
   </div>
 
@@ -85,7 +85,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div class="wrap">
       <table id="mainTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
-        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th>
+        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -145,14 +145,18 @@ function renderKpis(){
 }
 const kpi=(l,v,c="")=>`<div class="kpi ${c}"><span>${l}</span><b>${v}</b></div>`;
 
-function renderTable(){
+function getFilteredRows(){
   const q = (document.getElementById("search").value||"").toLowerCase();
   const st = document.getElementById("fStatus").value;
   const mk = document.getElementById("fMarket").value;
-  const rows = DATA.rows.filter(r=>{
+  return DATA.rows.filter(r=>{
     const text = [r.tech_name,r.customer_first,r.customer_last,r.account_number,r.evo_serial_mac,r.removed_from_acct].join(" ").toLowerCase();
     return (!q||text.includes(q)) && (st==="all"||r.status===st) && (mk==="all"||r.market_code===mk);
   });
+}
+
+function renderTable(){
+  const rows = getFilteredRows();
   document.getElementById("rowCount").textContent = `${rows.length} of ${DATA.rows.length}`;
   const tb = document.querySelector("#mainTable tbody");
   tb.innerHTML = rows.length ? rows.map(r=>{
@@ -170,8 +174,9 @@ function renderTable(){
       <td class="mono">${cl.ont_light_ont??"—"}</td>
       <td>${opened?opened+" opened":'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
       <td class="muted">${esc(r.decided_by_email||"—")}</td>
+      <td class="muted" style="min-width:200px;white-space:normal" title="${esc(r.decision_note||"")}">${esc(r.decision_note||"—")}</td>
     </tr>`;
-  }).join("") : `<tr><td colspan="11" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+  }).join("") : `<tr><td colspan="12" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
 }
 
 function renderTechs(){
@@ -191,8 +196,9 @@ function renderTechs(){
 
 function exportXlsx(){
   const wb = XLSX.utils.book_new();
-  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Reason","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Decision Note"];
-  const reqRows = DATA.rows.map(r=>{const c=r.checklist||{};return [
+  const rows = getFilteredRows();
+  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
+  const reqRows = rows.map(r=>{const c=r.checklist||{};return [
     fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,
     r.evo_serial_mac,r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
     yn(c.router_relocated),yn(c.dual_ssid_attempted),yn(c.no_parallel_networks),
@@ -206,10 +212,12 @@ function exportXlsx(){
 
   // 4558 Orlando return tracking — units owed back
   const retHeaders=["EVO S/N or MAC","Removed From Acct","Tech","Market","Submitted","Status"];
-  const retRows=DATA.rows.map(r=>[r.evo_serial_mac,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status]);
+  const retRows=rows.map(r=>[r.evo_serial_mac,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status]);
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([retHeaders,...retRows]), "Return to 4558 Orlando");
 
-  XLSX.writeFile(wb, `EVO_Swap_Control_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const stf = document.getElementById("fStatus").value;
+  const tag = stf && stf!=="all" ? "_"+stf : "";
+  XLSX.writeFile(wb, `EVO_Swap_Control${tag}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
