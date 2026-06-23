@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>EVO Swap — Field Tech Tutorial · Summit Broadband</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0b2545; --navy2:#13315c; --cyan:#00bbbb; --teal:#18b6c9;
+    --ink:#15233a; --muted:#5b6b80; --line:#e6ebf2; --good:#1a7f37; --bad:#b42318;
+    --shadow:0 18px 50px rgba(11,37,69,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Manrope,system-ui,Arial,sans-serif;color:#fff;
+    background:radial-gradient(120% 120% at 50% 0%, #16386b 0%, var(--navy) 55%, #081a33 100%);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  .wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+  /* top bar */
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:12px}
+  .bar .logo{background:#fff;border-radius:12px;padding:7px 12px;display:flex;align-items:center}
+  .bar .logo img{height:30px;width:auto;display:block}
+  .bar .count{font-weight:800;font-size:13px;color:#bcd3ee;letter-spacing:.04em}
+  .bar .x{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:11px;font-size:18px;cursor:pointer;flex:none}
+  .bar .x:hover{background:rgba(255,255,255,.22)}
+  /* stage */
+  .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 20px 0;position:relative;overflow:hidden}
+  .card{width:100%;max-width:680px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);
+    border-radius:22px;padding:34px 30px 38px;backdrop-filter:blur(4px);animation:in .28s ease}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:30px;font-weight:800;
+    background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a;box-shadow:0 10px 26px rgba(0,187,187,.32);margin-bottom:18px}
+  .kick{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:800;margin-bottom:8px}
+  h2{margin:0 0 12px;font-size:27px;line-height:1.15;font-weight:800}
+  p{margin:0 0 12px;font-size:16.5px;line-height:1.6;color:#dce6f2}
+  ul{margin:10px 0 0;padding:0;list-style:none}
+  li{position:relative;padding:7px 0 7px 28px;font-size:15.5px;line-height:1.5;color:#e6eef8}
+  li::before{content:"";position:absolute;left:4px;top:14px;width:9px;height:9px;border-radius:50%;
+    background:linear-gradient(135deg,var(--cyan),var(--teal))}
+  .hl{color:#ffd66b;font-weight:800}
+  .ok{color:#7ee2a8;font-weight:800}
+  .no{color:#ff9c8f;font-weight:800}
+  .mono{font-variant-numeric:tabular-nums}
+  /* footer nav */
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
+  .nav{appearance:none;border:0;font:inherit;font-weight:800;font-size:16px;padding:15px 22px;border-radius:14px;cursor:pointer}
+  .back{background:rgba(255,255,255,.12);color:#fff}
+  .back:disabled{opacity:.35;cursor:default}
+  .next{background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a;box-shadow:0 10px 24px rgba(0,187,187,.32)}
+  .dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:.2s}
+  .dot.on{background:var(--cyan);transform:scale(1.35)}
+  @media(max-width:480px){
+    h2{font-size:23px} p{font-size:15.5px} .card{padding:26px 20px 30px}
+    .nav{padding:14px 16px;font-size:15px} .bar .logo img{height:26px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="logo"><img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband"></div>
+    <div class="count" id="count">1 / 10</div>
+    <button class="x" id="close" type="button" aria-label="Close tutorial">✕</button>
+  </div>
+  <div class="stage"><div class="card" id="card"></div></div>
+  <div class="foot">
+    <button class="nav back" id="back" type="button">‹ Back</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav next" id="next" type="button">Next ›</button>
+  </div>
+</div>
+<script>
+const SLIDES = [
+  { ic:"▶", kick:"Summit Broadband · Field", title:"EVO Swap Request",
+    html:`<p>A field-tech walkthrough — how to use the dashboard, screen by screen.</p>
+          <p style="color:#9fb3cc">Swipe, tap <b>Next ›</b>, or use your arrow keys.</p>` },
+  { ic:"!", kick:"The golden rule", title:"Every swap needs approval",
+    html:`<p>No EVO comes off an account until <b>Anthony or Peterson</b> approves it. <span class="hl">No exceptions.</span></p>
+          <p>The dashboard keeps the job <b>gated</b> until a manager says go — so you’re always covered.</p>` },
+  { ic:"1", kick:"Step 1", title:"Run the basics first",
+    html:`<p>Most “swaps” are fixed <b>without</b> one. Before you request, try:</p>
+          <ul>
+            <li>Relocate the router to a <b>central</b> spot</li>
+            <li>Attempt a <b>Dual-SSID split</b> for legacy devices</li>
+            <li>Confirm there’s <b>no second / old network</b> still broadcasting</li>
+          </ul>
+          <p style="margin-top:12px">Tap any <b>Guide</b> on the dashboard to open the SOP at the right page.</p>` },
+  { ic:"2", kick:"Step 2", title:"Finish the checklist",
+    html:`<p>Tick <b>all three boxes</b> on the checklist.</p>
+          <p>The <b>Request approval</b> button stays <span class="no">locked</span> until the basics and your ONT reading are in — so nothing gets submitted half-done.</p>` },
+  { ic:"📶", kick:"Step 2 · readings", title:"ONT light readings",
+    html:`<ul>
+            <li><b>NID / FCPA Closet (dB)</b></li>
+            <li><b>ONT | 1490 / 1550 or 1577 (dB)</b></li>
+            <li><b>Frontline Health Score</b></li>
+          </ul>
+          <p style="margin-top:12px">SOP range is <b class="mono">−14 to −19.5 dB</b>, with <b>no more than 1 dB loss</b> from NID → ONT.</p>` },
+  { ic:"3", kick:"Step 3", title:"Submit the request",
+    html:`<p>Add the details and tap <b>Request approval</b>:</p>
+          <ul>
+            <li>Customer + <b>account / job #</b></li>
+            <li>The <b>EVO serial or MAC</b> you’re removing — and its account</li>
+            <li>Your <b>market</b> and your <b>name</b></li>
+          </ul>` },
+  { ic:"➜", kick:"Routing", title:"Where your request goes",
+    html:`<p>It routes <b>automatically</b> to your market’s manager:</p>
+          <ul>
+            <li><b>Anthony</b> — Central FL, West / Tampa, Lakeland / Cassel, Leesburg FTTH</li>
+            <li><b>Peterson</b> — Southwest FL (SWFL), Marco FTTH</li>
+          </ul>` },
+  { ic:"⚡", kick:"After you submit", title:"A manager decides — fast",
+    html:`<p>Your manager is <b>pinged instantly</b> and approves or denies in one tap.</p>
+          <p>The job stays <b>gated</b> until they decide. No answer in <b>30 minutes</b> auto-escalates to a backstop, so you’re never stuck waiting.</p>` },
+  { ic:"✓", kick:"Live on your screen", title:"You’ll see the answer",
+    html:`<p>Your screen updates by itself — no refresh:</p>
+          <ul>
+            <li><span class="ok">GREEN — Approved.</span> You’re cleared, with the manager’s reason.</li>
+            <li><span class="no">RED — Denied.</span> Do not swap — with the manager’s instruction.</li>
+          </ul>` },
+  { ic:"★", kick:"That’s it", title:"Basics → gate → approved",
+    html:`<p>Run the basics, finish the checklist, submit, and wait for the <span class="ok">green</span>.</p>
+          <p>Every removed EVO returns to <b>4558 in Orlando</b> with its account #.</p>
+          <p style="color:#9fb3cc">Reopen this anytime from the <b>“How it works”</b> button.</p>` },
+];
+
+const card=document.getElementById("card"), countEl=document.getElementById("count"),
+      dotsEl=document.getElementById("dots"), back=document.getElementById("back"), next=document.getElementById("next");
+let i=0;
+function render(){
+  const s=SLIDES[i];
+  card.innerHTML=`<div class="ic">${s.ic}</div><div class="kick">${s.kick}</div><h2>${s.title}</h2>${s.html}`;
+  countEl.textContent=`${i+1} / ${SLIDES.length}`;
+  dotsEl.innerHTML=SLIDES.map((_,n)=>`<span class="dot ${n===i?"on":""}"></span>`).join("");
+  back.disabled=i===0;
+  next.textContent=i===SLIDES.length-1?"Done ✓":"Next ›";
+}
+function go(d){
+  const n=i+d;
+  if(n<0) return;
+  if(n>=SLIDES.length){ closeTut(); return; }
+  i=n; render();
+}
+function closeTut(){ if(history.length>1) history.back(); else location.href="index.html"; }
+back.addEventListener("click",()=>go(-1));
+next.addEventListener("click",()=>go(1));
+document.getElementById("close").addEventListener("click",closeTut);
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") go(1);
+  else if(e.key==="ArrowLeft") go(-1);
+  else if(e.key==="Escape") closeTut();
+});
+// swipe
+let tx=null;
+document.querySelector(".stage").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
+document.querySelector(".stage").addEventListener("touchend",e=>{
+  if(tx==null) return; const dx=e.changedTouches[0].clientX-tx; tx=null;
+  if(dx<-45) go(1); else if(dx>45) go(-1);
+});
+render();
+</script>
+</body>
+</html>
