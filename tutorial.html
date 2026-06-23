@@ -47,6 +47,10 @@
   .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
   .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25)}.dot.on{background:var(--cyan);transform:scale(1.35)}
   @media(max-width:480px){ .explain h2{font-size:16.5px} .panel h2{font-size:21px} }
+  /* desktop: widen the embed so it shows the real two-pane layout */
+  body.dev-desktop .device,body.dev-desktop .explain,body.dev-desktop .panel{max-width:1080px}
+  body.dev-desktop .stage{padding-left:24px;padding-right:24px}
+  body.dev-desktop .explain h2{font-size:20px}
 </style>
 </head>
 <body>
@@ -80,9 +84,11 @@ const SLIDES=[
       <p>A tour of the <b>actual screen</b> you'll use, section by section, with a filled-in example.</p>
       <p style="color:#9fb3cc">Tap <b>Next ›</b>, swipe, or use arrow keys.</p>` },
   { type:"live", step:0, sel:null, tag:"Home screen", kick:"The screen", title:"This is your EVO Swap screen",
-    text:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. The screen keeps the job locked until a manager decides.` },
+    text:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. The screen keeps the job locked until a manager decides.`,
+    dtext:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. Your progress and guides stay pinned on the <b>left</b>; the active step shows on the right.` },
   { type:"live", step:0, sel:".resources", tag:"Step 1 · Basics & Guides", kick:"Step 1", title:"Run the basics first",
-    text:`Tap any <b>Guide</b> to open the SOP at the right page. When you've done the basics, tap <b>“I've reviewed the basics.”</b>` },
+    text:`Tap any <b>Guide</b> to open the SOP at the right page. When you've done the basics, tap <b>“I've reviewed the basics.”</b>`,
+    dtext:`Open any <b>Guide</b> from the left sidebar to read the SOP. When the basics are done, click <b>“I've reviewed the basics.”</b>` },
   { type:"live", step:1, sel:".checks", tag:"Step 2 · Checklist", kick:"Step 2", title:"Tick all three boxes",
     text:`Router relocated, Dual-SSID attempted, no parallel network. Each box has its own <b>Guide</b> if you need it.` },
   { type:"live", step:1, sel:".readings", tag:"Step 2 · ONT readings", kick:"Step 2", title:"Enter your ONT readings",
@@ -103,6 +109,14 @@ const explain=document.getElementById("explain"),device=document.getElementById(
       frame=document.getElementById("siteFrame"),deviceTag=document.getElementById("deviceTag"),countEl=document.getElementById("count"),
       dotsEl=document.getElementById("dots"),back=document.getElementById("back"),next=document.getElementById("next");
 let i=0,frameReady=false;
+
+// device detection — keys off the SAME breakpoint the dashboard layout uses,
+// so the walkthrough always matches what the tech is actually looking at.
+const MQ = window.matchMedia("(min-width:980px)");
+function applyDevice(){ document.body.classList.toggle("dev-desktop", MQ.matches); }
+function onMQ(){ applyDevice(); render(); }
+applyDevice();
+if (MQ.addEventListener) MQ.addEventListener("change", onMQ); else MQ.addListener(onMQ);
 
 function setVal(doc,id,val){ const el=doc.getElementById(id); if(!el)return; el.value=val; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }
 function setChk(doc,id){ const el=doc.getElementById(id); if(!el)return; el.checked=true; el.dispatchEvent(new Event("change",{bubbles:true})); }
@@ -151,7 +165,7 @@ function render(){
   back.disabled=i===0; next.textContent=i===SLIDES.length-1?"Done ✓":"Next ›";
   explain.hidden=true; device.hidden=true; panel.hidden=true;
   if(s.type==="panel"){ panel.hidden=false; panel.innerHTML=s.html; }
-  else { explain.hidden=false; explain.innerHTML=`<div class="kick">${s.kick}</div><h2>${s.title}</h2><p>${s.text}</p>`;
+  else { const txt=(MQ.matches && s.dtext)?s.dtext:s.text; explain.hidden=false; explain.innerHTML=`<div class="kick">${s.kick}</div><h2>${s.title}</h2><p>${txt}</p>`;
     device.hidden=false; deviceTag.textContent=s.tag||""; driveLive(s); }
 }
 function go(d){ const n=i+d; if(n<0)return; if(n>=SLIDES.length){closeTut();return;} i=n; render(); }
