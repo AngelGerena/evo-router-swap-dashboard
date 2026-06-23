@@ -38,6 +38,7 @@ const CFG = window.EVO_CONFIG;
 const params = new URLSearchParams(location.search);
 const token = params.get("t");
 const action = params.get("a"); // approve | deny
+const by = params.get("by") || ""; // who is deciding (email) — attributes the decision
 const card = document.getElementById("card");
 
 function render(html, cls=""){ card.className = "dcard " + cls; card.innerHTML = html; }
@@ -79,7 +80,7 @@ async function submit(note){
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/decide`, {
       method:"POST",
       headers:{ "Content-Type":"application/json", apikey: CFG.SUPABASE_ANON_KEY },
-      body: JSON.stringify({ t: token, a: action, note })
+      body: JSON.stringify({ t: token, a: action, note, by })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || "Could not record decision");

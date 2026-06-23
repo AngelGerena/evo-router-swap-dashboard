@@ -60,8 +60,8 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 <div class="gate" id="gate">
   <div class="kick" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800">Summit Broadband</div>
   <h2 style="margin:8px 0 0">EVO Swap Control — Admin</h2>
-  <p class="muted" style="font-size:14px">Managers: sign in with the <b>Manager</b> username &amp; password. Owner: leave username blank and enter your owner password.</p>
-  <input type="text" id="adminUser" placeholder="Username" autocomplete="username" />
+  <p class="muted" style="font-size:14px">Managers: sign in with your <b>Summit email</b> and the manager password. Owner: leave email blank and enter your owner password.</p>
+  <input type="text" id="adminUser" placeholder="Summit email (managers)" autocomplete="username" />
   <input type="password" id="adminToken" placeholder="Password" autocomplete="current-password" />
   <button class="btn" onclick="loadAll()">Sign in</button>
   <p class="muted" id="gateErr" style="color:var(--bad);font-size:13px;min-height:18px"></p>
@@ -121,14 +121,15 @@ const LOGO_URL = "https://images.weserv.nl/?url=" + encodeURIComponent("https://
 let LOGO_DATAURL = ""; // cached data URI so the PDF export can embed the logo
 (function(){ const img=document.getElementById("brandLogo"), bar=document.getElementById("brandbar"); if(img){ img.src=LOGO_URL; bar.hidden=false; } })();
 (async function(){ try{ const r=await fetch(LOGO_URL); const b=await r.blob(); LOGO_DATAURL=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res("");fr.readAsDataURL(b);}); }catch(e){} })();
-let DATA = null, TOKEN = "";
+let DATA = null, TOKEN = "", USER = "";
 
 async function loadAll(){
   TOKEN = document.getElementById("adminToken").value.trim() || TOKEN;
-  if(!TOKEN){ document.getElementById("gateErr").textContent="Enter your token."; return; }
+  USER = (document.getElementById("adminUser").value.trim() || USER);
+  if(!TOKEN){ document.getElementById("gateErr").textContent="Enter your password."; return; }
   try{
-    const res = await fetch(`${CFG.FUNCTIONS_BASE}/admin-data`, { headers:{ "x-admin-token":TOKEN } });
-    if(res.status===401){ document.getElementById("gateErr").textContent="Invalid token."; return; }
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/admin-data`, { headers:{ "x-admin-token":TOKEN, "x-admin-user":USER } });
+    if(res.status===401){ const j=await res.json().catch(()=>({})); document.getElementById("gateErr").textContent=j.error||"Invalid sign-in."; return; }
     DATA = await res.json();
     document.getElementById("gate").hidden = true;
     document.getElementById("dash").hidden = false;
@@ -145,7 +146,7 @@ function applyRole(){
   const expp = document.getElementById("exportPdfBtn");
   if (expp) expp.style.display = isOwner ? "" : "none";
   const tag = document.getElementById("roleTag");
-  if (tag) tag.textContent = isOwner ? "Owner" : "Manager \u00b7 read-only";
+  if (tag) tag.textContent = isOwner ? "Owner" : ("Manager \u00b7 read-only" + (DATA.viewer ? " \u00b7 " + DATA.viewer : ""));
 }
 
 function fillMarketFilter(){
@@ -198,7 +199,7 @@ function renderTable(){
       <td class="mono">${esc(r.removed_from_acct)}</td>
       <td class="mono">${cl.ont_light_ont??"—"}</td>
       <td>${opened?opened+" opened":'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
-      <td class="muted">${esc(r.decided_by_email||"—")}</td>
+      <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
       <td class="muted" style="min-width:200px;white-space:normal" title="${esc(r.decision_note||"")}">${esc(r.decision_note||"—")}</td>
     </tr>`;
   }).join("") : `<tr><td colspan="12" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
@@ -244,7 +245,7 @@ function exportPdf(){
   doc.text(`Approved ${approved}      Denied ${denied}      Awaiting decision ${pending}`, 110, 92);
   // table
   const head=[["Submitted","Status","Tech","Market","Customer","Account","Tech Reason","Decided By","Manager Reason"]];
-  const body=rows.map(r=>[fmt(r.submitted_at), (r.status||""), r.tech_name||"", r.market_code||"", `${r.customer_first||""} ${r.customer_last||""}`.trim(), r.account_number||"", r.swap_reason||"", r.decided_by_email||"", r.decision_note||""]);
+  const body=rows.map(r=>[fmt(r.submitted_at), (r.status||""), r.tech_name||"", r.market_code||"", `${r.customer_first||""} ${r.customer_last||""}`.trim(), r.account_number||"", r.swap_reason||"", r.decided_by_name||r.decided_by_email||"", r.decision_note||""]);
   doc.autoTable({
     head, body, startY:104,
     styles:{ fontSize:8, cellPadding:4, overflow:"linebreak", textColor:INK, lineColor:[226,232,241], lineWidth:0.5 },
@@ -269,7 +270,7 @@ function exportXlsx(){
     fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,
     r.evo_serial_mac,r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
     yn(c.router_relocated),yn(c.dual_ssid_attempted),yn(c.no_parallel_networks),
-    (c.resources_opened||[]).join("; "),c.time_to_submit_secs??"",r.decided_by_email||"",r.decided_at?fmt(r.decided_at):"",r.decision_note||""
+    (c.resources_opened||[]).join("; "),c.time_to_submit_secs??"",r.decided_by_name||r.decided_by_email||"",r.decided_at?fmt(r.decided_at):"",r.decision_note||""
   ];});
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([reqHeaders,...reqRows]), "Swap Requests");
 
