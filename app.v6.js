@@ -86,10 +86,10 @@ function markSeen(id) {
 const reader = $("#reader"), readerScroll = $("#readerScroll");
 let currentPdf = null;
 
-async function openResource(id, cardEl, targetPage) {
-  const res = CFG.RESOURCES.find((r) => r.id === id);
+async function openResource(id, cardEl, targetPage, explicitRes) {
+  const res = explicitRes || CFG.RESOURCES.find((r) => r.id === id);
   if (!res) return;
-  markSeen(id);
+  if (!explicitRes) markSeen(id);
   $("#readerTitle").textContent = res.title;
   $("#readerPage").textContent = "";
   reader.hidden = false;
@@ -353,7 +353,11 @@ if (tutorial) {
     if (n >= TUTORIAL.length) { closeTut(); return; }
     tutIdx = n; renderTut();
   };
-  $("#tutBtn").addEventListener("click", openTut);
+  // Tutorial now opens the uploaded PDF in the in-app reader (replaces slide deck).
+  $("#tutBtn").addEventListener("click", () => openResource(null, null, null, {
+    title: "EVO Swap — Full Tutorial",
+    file: "EVO%20Swap%20Tutorial.pdf"
+  }));
   $("#tutClose").addEventListener("click", closeTut);
   tutPrev.addEventListener("click", () => go(-1));
   tutNext.addEventListener("click", () => go(1));
