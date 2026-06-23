@@ -353,11 +353,7 @@ if (tutorial) {
     if (n >= TUTORIAL.length) { closeTut(); return; }
     tutIdx = n; renderTut();
   };
-  // Tutorial now opens the uploaded PDF in the in-app reader (replaces slide deck).
-  $("#tutBtn").addEventListener("click", () => openResource(null, null, null, {
-    title: "EVO Swap — Full Tutorial",
-    file: "EVO%20Swap%20Tutorial.pdf"
-  }));
+  $("#tutBtn").addEventListener("click", openTut);
   $("#tutClose").addEventListener("click", closeTut);
   tutPrev.addEventListener("click", () => go(-1));
   tutNext.addEventListener("click", () => go(1));
