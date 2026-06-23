@@ -15,7 +15,11 @@
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%}
 body{display:flex;justify-content:center}
-.phone{width:100%;max-width:560px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;padding:0 16px calc(28px + var(--safe-b))}
+.app{width:100%;max-width:560px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;padding:0 16px calc(28px + var(--safe-b))}
+.layout,.side,.main{display:block}
+.hdr-logo{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:10px 16px;margin:0 0 12px;display:flex;justify-content:center}
+.hdr-logo img{height:44px;width:auto;max-width:100%;display:block}
+.buildtag{text-align:right;font-size:10px;color:#9aa7b6;margin-top:4px;font-family:monospace}
 
 /* ---- header ---- */
 .top{padding:18px 4px 14px}
@@ -135,12 +139,42 @@ h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
 .reader-scroll canvas{display:block;width:100%;height:auto;margin:0 auto 14px;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 .reader-loading{color:#9fb6d4;text-align:center;padding:40px;font-weight:700}
 
-/* ---- desktop niceties ---- */
+/* ---- tablet: a touch wider, still a single column ---- */
 @media(min-width:600px){
-  .phone{margin-top:18px;margin-bottom:18px;min-height:auto;border-radius:24px;box-shadow:0 30px 80px rgba(15,40,75,.18);padding-top:6px}
   body{align-items:flex-start;padding:0 16px}
+  .app{max-width:640px;padding-top:6px}
   .reader-scroll{padding:20px}
   .reader-scroll canvas{max-width:820px}
+}
+
+/* ---- desktop / laptop: two-pane — sidebar (progress + guides) | main (active step) ---- */
+@media(min-width:980px){
+  body{align-items:flex-start;padding:26px 26px 48px}
+  .app{max-width:1180px;padding-left:0;padding-right:0}
+
+  /* header as a full-width band */
+  .top{display:flex;align-items:center;flex-wrap:wrap;gap:16px;background:var(--card);
+    border-radius:20px;box-shadow:var(--shadow);padding:16px 22px;margin-bottom:20px}
+  .hdr-logo{margin:0;box-shadow:none;padding:0;border-radius:0}
+  .hdr-logo img{height:40px}
+  .top .brand{margin:0}
+  .top .tut-launch{width:auto;margin:0 0 0 auto;padding:11px 16px}
+  .top .gate-note{flex-basis:100%;margin:0}
+  .buildtag{flex-basis:100%;margin:0}
+
+  /* the split */
+  .layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:26px;align-items:start}
+  .side{position:sticky;top:26px;display:flex;flex-direction:column}
+
+  /* progress becomes a vertical list */
+  .rail{flex-direction:column;gap:8px;margin:0 0 18px}
+  .rail-step{flex:none;justify-content:flex-start;font-size:14px;padding:13px 15px}
+  .rail-step span{width:24px;height:24px;font-size:12px}
+
+  /* main column: keep the form readable, don't let it sprawl */
+  .main{min-height:62vh}
+  .main .step{max-width:660px}
+  .reader-scroll canvas{max-width:900px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 

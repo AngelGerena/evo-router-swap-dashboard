@@ -8,15 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<link rel="stylesheet" href="app.css?v=20260622d" />
+<link rel="stylesheet" href="app.css?v=20260623e" />
 </head>
 <body>
-<div class="phone">
+<div class="app">
 
   <!-- ===== Header ===== -->
   <header class="top">
-    <div style="background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:10px 16px;margin:0 0 12px;display:flex;justify-content:center">
-      <img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband — 30 Years" style="height:44px;width:auto;max-width:100%;display:block">
+    <div class="hdr-logo">
+      <img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband — 30 Years">
     </div>
     <div class="brand">
       <span class="wave" aria-hidden="true"></span>
@@ -25,108 +25,117 @@
         <h1>EVO Swap Request</h1>
       </div>
     </div>
-    <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
     <button class="tut-launch" id="tutBtn" type="button"><span class="tut-launch-ic">▶</span> How it works — 60-second tutorial</button>
-    <div style="text-align:right;font-size:10px;color:#9aa7b6;margin-top:4px;font-family:monospace">build v8-tutorial-pdf</div>
+    <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
+    <div class="buildtag">build v9-desktop</div>
   </header>
 
-  <!-- ===== Step rail ===== -->
-  <nav class="rail" aria-label="Progress">
-    <button class="rail-step is-active" data-go="0"><span>1</span>Basics</button>
-    <button class="rail-step" data-go="1"><span>2</span>Checklist</button>
-    <button class="rail-step" data-go="2"><span>3</span>Submit</button>
-  </nav>
+  <!-- ===== Two-pane layout: sidebar (progress + guides) | main (active step) ===== -->
+  <div class="layout">
 
-  <!-- ===== STEP 1: best-practices basics ===== -->
-  <section class="step is-active" data-step="0">
-    <p class="lead">Before requesting a swap, run the basics. Most "swaps" are fixed by relocating the router or splitting the network for old devices.</p>
+    <aside class="side">
+      <!-- Step rail (progress) -->
+      <nav class="rail" aria-label="Progress">
+        <button class="rail-step is-active" data-go="0"><span>1</span>Basics</button>
+        <button class="rail-step" data-go="1"><span>2</span>Checklist</button>
+        <button class="rail-step" data-go="2"><span>3</span>Submit</button>
+      </nav>
 
-    <div class="resources">
-      <div class="res-label">Field resources — tap to read</div>
-      <div id="resourceList"></div>
-    </div>
-
-    <button class="primary" data-next>I've reviewed the basics →</button>
-  </section>
-
-  <!-- ===== STEP 2: gated checklist ===== -->
-  <section class="step" data-step="1">
-    <p class="lead">Confirm each step. The request button stays locked until the basics are done and the ONT reading is in.</p>
-
-    <ul class="checks">
-      <li>
-        <label class="check">
-          <input type="checkbox" id="c_relocate">
-          <span class="box" aria-hidden="true"></span>
-          <span class="ctext"><b>Router relocated centrally</b><em>Moved to a central spot, wired where possible</em></span>
-        </label>
-        <button class="mini" data-open="install_sop" data-page="2">Guide</button>
-      </li>
-      <li>
-        <label class="check">
-          <input type="checkbox" id="c_ssid">
-          <span class="box" aria-hidden="true"></span>
-          <span class="ctext"><b>Dual SSID split attempted</b><em>WPA2 "-2" network for legacy devices, printers, OTT</em></span>
-        </label>
-        <button class="mini" data-open="dual_ssid" data-page="2">Guide</button>
-      </li>
-      <li>
-        <label class="check">
-          <input type="checkbox" id="c_parallel">
-          <span class="box" aria-hidden="true"></span>
-          <span class="ctext"><b>No parallel networks</b><em>Confirmed there's no second/old network in the home</em></span>
-        </label>
-        <button class="mini" data-open="dual_ssid" data-page="10">Guide</button>
-      </li>
-    </ul>
-
-    <div class="readings">
-      <div class="read-head">ONT light readings <span>required</span></div>
-      <p class="read-sub">SOP range: -14 to -19.5 dB. No more than -1 dB loss NID → ONT. Just type the number — we add the minus for you.</p>
-      <div class="read-grid">
-        <label>NID/FCPA CLOSET (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
-        <label>ONT | 1490/1550 or 1577 (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_ont" placeholder="e.g. -17.2"></label>
-        <label>Frontline Health Score<input type="text" inputmode="numeric" id="r_health" placeholder="e.g. 95"></label>
+      <!-- Field guides — always reachable -->
+      <div class="resources">
+        <div class="res-label">Field resources — tap to read</div>
+        <div id="resourceList"></div>
       </div>
-      <div id="readingFlag" class="read-flag" hidden></div>
-    </div>
+    </aside>
 
-    <button class="primary" data-next id="toSubmit" disabled>Continue to request →</button>
-    <div class="lock-hint" id="lockHint">Complete all three checks and enter the ONT reading to continue.</div>
-  </section>
+    <main class="main">
+      <!-- ===== STEP 1: best-practices basics ===== -->
+      <section class="step is-active" data-step="0">
+        <p class="lead">Before requesting a swap, run the basics. Most "swaps" are fixed by relocating the router or splitting the network for old devices. Open any guide on the left, then continue.</p>
+        <button class="primary" data-next>I've reviewed the basics →</button>
+      </section>
 
-  <!-- ===== STEP 3: the request ===== -->
-  <section class="step" data-step="2">
-    <p class="lead">Last step. This gates the job until a manager decides — they get pinged instantly.</p>
+      <!-- ===== STEP 2: gated checklist ===== -->
+      <section class="step" data-step="1">
+        <p class="lead">Confirm each step. The request button stays locked until the basics are done and the ONT reading is in.</p>
 
-    <form id="reqForm" class="form" autocomplete="off">
-      <div class="grid2">
-        <label>Customer first name<input id="f_first" required></label>
-        <label>Customer last name<input id="f_last" required></label>
-      </div>
-      <label>Account # / Job # (Offer #)<input id="f_acct" required inputmode="numeric"></label>
+        <ul class="checks">
+          <li>
+            <label class="check">
+              <input type="checkbox" id="c_relocate">
+              <span class="box" aria-hidden="true"></span>
+              <span class="ctext"><b>Router relocated centrally</b><em>Moved to a central spot, wired where possible</em></span>
+            </label>
+            <button class="mini" data-open="install_sop" data-page="2">Guide</button>
+          </li>
+          <li>
+            <label class="check">
+              <input type="checkbox" id="c_ssid">
+              <span class="box" aria-hidden="true"></span>
+              <span class="ctext"><b>Dual SSID split attempted</b><em>WPA2 "-2" network for legacy devices, printers, OTT</em></span>
+            </label>
+            <button class="mini" data-open="dual_ssid" data-page="2">Guide</button>
+          </li>
+          <li>
+            <label class="check">
+              <input type="checkbox" id="c_parallel">
+              <span class="box" aria-hidden="true"></span>
+              <span class="ctext"><b>No parallel networks</b><em>Confirmed there's no second/old network in the home</em></span>
+            </label>
+            <button class="mini" data-open="dual_ssid" data-page="10">Guide</button>
+          </li>
+        </ul>
 
-      <div class="divider"><span>The unit you're swapping</span></div>
+        <div class="readings">
+          <div class="read-head">ONT light readings <span>required</span></div>
+          <p class="read-sub">SOP range: -14 to -19.5 dB. No more than -1 dB loss NID → ONT. Just type the number — we add the minus for you.</p>
+          <div class="read-grid">
+            <label>NID/FCPA CLOSET (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
+            <label>ONT | 1490/1550 or 1577 (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_ont" placeholder="e.g. -17.2"></label>
+            <label>Frontline Health Score<input type="text" inputmode="numeric" id="r_health" placeholder="e.g. 95"></label>
+          </div>
+          <div id="readingFlag" class="read-flag" hidden></div>
+        </div>
 
-      <label>EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
-      <label>Account it's being removed from<input id="f_removed" required inputmode="numeric"></label>
-      <p class="micro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
+        <button class="primary" data-next id="toSubmit" disabled>Continue to request →</button>
+        <div class="lock-hint" id="lockHint">Complete all three checks and enter the ONT reading to continue.</div>
+      </section>
 
-      <div class="divider"><span>Your market</span></div>
-      <label>Market <select id="f_market" required></select></label>
+      <!-- ===== STEP 3: the request ===== -->
+      <section class="step" data-step="2">
+        <p class="lead">Last step. This gates the job until a manager decides — they get pinged instantly.</p>
 
-      <label>Your name<input id="f_tech" required></label>
-      <label>Reason for swap (optional)<textarea id="f_reason" rows="2" placeholder="What did the basics not fix?"></textarea></label>
+        <form id="reqForm" class="form" autocomplete="off">
+          <div class="grid2">
+            <label>Customer first name<input id="f_first" required></label>
+            <label>Customer last name<input id="f_last" required></label>
+          </div>
+          <label>Account # / Job # (Offer #)<input id="f_acct" required inputmode="numeric"></label>
 
-      <button type="submit" class="primary submit" id="submitBtn">Request approval</button>
-      <div class="micro center">You'll see a confirmation. The tech screen unlocks when a manager approves.</div>
-    </form>
-  </section>
+          <div class="divider"><span>The unit you're swapping</span></div>
 
-  <!-- ===== Result ===== -->
-  <section class="step result" data-step="3">
-    <div class="result-card" id="resultCard"></div>
-  </section>
+          <label>EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
+          <label>Account it's being removed from<input id="f_removed" required inputmode="numeric"></label>
+          <p class="micro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
+
+          <div class="divider"><span>Your market</span></div>
+          <label>Market <select id="f_market" required></select></label>
+
+          <label>Your name<input id="f_tech" required></label>
+          <label>Reason for swap (optional)<textarea id="f_reason" rows="2" placeholder="What did the basics not fix?"></textarea></label>
+
+          <button type="submit" class="primary submit" id="submitBtn">Request approval</button>
+          <div class="micro center">You'll see a confirmation. The tech screen unlocks when a manager approves.</div>
+        </form>
+      </section>
+
+      <!-- ===== Result ===== -->
+      <section class="step result" data-step="3">
+        <div class="result-card" id="resultCard"></div>
+      </section>
+    </main>
+
+  </div>
 </div>
 
 <!-- ===== PDF reader overlay ===== -->
