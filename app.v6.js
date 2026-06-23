@@ -353,7 +353,11 @@ if (tutorial) {
     if (n >= TUTORIAL.length) { closeTut(); return; }
     tutIdx = n; renderTut();
   };
-  $("#tutBtn").addEventListener("click", openTut);
+  // Tutorial opens the uploaded multi-page PDF in the in-app reader (scroll through all slides).
+  $("#tutBtn").addEventListener("click", () => openResource(null, null, null, {
+    title: "EVO Swap — Full Tutorial",
+    file: "EVO%20Swap%20Tutorial-a2d67997.pdf"
+  }));
   $("#tutClose").addEventListener("click", closeTut);
   tutPrev.addEventListener("click", () => go(-1));
   tutNext.addEventListener("click", () => go(1));
