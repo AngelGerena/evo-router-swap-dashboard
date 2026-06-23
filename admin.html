@@ -6,6 +6,8 @@
 <title>EVO Swap Control — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{--navy:#0b2545;--navy2:#123c69;--teal:#0f766e;--ink:#16202e;--muted:#5b6b80;
   --line:#e2e8f1;--bg:#eef2f7;--card:#fff;--good:#166534;--good-bg:#e6f4ea;
@@ -45,7 +47,11 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 .muted{color:var(--muted)}
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .filters input,.filters select{padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;background:#fff}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.brandbar{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:12px 20px;margin-bottom:14px;display:flex;align-items:center}
+.brandbar[hidden]{display:none!important}
+.brandbar img{height:46px;width:auto;display:block}
+.gate input{margin:8px 0}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.brandbar img{height:38px}}
 </style>
 </head>
 <body>
@@ -54,20 +60,23 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 <div class="gate" id="gate">
   <div class="kick" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800">Summit Broadband</div>
   <h2 style="margin:8px 0 0">EVO Swap Control — Admin</h2>
-  <p class="muted" style="font-size:14px">Enter your admin access token to view the queue and analytics.</p>
-  <input type="password" id="adminToken" placeholder="Admin access token" />
-  <button class="btn" onclick="loadAll()">Open dashboard</button>
+  <p class="muted" style="font-size:14px">Managers: sign in with the <b>Manager</b> username &amp; password. Owner: leave username blank and enter your owner password.</p>
+  <input type="text" id="adminUser" placeholder="Username" autocomplete="username" />
+  <input type="password" id="adminToken" placeholder="Password" autocomplete="current-password" />
+  <button class="btn" onclick="loadAll()">Sign in</button>
   <p class="muted" id="gateErr" style="color:var(--bad);font-size:13px;min-height:18px"></p>
 </div>
 
 <!-- dashboard -->
 <div class="shell" id="dash" hidden>
+  <div class="brandbar" id="brandbar" hidden><img id="brandLogo" alt="Summit Broadband"></div>
   <div class="hero">
     <div><div class="kick">Summit Broadband · Field Operations</div><h1>EVO Swap Control</h1></div>
     <div class="acts">
       <span id="roleTag" style="align-self:center;font-weight:800;font-size:12px;opacity:.9;padding:0 4px"></span>
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
-      <button class="btn light" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters (e.g. filter to Approved for an approved-only report).">Export report (XLSX)</button>
+      <button class="btn light" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters.">Export (XLSX)</button>
+      <button class="btn light" id="exportPdfBtn" onclick="exportPdf()" title="Branded PDF of the rows currently shown — respects your filters.">Export (PDF)</button>
     </div>
   </div>
 
@@ -108,6 +117,8 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 <script src="config.js"></script>
 <script>
 const CFG = window.EVO_CONFIG;
+const LOGO_B64 = ""; // Summit Broadband logo (data URI) — filled in on deploy
+(function(){ const img=document.getElementById("brandLogo"), bar=document.getElementById("brandbar"); if(LOGO_B64 && img){ img.src=LOGO_B64; bar.hidden=false; } })();
 let DATA = null, TOKEN = "";
 
 async function loadAll(){
@@ -129,6 +140,8 @@ function applyRole(){
   const isOwner = DATA.role === "owner";
   const exp = document.getElementById("exportBtn");
   if (exp) exp.style.display = isOwner ? "" : "none";
+  const expp = document.getElementById("exportPdfBtn");
+  if (expp) expp.style.display = isOwner ? "" : "none";
   const tag = document.getElementById("roleTag");
   if (tag) tag.textContent = isOwner ? "Owner" : "Manager \u00b7 read-only";
 }
@@ -202,6 +215,47 @@ function renderTechs(){
       <td class="mono muted">${t.markets.join(", ")}</td>
       <td><span class="risk r-${t.risk}">${t.risk==="high"?"High":t.risk==="watch"?"Watch":"OK"}</span></td>
     </tr>`).join("") || `<tr><td colspan="10" class="muted" style="text-align:center;padding:26px">No data yet.</td></tr>`;
+}
+
+function exportPdf(){
+  if (!DATA || DATA.role !== "owner") { alert("Reports are available to the owner account only."); return; }
+  if (!window.jspdf || !window.jspdf.jsPDF) { alert("PDF library still loading — try again in a second."); return; }
+  const rows = getFilteredRows();
+  const NAVY=[11,37,69], TEAL=[15,163,163], CYAN=[24,182,201], INK=[22,32,46], MUT=[91,107,128], ZEBRA=[238,242,247];
+  const doc = new window.jspdf.jsPDF({ orientation:"landscape", unit:"pt", format:"a4" });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  // header band
+  doc.setFillColor.apply(doc, NAVY); doc.rect(0,0,W,66,"F");
+  doc.setFillColor.apply(doc, CYAN); doc.rect(0,66,W,4,"F");
+  if (LOGO_B64) { try { doc.addImage(LOGO_B64, "PNG", 24, 15, 156, 38); } catch(e){} }
+  doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16);
+  doc.text("EVO Swap Report", W-24, 32, { align:"right" });
+  const stf = document.getElementById("fStatus").value, mkf = document.getElementById("fMarket").value;
+  const filt = [stf!=="all"?stf:null, mkf!=="all"?mkf:null].filter(Boolean).join(" · ");
+  doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
+  doc.text(`${new Date().toLocaleString()}${filt?"  ·  "+filt:""}`, W-24, 50, { align:"right" });
+  // summary line
+  const approved=rows.filter(r=>r.status==="approved").length, denied=rows.filter(r=>r.status==="denied").length, pending=rows.filter(r=>r.status==="pending"||r.status==="escalated").length;
+  doc.setTextColor.apply(doc, INK); doc.setFont("helvetica","bold"); doc.setFontSize(11);
+  doc.text(`${rows.length} request${rows.length===1?"":"s"}`, 24, 92);
+  doc.setFont("helvetica","normal"); doc.setTextColor.apply(doc, MUT); doc.setFontSize(10);
+  doc.text(`Approved ${approved}      Denied ${denied}      Awaiting decision ${pending}`, 110, 92);
+  // table
+  const head=[["Submitted","Status","Tech","Market","Customer","Account","Tech Reason","Decided By","Manager Reason"]];
+  const body=rows.map(r=>[fmt(r.submitted_at), (r.status||""), r.tech_name||"", r.market_code||"", `${r.customer_first||""} ${r.customer_last||""}`.trim(), r.account_number||"", r.swap_reason||"", r.decided_by_email||"", r.decision_note||""]);
+  doc.autoTable({
+    head, body, startY:104,
+    styles:{ fontSize:8, cellPadding:4, overflow:"linebreak", textColor:INK, lineColor:[226,232,241], lineWidth:0.5 },
+    headStyles:{ fillColor:NAVY, textColor:[255,255,255], fontStyle:"bold", fontSize:8 },
+    alternateRowStyles:{ fillColor:ZEBRA },
+    columnStyles:{ 0:{cellWidth:74}, 1:{cellWidth:52}, 3:{cellWidth:60}, 5:{cellWidth:64}, 6:{cellWidth:120}, 7:{cellWidth:120}, 8:{cellWidth:150} },
+    margin:{ left:24, right:24 },
+    didParseCell:(d)=>{ if(d.section==="body" && d.column.index===1){ const v=String(d.cell.raw||"").toLowerCase(); d.cell.styles.fontStyle="bold"; if(v==="approved")d.cell.styles.textColor=[22,101,52]; else if(v==="denied")d.cell.styles.textColor=[185,28,28]; else d.cell.styles.textColor=[180,83,9]; } },
+  });
+  const pages=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){ doc.setPage(i); doc.setFontSize(8); doc.setTextColor.apply(doc, MUT); doc.text(`Summit Broadband · EVO Swap Control`, 24, H-14); doc.text(`Page ${i} of ${pages}`, W-24, H-14, {align:"right"}); }
+  const tag = stf && stf!=="all" ? "_"+stf : "";
+  doc.save(`EVO_Swap_Report${tag}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 function exportXlsx(){
