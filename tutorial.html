@@ -3,70 +3,66 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>EVO Swap — Field Tech Tutorial · Summit Broadband</title>
+<title>EVO Swap — Field Tech Walkthrough · Summit Broadband</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --navy:#0b2545; --navy2:#13315c; --cyan:#00bbbb; --teal:#18b6c9;
-    --ink:#15233a; --muted:#5b6b80; --line:#e6ebf2; --good:#1a7f37; --bad:#b42318;
-    --shadow:0 18px 50px rgba(11,37,69,.18);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:Manrope,system-ui,Arial,sans-serif;color:#fff;
+  :root{ --navy:#0b2545; --cyan:#00bbbb; --teal:#18b6c9; --good:#1a7f37; --good-bg:#e7f6ec; --bad:#b42318; --bad-bg:#fde9e7; }
+  *{box-sizing:border-box} html,body{height:100%;margin:0}
+  body{font-family:Manrope,system-ui,Arial,sans-serif;color:#fff;
     background:radial-gradient(120% 120% at 50% 0%, #16386b 0%, var(--navy) 55%, #081a33 100%);
     -webkit-font-smoothing:antialiased;overflow:hidden}
   .wrap{position:fixed;inset:0;display:flex;flex-direction:column}
-  /* top bar */
-  .bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:12px}
-  .bar .logo{background:#fff;border-radius:12px;padding:7px 12px;display:flex;align-items:center}
-  .bar .logo img{height:30px;width:auto;display:block}
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px;flex:none}
+  .bar .logo{background:#fff;border-radius:11px;padding:6px 11px;display:flex;align-items:center}
+  .bar .logo img{height:26px;width:auto;display:block}
   .bar .count{font-weight:800;font-size:13px;color:#bcd3ee;letter-spacing:.04em}
-  .bar .x{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:11px;font-size:18px;cursor:pointer;flex:none}
-  .bar .x:hover{background:rgba(255,255,255,.22)}
-  /* stage */
-  .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 20px 0;position:relative;overflow:hidden}
-  .card{width:100%;max-width:680px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);
-    border-radius:22px;padding:34px 30px 38px;backdrop-filter:blur(4px);animation:in .28s ease}
-  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:30px;font-weight:800;
-    background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a;box-shadow:0 10px 26px rgba(0,187,187,.32);margin-bottom:18px}
-  .kick{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:800;margin-bottom:8px}
-  h2{margin:0 0 12px;font-size:27px;line-height:1.15;font-weight:800}
-  p{margin:0 0 12px;font-size:16.5px;line-height:1.6;color:#dce6f2}
-  ul{margin:10px 0 0;padding:0;list-style:none}
-  li{position:relative;padding:7px 0 7px 28px;font-size:15.5px;line-height:1.5;color:#e6eef8}
-  li::before{content:"";position:absolute;left:4px;top:14px;width:9px;height:9px;border-radius:50%;
-    background:linear-gradient(135deg,var(--cyan),var(--teal))}
-  .hl{color:#ffd66b;font-weight:800}
-  .ok{color:#7ee2a8;font-weight:800}
-  .no{color:#ff9c8f;font-weight:800}
-  .mono{font-variant-numeric:tabular-nums}
-  /* footer nav */
-  .foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
-  .nav{appearance:none;border:0;font:inherit;font-weight:800;font-size:16px;padding:15px 22px;border-radius:14px;cursor:pointer}
-  .back{background:rgba(255,255,255,.12);color:#fff}
-  .back:disabled{opacity:.35;cursor:default}
-  .next{background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a;box-shadow:0 10px 24px rgba(0,187,187,.32)}
-  .dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
-  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:.2s}
-  .dot.on{background:var(--cyan);transform:scale(1.35)}
-  @media(max-width:480px){
-    h2{font-size:23px} p{font-size:15.5px} .card{padding:26px 20px 30px}
-    .nav{padding:14px 16px;font-size:15px} .bar .logo img{height:26px}
-  }
+  .bar .x{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:38px;height:38px;border-radius:10px;font-size:17px;cursor:pointer;flex:none}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;min-height:0;padding:4px 14px 0}
+  .explain{width:100%;max-width:460px;flex:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;padding:13px 16px;margin-bottom:10px;animation:in .25s ease}
+  .explain .kick{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;margin-bottom:4px}
+  .explain h2{margin:0 0 5px;font-size:18px;line-height:1.2;font-weight:800}
+  .explain p{margin:0;font-size:13.5px;line-height:1.5;color:#dce6f2}
+  .hl{color:#ffd66b;font-weight:800}.ok-t{color:#7ee2a8;font-weight:800}.no-t{color:#ff9c8f;font-weight:800}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .device{position:relative;width:100%;max-width:430px;flex:1;min-height:0;margin-bottom:10px;border-radius:20px;
+    overflow:hidden;background:#eef2f7;box-shadow:0 18px 50px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15)}
+  .device iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;background:#eef2f7}
+  .device .tag{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:11px;font-weight:700;color:#fff;
+    background:linear-gradient(0deg, rgba(11,37,69,.92), rgba(11,37,69,0));padding:18px 8px 7px;letter-spacing:.04em}
+  .panel{width:100%;max-width:460px;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:26px 22px;margin-bottom:10px;overflow:auto;animation:in .25s ease}
+  .panel .ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:25px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a;margin-bottom:13px}
+  .panel h2{margin:0 0 9px;font-size:23px;font-weight:800;line-height:1.15}
+  .panel p{margin:0 0 9px;font-size:15px;line-height:1.55;color:#dce6f2}
+  .panel .logo-lg{background:#fff;border-radius:14px;padding:10px 16px;display:inline-flex;align-self:flex-start;margin-bottom:16px}
+  .panel .logo-lg img{height:34px}
+  .foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .nav{appearance:none;border:0;font:inherit;font-weight:800;font-size:15px;padding:13px 20px;border-radius:13px;cursor:pointer}
+  .back{background:rgba(255,255,255,.12);color:#fff}.back:disabled{opacity:.35;cursor:default}
+  .next{background:linear-gradient(135deg,var(--cyan),var(--teal));color:#06303a}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25)}.dot.on{background:var(--cyan);transform:scale(1.35)}
+  @media(max-width:480px){ .explain h2{font-size:16.5px} .panel h2{font-size:21px} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="bar">
     <div class="logo"><img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband"></div>
-    <div class="count" id="count">1 / 10</div>
+    <div class="count" id="count">1 / 8</div>
     <button class="x" id="close" type="button" aria-label="Close tutorial">✕</button>
   </div>
-  <div class="stage"><div class="card" id="card"></div></div>
+  <div class="stage">
+    <div class="explain" id="explain" hidden></div>
+    <div class="device" id="device" hidden>
+      <iframe id="siteFrame" src="index.html?embed=1" title="EVO Swap dashboard preview" scrolling="no"></iframe>
+      <div class="tag" id="deviceTag"></div>
+    </div>
+    <div class="panel" id="panel" hidden></div>
+  </div>
   <div class="foot">
     <button class="nav back" id="back" type="button">‹ Back</button>
     <div class="dots" id="dots"></div>
@@ -74,92 +70,97 @@
   </div>
 </div>
 <script>
-const SLIDES = [
-  { ic:"▶", kick:"Summit Broadband · Field", title:"EVO Swap Request",
-    html:`<p>A field-tech walkthrough — how to use the dashboard, screen by screen.</p>
-          <p style="color:#9fb3cc">Swipe, tap <b>Next ›</b>, or use your arrow keys.</p>` },
-  { ic:"!", kick:"The golden rule", title:"Every swap needs approval",
-    html:`<p>No EVO comes off an account until <b>Anthony or Peterson</b> approves it. <span class="hl">No exceptions.</span></p>
-          <p>The dashboard keeps the job <b>gated</b> until a manager says go — so you’re always covered.</p>` },
-  { ic:"1", kick:"Step 1", title:"Run the basics first",
-    html:`<p>Most “swaps” are fixed <b>without</b> one. Before you request, try:</p>
-          <ul>
-            <li>Relocate the router to a <b>central</b> spot</li>
-            <li>Attempt a <b>Dual-SSID split</b> for legacy devices</li>
-            <li>Confirm there’s <b>no second / old network</b> still broadcasting</li>
-          </ul>
-          <p style="margin-top:12px">Tap any <b>Guide</b> on the dashboard to open the SOP at the right page.</p>` },
-  { ic:"2", kick:"Step 2", title:"Finish the checklist",
-    html:`<p>Tick <b>all three boxes</b> on the checklist.</p>
-          <p>The <b>Request approval</b> button stays <span class="no">locked</span> until the basics and your ONT reading are in — so nothing gets submitted half-done.</p>` },
-  { ic:"📶", kick:"Step 2 · readings", title:"ONT light readings",
-    html:`<ul>
-            <li><b>NID / FCPA Closet (dB)</b></li>
-            <li><b>ONT | 1490 / 1550 or 1577 (dB)</b></li>
-            <li><b>Frontline Health Score</b></li>
-          </ul>
-          <p style="margin-top:12px">SOP range is <b class="mono">−14 to −19.5 dB</b>, with <b>no more than 1 dB loss</b> from NID → ONT.</p>` },
-  { ic:"3", kick:"Step 3", title:"Submit the request",
-    html:`<p>Add the details and tap <b>Request approval</b>:</p>
-          <ul>
-            <li>Customer + <b>account / job #</b></li>
-            <li>The <b>EVO serial or MAC</b> you’re removing — and its account</li>
-            <li>Your <b>market</b> and your <b>name</b></li>
-          </ul>` },
-  { ic:"➜", kick:"Routing", title:"Where your request goes",
-    html:`<p>It routes <b>automatically</b> to your market’s manager:</p>
-          <ul>
-            <li><b>Anthony</b> — Central FL, West / Tampa, Lakeland / Cassel, Leesburg FTTH</li>
-            <li><b>Peterson</b> — Southwest FL (SWFL), Marco FTTH</li>
-          </ul>` },
-  { ic:"⚡", kick:"After you submit", title:"A manager decides — fast",
-    html:`<p>Your manager is <b>pinged instantly</b> and approves or denies in one tap.</p>
-          <p>The job stays <b>gated</b> until they decide. No answer in <b>30 minutes</b> auto-escalates to a backstop, so you’re never stuck waiting.</p>` },
-  { ic:"✓", kick:"Live on your screen", title:"You’ll see the answer",
-    html:`<p>Your screen updates by itself — no refresh:</p>
-          <ul>
-            <li><span class="ok">GREEN — Approved.</span> You’re cleared, with the manager’s reason.</li>
-            <li><span class="no">RED — Denied.</span> Do not swap — with the manager’s instruction.</li>
-          </ul>` },
-  { ic:"★", kick:"That’s it", title:"Basics → gate → approved",
-    html:`<p>Run the basics, finish the checklist, submit, and wait for the <span class="ok">green</span>.</p>
-          <p>Every removed EVO returns to <b>4558 in Orlando</b> with its account #.</p>
-          <p style="color:#9fb3cc">Reopen this anytime from the <b>“How it works”</b> button.</p>` },
+const LOGO="https://images.weserv.nl/?url="+encodeURIComponent("https://www.dropbox.com/scl/fi/x4s94tmq5dsayd04yrkt9/30yrs-footer.png?rlkey=53ncalcl2fo0wcpkldm5gii42&raw=1")+"&output=png";
+const SLIDES=[
+  { type:"panel", html:`
+      <div class="logo-lg"><img src="${LOGO}" alt="Summit Broadband"></div>
+      <div style="color:var(--cyan);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-bottom:6px">Summit Broadband · Field</div>
+      <h2>EVO Swap Request — Walkthrough</h2>
+      <p>A tour of the <b>actual screen</b> you'll use, section by section, with a filled-in example.</p>
+      <p style="color:#9fb3cc">Tap <b>Next ›</b>, swipe, or use arrow keys.</p>` },
+  { type:"live", step:0, sel:null, tag:"Home screen", kick:"The screen", title:"This is your EVO Swap screen",
+    text:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. The screen keeps the job locked until a manager decides.` },
+  { type:"live", step:0, sel:".resources", tag:"Step 1 · Basics & Guides", kick:"Step 1", title:"Run the basics first",
+    text:`Tap any <b>Guide</b> to open the SOP at the right page. When you've done the basics, tap <b>“I've reviewed the basics.”</b>` },
+  { type:"live", step:1, sel:".checks", tag:"Step 2 · Checklist", kick:"Step 2", title:"Tick all three boxes",
+    text:`Router relocated, Dual-SSID attempted, no parallel network. Each box has its own <b>Guide</b> if you need it.` },
+  { type:"live", step:1, sel:".readings", tag:"Step 2 · ONT readings", kick:"Step 2", title:"Enter your ONT readings",
+    text:`<b>NID/FCPA</b> and <b>ONT</b> — SOP <b>−14 to −19.5 dB</b>, ≤1 dB loss — plus the <b>Frontline Health Score</b>. <b>Continue</b> unlocks once they're in.` },
+  { type:"live", step:2, sel:"#reqForm", tag:"Step 3 · Submit", kick:"Step 3", title:"Submit the request",
+    text:`Customer, account/job #, the <b>EVO S/N or MAC</b> you're removing + its account, your <b>market</b>, your name. Tap <b>Request approval</b>.` },
+  { type:"live", step:3, sel:null, tag:"After you submit", kick:"Confirmation", title:"Request sent — and it's gated",
+    text:`The job is <b>locked</b> until your manager decides — they're pinged instantly. Your screen then turns <span class="ok-t">GREEN</span> (approved) or <span class="no-t">RED</span> (denied) with their reason. No answer in 30 min auto-escalates.` },
+  { type:"panel", html:`
+      <div class="ic">★</div>
+      <h2>That's it</h2>
+      <p>Basics → checklist → submit → wait for the <span class="ok-t">green</span>.</p>
+      <p>Every removed EVO returns to <b>4558 in Orlando</b> with its account #.</p>
+      <p style="color:#9fb3cc">Reopen this anytime from <b>“How it works.”</b></p>` },
 ];
 
-const card=document.getElementById("card"), countEl=document.getElementById("count"),
-      dotsEl=document.getElementById("dots"), back=document.getElementById("back"), next=document.getElementById("next");
-let i=0;
+const explain=document.getElementById("explain"),device=document.getElementById("device"),panel=document.getElementById("panel"),
+      frame=document.getElementById("siteFrame"),deviceTag=document.getElementById("deviceTag"),countEl=document.getElementById("count"),
+      dotsEl=document.getElementById("dots"),back=document.getElementById("back"),next=document.getElementById("next");
+let i=0,frameReady=false;
+
+function setVal(doc,id,val){ const el=doc.getElementById(id); if(!el)return; el.value=val; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }
+function setChk(doc,id){ const el=doc.getElementById(id); if(!el)return; el.checked=true; el.dispatchEvent(new Event("change",{bubbles:true})); }
+
+function fillExample(){
+  try{
+    const doc=frame.contentDocument;
+    setChk(doc,"c_relocate"); setChk(doc,"c_ssid"); setChk(doc,"c_parallel");
+    setVal(doc,"r_nid","-14"); setVal(doc,"r_ont","-15"); setVal(doc,"r_health","90");
+    setVal(doc,"f_first","Angel"); setVal(doc,"f_last","Gerena"); setVal(doc,"f_acct","30049999");
+    setVal(doc,"f_serial","1834AFA99999"); setVal(doc,"f_removed","30049999");
+    setVal(doc,"f_market","SWFL"); setVal(doc,"f_tech","John Doe");
+    setVal(doc,"f_reason","Router won't power up, replaced power supply and moved to different outlet, no change.");
+    // build a realistic "Request sent" result card for the confirmation step
+    const rc=doc.getElementById("resultCard");
+    if(rc){ rc.innerHTML=`
+      <div style="text-align:center;padding:6px 4px">
+        <div style="width:64px;height:64px;border-radius:50%;background:#fbe9cf;color:#b5791f;display:grid;place-items:center;font-size:30px;margin:0 auto 14px">✓</div>
+        <h2 style="margin:0 0 8px;font-size:21px;color:#15233a">Request sent</h2>
+        <p style="margin:0 0 12px;color:#5b6b80;font-size:14.5px">The job is gated until a manager decides — they've been pinged now.</p>
+        <div style="font-weight:800;color:#15233a;margin-bottom:12px">Routed to Peterson Germain</div>
+        <div style="background:#f4f7fb;border-radius:12px;padding:11px 14px;color:#5b6b80;font-size:13.5px">● Waiting on their decision… this screen updates by itself.</div>
+      </div>`; }
+  }catch(e){}
+}
+
+frame.addEventListener("load",()=>{ frameReady=true; fillExample(); if(SLIDES[i].type==="live") driveLive(SLIDES[i]); });
+
+function driveLive(s){
+  if(!frameReady) return;
+  try{
+    const doc=frame.contentDocument,win=frame.contentWindow;
+    doc.querySelectorAll(".step").forEach(el=>el.classList.toggle("is-active",el.getAttribute("data-step")==String(s.step)));
+    doc.querySelectorAll(".rail-step").forEach(el=>el.classList.toggle("is-active",el.getAttribute("data-go")==String(s.step)));
+    setTimeout(()=>{ try{
+      if(s.sel){ const el=doc.querySelector(s.sel); if(el){ el.scrollIntoView({block:"start"}); win.scrollBy(0,-14); return; } }
+      win.scrollTo(0,0);
+    }catch(e){} },90);
+  }catch(e){}
+}
+
 function render(){
   const s=SLIDES[i];
-  card.innerHTML=`<div class="ic">${s.ic}</div><div class="kick">${s.kick}</div><h2>${s.title}</h2>${s.html}`;
   countEl.textContent=`${i+1} / ${SLIDES.length}`;
   dotsEl.innerHTML=SLIDES.map((_,n)=>`<span class="dot ${n===i?"on":""}"></span>`).join("");
-  back.disabled=i===0;
-  next.textContent=i===SLIDES.length-1?"Done ✓":"Next ›";
+  back.disabled=i===0; next.textContent=i===SLIDES.length-1?"Done ✓":"Next ›";
+  explain.hidden=true; device.hidden=true; panel.hidden=true;
+  if(s.type==="panel"){ panel.hidden=false; panel.innerHTML=s.html; }
+  else { explain.hidden=false; explain.innerHTML=`<div class="kick">${s.kick}</div><h2>${s.title}</h2><p>${s.text}</p>`;
+    device.hidden=false; deviceTag.textContent=s.tag||""; driveLive(s); }
 }
-function go(d){
-  const n=i+d;
-  if(n<0) return;
-  if(n>=SLIDES.length){ closeTut(); return; }
-  i=n; render();
-}
+function go(d){ const n=i+d; if(n<0)return; if(n>=SLIDES.length){closeTut();return;} i=n; render(); }
 function closeTut(){ if(history.length>1) history.back(); else location.href="index.html"; }
-back.addEventListener("click",()=>go(-1));
-next.addEventListener("click",()=>go(1));
+back.addEventListener("click",()=>go(-1)); next.addEventListener("click",()=>go(1));
 document.getElementById("close").addEventListener("click",closeTut);
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowRight") go(1);
-  else if(e.key==="ArrowLeft") go(-1);
-  else if(e.key==="Escape") closeTut();
-});
-// swipe
+document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight")go(1); else if(e.key==="ArrowLeft")go(-1); else if(e.key==="Escape")closeTut(); });
 let tx=null;
 document.querySelector(".stage").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
-document.querySelector(".stage").addEventListener("touchend",e=>{
-  if(tx==null) return; const dx=e.changedTouches[0].clientX-tx; tx=null;
-  if(dx<-45) go(1); else if(dx>45) go(-1);
-});
+document.querySelector(".stage").addEventListener("touchend",e=>{ if(tx==null)return; const dx=e.changedTouches[0].clientX-tx; tx=null; if(dx<-45)go(1); else if(dx>45)go(-1); });
 render();
 </script>
 </body>
