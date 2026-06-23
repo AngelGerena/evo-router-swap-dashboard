@@ -117,8 +117,10 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 <script src="config.js"></script>
 <script>
 const CFG = window.EVO_CONFIG;
-const LOGO_B64 = ""; // Summit Broadband logo (data URI) — filled in on deploy
-(function(){ const img=document.getElementById("brandLogo"), bar=document.getElementById("brandbar"); if(LOGO_B64 && img){ img.src=LOGO_B64; bar.hidden=false; } })();
+const LOGO_URL = "https://images.weserv.nl/?url=" + encodeURIComponent("https://www.dropbox.com/scl/fi/x4s94tmq5dsayd04yrkt9/30yrs-footer.png?rlkey=53ncalcl2fo0wcpkldm5gii42&raw=1") + "&output=png";
+let LOGO_DATAURL = ""; // cached data URI so the PDF export can embed the logo
+(function(){ const img=document.getElementById("brandLogo"), bar=document.getElementById("brandbar"); if(img){ img.src=LOGO_URL; bar.hidden=false; } })();
+(async function(){ try{ const r=await fetch(LOGO_URL); const b=await r.blob(); LOGO_DATAURL=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res("");fr.readAsDataURL(b);}); }catch(e){} })();
 let DATA = null, TOKEN = "";
 
 async function loadAll(){
@@ -227,7 +229,7 @@ function exportPdf(){
   // header band
   doc.setFillColor.apply(doc, NAVY); doc.rect(0,0,W,66,"F");
   doc.setFillColor.apply(doc, CYAN); doc.rect(0,66,W,4,"F");
-  if (LOGO_B64) { try { doc.addImage(LOGO_B64, "PNG", 24, 15, 156, 38); } catch(e){} }
+  if (LOGO_DATAURL) { try { doc.addImage(LOGO_DATAURL, "PNG", 24, 14, 202, 38); } catch(e){} }
   doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16);
   doc.text("EVO Swap Report", W-24, 32, { align:"right" });
   const stf = document.getElementById("fStatus").value, mkf = document.getElementById("fMarket").value;
