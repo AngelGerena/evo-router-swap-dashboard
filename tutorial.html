@@ -151,10 +151,14 @@ function driveLive(s){
     const doc=frame.contentDocument,win=frame.contentWindow;
     doc.querySelectorAll(".step").forEach(el=>el.classList.toggle("is-active",el.getAttribute("data-step")==String(s.step)));
     doc.querySelectorAll(".rail-step").forEach(el=>el.classList.toggle("is-active",el.getAttribute("data-go")==String(s.step)));
+    const desktop=document.body.classList.contains("dev-desktop");
     setTimeout(()=>{ try{
-      if(s.sel){ const el=doc.querySelector(s.sel); if(el){ el.scrollIntoView({block:"start"}); win.scrollBy(0,-14); return; } }
+      // On desktop the sidebar holds the guides, so for the Basics&Guides slide
+      // show the whole two-pane (scroll top) instead of cropping to the sidebar.
+      const topOnly = !s.sel || (desktop && s.sel===".resources");
+      if(!topOnly){ const el=doc.querySelector(s.sel); if(el){ el.scrollIntoView({block:"start"}); win.scrollBy(0,-14); return; } }
       win.scrollTo(0,0);
-    }catch(e){} },90);
+    }catch(e){} },120);
   }catch(e){}
 }
 
