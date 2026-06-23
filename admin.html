@@ -141,12 +141,13 @@ async function loadAll(){
 
 function applyRole(){
   const isOwner = DATA.role === "owner";
+  // Owner and managers can both export.
   const exp = document.getElementById("exportBtn");
-  if (exp) exp.style.display = isOwner ? "" : "none";
+  if (exp) exp.style.display = "";
   const expp = document.getElementById("exportPdfBtn");
-  if (expp) expp.style.display = isOwner ? "" : "none";
+  if (expp) expp.style.display = "";
   const tag = document.getElementById("roleTag");
-  if (tag) tag.textContent = isOwner ? "Owner" : ("Manager \u00b7 read-only" + (DATA.viewer ? " \u00b7 " + DATA.viewer : ""));
+  if (tag) tag.textContent = isOwner ? "Owner" : ("Manager" + (DATA.viewer ? " \u00b7 " + DATA.viewer : ""));
 }
 
 function fillMarketFilter(){
@@ -221,7 +222,7 @@ function renderTechs(){
 }
 
 function exportPdf(){
-  if (!DATA || DATA.role !== "owner") { alert("Reports are available to the owner account only."); return; }
+  if (!DATA || (DATA.role !== "owner" && DATA.role !== "manager")) { alert("Please sign in to export."); return; }
   if (!window.jspdf || !window.jspdf.jsPDF) { alert("PDF library still loading — try again in a second."); return; }
   const rows = getFilteredRows();
   const NAVY=[11,37,69], TEAL=[15,163,163], CYAN=[24,182,201], INK=[22,32,46], MUT=[91,107,128], ZEBRA=[238,242,247];
@@ -262,7 +263,7 @@ function exportPdf(){
 }
 
 function exportXlsx(){
-  if (!DATA || DATA.role !== "owner") { alert("Reports are available to the owner account only."); return; }
+  if (!DATA || (DATA.role !== "owner" && DATA.role !== "manager")) { alert("Please sign in to export."); return; }
   const wb = XLSX.utils.book_new();
   const rows = getFilteredRows();
   const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
