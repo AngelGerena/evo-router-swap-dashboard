@@ -20,6 +20,11 @@ body{display:flex;justify-content:center}
 .hdr-logo{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:10px 16px;margin:0 0 12px;display:flex;justify-content:center}
 .hdr-logo img{height:44px;width:auto;max-width:100%;display:block}
 .buildtag{text-align:right;font-size:10px;color:#9aa7b6;margin-top:4px;font-family:monospace}
+.frontline-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;
+  border:0;background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;font:inherit;font-weight:800;
+  font-size:13.5px;letter-spacing:.04em;padding:12px 14px;border-radius:12px;text-decoration:none;box-shadow:var(--shadow)}
+.frontline-btn:hover{filter:brightness(1.1)}
+.frontline-btn span{font-weight:700}
 
 /* ---- header ---- */
 .top{padding:18px 4px 14px}
@@ -158,7 +163,8 @@ h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
   .hdr-logo{margin:0;box-shadow:none;padding:0;border-radius:0}
   .hdr-logo img{height:40px}
   .top .brand{margin:0}
-  .top .tut-launch{width:auto;margin:0 0 0 auto;padding:11px 16px}
+  .top .frontline-btn{width:auto;margin:0 0 0 auto}
+  .top .tut-launch{width:auto;margin:0 0 0 12px;padding:11px 16px}
   .top .gate-note{flex-basis:100%;margin:0}
   .buildtag{flex-basis:100%;margin:0}
 
