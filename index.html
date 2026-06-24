@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<link rel="stylesheet" href="app.css?v=20260623f" />
+<link rel="stylesheet" href="app.css?v=20260623g" />
 </head>
 <body>
 <div class="app">
@@ -53,6 +53,37 @@
       <!-- ===== STEP 1: best-practices basics ===== -->
       <section class="step is-active" data-step="0">
         <p class="lead">Before requesting a swap, run the basics. Most "swaps" are fixed by relocating the router or splitting the network for old devices. Open any guide, then continue.</p>
+
+        <details class="basics-note" id="basicsNote">
+          <summary>
+            <span class="bn-ic" aria-hidden="true">!</span>
+            <span class="bn-head"><b>Optimize first, swap last</b><em>Why an EVO swap is a last resort — read this</em></span>
+            <span class="bn-toggle" aria-hidden="true">+</span>
+          </summary>
+          <div class="bn-body">
+            <h4>Our standard: optimize first, swap last</h4>
+            <p>Every truck roll is a chance to take care of the customer the right way. Before we ever consider removing an EVO router, our responsibility is to exhaust every reasonable step to make the existing equipment perform the way it was designed to. A router swap is not a fix — it is a last resort, and only appropriate after we've confirmed the unit has been set up to maximize performance in the home.</p>
+
+            <h4>Cover the fundamentals — every time</h4>
+            <p>Most "bad router" calls are really placement, configuration, or power problems. Before requesting a swap, confirm the basics are genuinely complete:</p>
+            <ul>
+              <li><b>Central placement &amp; clean wiring</b> — relocate the router to a central location and hard-wire wherever possible. Poor placement, not hardware, is the most common cause of weak coverage. (See Install Process &amp; Procedure.)</li>
+              <li><b>Split the networks</b> — for legacy devices, printers, and OTT gear that won't hold WPA3, stand up the WPA2 "-2" network so those devices stop dragging down the primary SSID. (See Dual SSID Split.)</li>
+              <li><b>Verify the power supply</b> — confirm the correct <b>3-amp</b> supply is installed, not a 2-amp. An under-rated supply starves the unit and mimics a hardware failure — this single check clears more "defective" routers than anything else.</li>
+              <li><b>Rule out parallel networks</b> — make sure there's no second or old network still broadcasting in the home and competing with the EVO.</li>
+            </ul>
+
+            <h4>Validate the signal before you judge the hardware</h4>
+            <p>Pull and record your ONT light readings — SOP range is <b>-14 to -19.5 dB</b>, with no more than <b>1 dB of loss from NID to ONT</b>. If the optical levels are out of spec, the issue is upstream of the router and a swap won't solve it. Capture the Frontline health score so we have a documented baseline of where the service actually stands.</p>
+
+            <h4>If a swap is truly warranted</h4>
+            <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline). If the swap is approved, make sure the removed unit carries its <b>account #</b> and is returned to <b>4558 in Orlando</b>.</p>
+
+            <h4>The bottom line</h4>
+            <p>Swapping an EVO is the easy answer, not the right one. We owe our customers the diligence of doing everything possible to make their service perform before reaching for new hardware. Holding the line on the basics is what separates a real fix from a temporary one.</p>
+          </div>
+        </details>
+
         <button class="primary" data-next>I've reviewed the basics →</button>
       </section>
 
@@ -165,5 +196,6 @@
 
 <script src="config.v4.js"></script>
 <script src="app.v6.js?v=20260623d"></script>
+<script>(function(){var d=document.getElementById("basicsNote");if(d&&window.matchMedia("(min-width:980px)").matches)d.open=true;})();</script>
 </body>
 </html>
