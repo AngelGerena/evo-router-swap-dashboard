@@ -180,6 +180,34 @@ h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
    swipe. Never horizontal. Works the same on any phone, tablet, or desktop.
    ============================================================================ */
 .reader[hidden]{display:none!important}
+
+/* ---- NRBY interstitial ---- */
+.nrby-screen{position:fixed;inset:0;background:var(--bg);z-index:55;display:flex;flex-direction:column;animation:fade .2s}
+.nrby-screen[hidden]{display:none!important}
+.nrby-bar{display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 12px;background:var(--navy);color:#fff;position:sticky;top:0;z-index:2}
+.nrby-close{width:38px;height:38px;border-radius:10px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:17px;cursor:pointer;flex:none}
+.nrby-bar-title{font-weight:800;font-size:15px}
+.nrby-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.nrby-card{max-width:640px;margin:0 auto;background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);border-left:4px solid var(--teal);overflow:hidden;padding:20px}
+.nrby-kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-deep);font-weight:800;margin-bottom:6px}
+.nrby-h{margin:0 0 16px;font-size:20px;letter-spacing:-.01em;color:var(--navy)}
+.nrby-block{display:flex;gap:13px;padding:12px 0;align-items:flex-start}
+.nrby-block + .nrby-block{border-top:1px solid var(--line)}
+.nrby-num{width:28px;height:28px;flex:none;border-radius:50%;background:var(--teal);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.nrby-body b{display:block;font-size:15px;color:var(--navy);margin-bottom:3px}
+.nrby-body p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.nrby-ack{display:flex;align-items:center;gap:12px;margin:18px 0 0;padding:14px;background:var(--good-bg);border-radius:12px;cursor:pointer}
+.nrby-ack input{position:absolute;opacity:0;width:0;height:0}
+.nrby-ack-box{width:26px;height:26px;border-radius:8px;border:2px solid var(--good);flex:none;display:grid;place-items:center;background:#fff;transition:.15s}
+.nrby-ack-box::after{content:"✓";color:#fff;font-weight:900;font-size:15px;opacity:0;transform:scale(.5);transition:.15s}
+.nrby-ack input:checked + .nrby-ack-box{background:var(--good)}
+.nrby-ack input:checked + .nrby-ack-box::after{opacity:1;transform:scale(1)}
+.nrby-ack input:focus-visible + .nrby-ack-box{outline:3px solid var(--teal);outline-offset:2px}
+.nrby-ack-text{font-size:14px;font-weight:700;color:var(--good)}
+.nrby-continue{width:100%;margin-top:16px;border:0;background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:#fff;font:inherit;font-weight:800;font-size:16px;padding:15px;border-radius:13px;cursor:pointer;box-shadow:var(--shadow);transition:.16s}
+.nrby-continue:disabled{background:var(--line);color:#9aa7b6;box-shadow:none;cursor:not-allowed}
+.nrby-fine{text-align:center;font-size:12px;color:var(--muted);margin:10px 0 0}
+
 .reader{position:fixed;inset:0;background:#0a1626;z-index:50;display:flex;flex-direction:column;animation:fade .2s}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .reader-bar{display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 12px;

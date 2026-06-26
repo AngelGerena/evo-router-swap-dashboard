@@ -146,6 +146,34 @@ $("#readerClose").addEventListener("click", () => {
   currentPdf = null;
 });
 
+// ---- NRBY interstitial -----------------------------------------------------
+const NRBY_URL = "https://app.nrby.ai/dashboard";
+const nrbyScreen = $("#nrbyScreen");
+const nrbyBtn = $("#nrbyBtn");
+const nrbyAck = $("#nrbyAck");
+const nrbyContinue = $("#nrbyContinue");
+
+function openNrby() {
+  if (nrbyAck) nrbyAck.checked = false;
+  if (nrbyContinue) nrbyContinue.disabled = true;
+  nrbyScreen.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function closeNrby() {
+  nrbyScreen.hidden = true;
+  document.body.style.overflow = "";
+}
+if (nrbyBtn) nrbyBtn.addEventListener("click", openNrby);
+$("#nrbyClose")?.addEventListener("click", closeNrby);
+if (nrbyAck) nrbyAck.addEventListener("change", () => {
+  if (nrbyContinue) nrbyContinue.disabled = !nrbyAck.checked;
+});
+if (nrbyContinue) nrbyContinue.addEventListener("click", () => {
+  if (nrbyAck && !nrbyAck.checked) return;
+  window.open(NRBY_URL, "_blank", "noopener");
+  closeNrby();
+});
+
 // ---- checklist gate --------------------------------------------------------
 const checks = ["#c_relocate", "#c_ssid", "#c_parallel"].map($);
 const rNid = $("#r_nid"), rHealth = $("#r_health");
@@ -253,8 +281,17 @@ function evalGate() {
   }
 }
 checks.forEach((c) => c.addEventListener("change", evalGate));
+// Show the minus in the box itself once the tech leaves the field.
+function normalizeFieldDisplay(el) {
+  if (!el) return;
+  const v = readLight(el);
+  if (!isNaN(v)) el.value = String(v);
+}
 ["input", "change", "blur", "keyup"].forEach((evt) =>
-  [rNid, r1490, r1550, r1577].forEach((el) => el && el.addEventListener(evt, () => { evalReadings(); evalNid(); evalGate(); }))
+  [rNid, r1490, r1550, r1577].forEach((el) => el && el.addEventListener(evt, () => {
+    if (evt === "blur") normalizeFieldDisplay(el);
+    evalReadings(); evalNid(); evalGate();
+  }))
 );
 
 // ---- submit ----------------------------------------------------------------

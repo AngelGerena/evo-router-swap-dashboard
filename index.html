@@ -27,7 +27,7 @@
     </div>
     <div class="ext-btns">
       <a class="frontline-btn" href="https://gamma.noc.plume.com/login" target="_blank" rel="noopener noreferrer">FRONTLINE <span aria-hidden="true">↗</span></a>
-      <a class="frontline-btn nrby-btn" href="https://app.nrby.ai/dashboard" target="_blank" rel="noopener noreferrer">NRBY <span aria-hidden="true">↗</span></a>
+      <button class="frontline-btn nrby-btn" id="nrbyBtn" type="button">NRBY <span aria-hidden="true">↗</span></button>
     </div>
     <button class="tut-launch" id="tutBtn" type="button"><span class="tut-launch-ic">▶</span> How it works — 60-second tutorial</button>
     <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
@@ -181,6 +181,53 @@
       </section>
     </main>
 
+  </div>
+</div>
+
+<!-- ===== NRBY interstitial overlay ===== -->
+<div class="nrby-screen" id="nrbyScreen" hidden role="dialog" aria-modal="true" aria-label="NRBY and OSP sequence">
+  <div class="nrby-bar">
+    <button class="nrby-close" id="nrbyClose" type="button" aria-label="Close">✕</button>
+    <div class="nrby-bar-title">NRBY &amp; OSP Sequence</div>
+  </div>
+  <div class="nrby-scroll">
+    <div class="nrby-card">
+      <div class="nrby-kick">Before you open NRBY · Read this</div>
+      <h2 class="nrby-h">Sequence matters — submit first, then document</h2>
+
+      <div class="nrby-block">
+        <div class="nrby-num">1</div>
+        <div class="nrby-body">
+          <b>Submit the NRBY request first</b>
+          <p>When OSP is required, submit the NRBY request <b>before</b> anything else. Do not document an NRBY in your notes until it has actually been submitted — submission can be verified.</p>
+        </div>
+      </div>
+
+      <div class="nrby-block">
+        <div class="nrby-num">2</div>
+        <div class="nrby-body">
+          <b>Then document it in your job notes</b>
+          <p>Once submitted, note in your job notes that the NRBY has been submitted. Noting an NRBY that wasn't actually submitted creates delays, confusion, and "OSP didn't show" callbacks.</p>
+        </div>
+      </div>
+
+      <div class="nrby-block">
+        <div class="nrby-num">3</div>
+        <div class="nrby-body">
+          <b>Set the right expectation with the customer</b>
+          <p>Advise the customer that OSP will be out <b>the next day</b> (except Sundays), and that it is an <b>all-day window</b> — no exceptions, no sooner time frames. Most often the customer is not required to be present. Setting this expectation prevents unnecessary ETA and "where's my tech" escalations.</p>
+        </div>
+      </div>
+
+      <label class="nrby-ack">
+        <input type="checkbox" id="nrbyAck">
+        <span class="nrby-ack-box" aria-hidden="true"></span>
+        <span class="nrby-ack-text">I have read and understood the NRBY &amp; OSP sequence above.</span>
+      </label>
+
+      <button class="nrby-continue" id="nrbyContinue" type="button" disabled>Continue to NRBY ↗</button>
+      <p class="nrby-fine">This opens app.nrby.ai in a new tab.</p>
+    </div>
   </div>
 </div>
 
