@@ -305,11 +305,51 @@ function renderDecision(d) {
     <div class="seal big">${approved ? "✓" : "✕"}</div>
     <h2>${approved ? "Approved — you're cleared" : "Denied — do not swap"}</h2>
     <p>${approved
-        ? "Your manager approved this swap. You're good to proceed."
+        ? "Your manager approved this swap. Before you remove the old EVO, the two steps below are required — no exceptions."
         : "Your manager denied this swap. Hold off and follow their note below."}</p>
     ${note ? `<div class="mgrnote ${approved ? "good" : "bad"}"><span class="mgrnote-h">${approved ? "Why it was approved" : "Manager's note / instruction"}</span>${escHtml(note)}</div>` : ""}
+    ${!approved ? `
+    <div class="must-wrap denied">
+      <div class="must-head">Still required · No exceptions</div>
+      <div class="must-step">
+        <div class="must-num">!</div>
+        <div class="must-body">
+          <b>Save the EVO log in Frontline</b>
+          <p>Even though the swap was denied, save the EVO log in Frontline for the record. Do this even if the unit is offline. Follow any additional instructions in the manager's note above.</p>
+          <button class="must-guide" id="deniedEvoLogGuide" type="button">Open “Save EVO Log” guide</button>
+        </div>
+      </div>
+    </div>` : ""}
+    ${approved ? `
+    <div class="must-wrap">
+      <div class="must-head">Required before &amp; after the swap · No exceptions</div>
+
+      <div class="must-step">
+        <div class="must-num">1</div>
+        <div class="must-body">
+          <b>Save the EVO log in Frontline first</b>
+          <p>Before you remove the old EVO router, save its log in Frontline so Evolution can review it in the lab. Do this even if the unit is offline.</p>
+          <button class="must-guide" id="approvedEvoLogGuide" type="button">Open “Save EVO Log” guide</button>
+        </div>
+      </div>
+
+      <div class="must-step">
+        <div class="must-num">2</div>
+        <div class="must-body">
+          <b>Quarantine &amp; return the old EVO</b>
+          <p>Quarantine the removed EVO router (and its power supply, if applicable). Label a box with the customer’s <b>account #</b> and ensure it is returned to:</p>
+          <div class="return-addr">
+            4558 35th St.<br>Orlando, FL 32811
+          </div>
+        </div>
+      </div>
+    </div>` : ""}
     ${d.by ? `<div class="routed">Decided by ${escHtml(d.by)}</div>` : ""}
     <button class="again" onclick="location.reload()">New request</button>`;
+
+  // The card is injected after load, so wire its guide button(s) directly.
+  const logGuide = $("#approvedEvoLogGuide") || $("#deniedEvoLogGuide");
+  if (logGuide) logGuide.addEventListener("click", () => openResource("evo_log"));
 }
 
 function escHtml(s) {

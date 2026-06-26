@@ -29,6 +29,23 @@ body{display:flex;justify-content:center}
 .ext-btns .frontline-btn{margin-top:0}
 .nrby-btn{background:linear-gradient(135deg,var(--teal-deep),var(--teal))}
 
+/* ---- mandatory post-approval steps (green card) ---- */
+.must-wrap{text-align:left;margin:18px 0 4px;border:2px solid var(--good);border-radius:var(--r);overflow:hidden;background:var(--good-bg)}
+.must-head{background:var(--good);color:#fff;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:9px 14px}
+.must-step{display:flex;gap:12px;padding:14px;align-items:flex-start}
+.must-step + .must-step{border-top:1px solid rgba(22,101,52,.18)}
+.must-num{width:28px;height:28px;flex:none;border-radius:50%;background:var(--good);color:#fff;font-weight:800;display:grid;place-items:center;font-size:15px}
+.must-body{flex:1}
+.must-body b{display:block;font-size:15px;color:var(--good);margin-bottom:3px}
+.must-body p{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+.must-guide{border:0;background:var(--navy);color:#fff;font:inherit;font-weight:800;font-size:13px;padding:10px 14px;border-radius:10px;cursor:pointer}
+.must-guide:hover{filter:brightness(1.12)}
+.return-addr{background:#fff;border:1px dashed var(--good);border-radius:10px;padding:11px 14px;font-weight:800;color:var(--navy);font-size:15px;line-height:1.4;letter-spacing:.01em}
+.must-wrap.denied{border-color:var(--bad);background:var(--bad-bg)}
+.must-wrap.denied .must-head{background:var(--bad)}
+.must-wrap.denied .must-num{background:var(--bad)}
+.must-wrap.denied .must-body b{color:var(--bad)}
+
 /* ---- header ---- */
 .top{padding:18px 4px 14px}
 .brand{display:flex;align-items:center;gap:12px}
