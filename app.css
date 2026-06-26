@@ -25,6 +25,9 @@ body{display:flex;justify-content:center}
   font-size:13.5px;letter-spacing:.04em;padding:12px 14px;border-radius:12px;text-decoration:none;box-shadow:var(--shadow)}
 .frontline-btn:hover{filter:brightness(1.1)}
 .frontline-btn span{font-weight:700}
+.ext-btns{display:flex;gap:8px;margin-top:10px}
+.ext-btns .frontline-btn{margin-top:0}
+.nrby-btn{background:linear-gradient(135deg,var(--teal-deep),var(--teal))}
 
 /* ---- header ---- */
 .top{padding:18px 4px 14px}
@@ -181,7 +184,8 @@ h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
   .hdr-logo{margin:0;box-shadow:none;padding:0;border-radius:0}
   .hdr-logo img{height:40px}
   .top .brand{margin:0}
-  .top .frontline-btn{width:auto;margin:0 0 0 auto}
+  .top .ext-btns{width:auto;margin:0 0 0 auto}
+  .top .ext-btns .frontline-btn{width:auto}
   .top .tut-launch{width:auto;margin:0 0 0 12px;padding:11px 16px}
   .top .gate-note{flex-basis:100%;margin:0}
   .buildtag{flex-basis:100%;margin:0}
