@@ -148,7 +148,33 @@ $("#readerClose").addEventListener("click", () => {
 
 // ---- checklist gate --------------------------------------------------------
 const checks = ["#c_relocate", "#c_ssid", "#c_parallel"].map($);
-const rOnt = $("#r_ont"), rNid = $("#r_nid"), rHealth = $("#r_health");
+const rNid = $("#r_nid"), rHealth = $("#r_health");
+const r1490 = $("#r_1490"), r1550 = $("#r_1550"), r1577 = $("#r_1577");
+const readGrid = $("#readGrid");
+let ontType = null; // 'iphotonix' | 'adtran'
+
+// Per-type acceptable ranges (dB). Reading must fall within [hi, lo].
+const ONT_RANGE = {
+  iphotonix: { lo: -21, hi: -13 },
+  adtran:    { lo: -22, hi: -10 },
+};
+
+// Which active fields apply to the selected type
+function activeOntFields() {
+  if (ontType === "iphotonix") return [r1490, r1550];
+  if (ontType === "adtran") return [r1577];
+  return [];
+}
+
+function selectOnt(type) {
+  ontType = type;
+  readGrid.hidden = false;
+  $$(".ont-pick").forEach((b) => b.classList.toggle("sel", b.dataset.ont === type));
+  $$(".fld-iphotonix").forEach((el) => (el.hidden = type !== "iphotonix"));
+  $$(".fld-adtran").forEach((el) => (el.hidden = type !== "adtran"));
+  evalReadings(); evalGate();
+}
+$$(".ont-pick").forEach((b) => b.addEventListener("click", () => selectOnt(b.dataset.ont)));
 const toSubmit = $("#toSubmit"), lockHint = $("#lockHint"), flag = $("#readingFlag");
 
 // Light readings (NID/ONT) are always negative dB. iOS numeric keyboards hide
@@ -167,44 +193,68 @@ function readInt(el){
 }
 
 function evalReadings() {
-  const ont = readLight(rOnt), nid = readLight(rNid);
-  if (isNaN(ont)) { flag.hidden = true; return; }
+  if (!ontType) { flag.hidden = true; return; }
+  const range = ONT_RANGE[ontType];
+  const fields = activeOntFields();
+  const entered = fields.filter((el) => !isNaN(readLight(el)));
+  if (entered.length === 0) { flag.hidden = true; return; }
+
+  // flag any entered reading that's out of this ONT type's range
+  const bad = entered
+    .map((el) => ({ el, v: readLight(el) }))
+    .filter(({ v }) => !(v <= range.hi && v >= range.lo));
+
   flag.hidden = false;
-  const inRange = ont <= -14 && ont >= -19.5;
-  const loss = !isNaN(nid) ? Math.abs(ont - nid) : null;
-  if (!inRange) {
+  if (bad.length) {
     flag.className = "read-flag warn";
-    flag.textContent = `ONT ${ont} dB is outside the -14 to -19.5 range. Re-check the fiber before swapping.`;
-  } else if (loss !== null && loss > 1) {
-    flag.className = "read-flag warn";
-    flag.textContent = `NID → ONT loss is ${loss.toFixed(1)} dB (over 1 dB). Troubleshoot fiber/connectors first.`;
+    const vals = bad.map((b) => `${b.v} dB`).join(", ");
+    flag.textContent =
+      `${vals} outside the ${range.hi} to ${range.lo} dB range for ${ontLabel()}. Re-check the fiber before swapping.`;
   } else {
     flag.className = "read-flag ok";
-    flag.textContent = "ONT reading is within SOP range.";
+    flag.textContent = `Readings are within the ${range.hi} to ${range.lo} dB range for ${ontLabel()}.`;
+  }
+}
+function ontLabel() { return ontType === "iphotonix" ? "iPhotonix" : "Adtran"; }
+
+// NID is informational only — never blocks the gate. Typical -13 to -17,
+// but lower is normal on longer fiber runs, so this is a gentle sanity check.
+function evalNid() {
+  const note = $("#nidNote");
+  if (!note) return;
+  const v = readLight(rNid);
+  if (isNaN(v)) { note.hidden = true; return; }
+  note.hidden = false;
+  if (v <= -13 && v >= -17) {
+    note.className = "nid-note ok";
+    note.textContent = `NID ${v} dB is within the typical -13 to -17 range.`;
+  } else {
+    note.className = "nid-note info";
+    note.textContent = `NID ${v} dB is outside the typical -13 to -17 range — that can be normal on longer fiber runs. Just confirm it's expected for this distance.`;
   }
 }
 
 function evalGate() {
-  const checkStates = checks.map((c) => (c && c.checked ? "1" : "0"));
   const allChecked = checks.every((c) => c && c.checked);
-  const ontVal = readLight(rOnt);
-  const hasOnt = !isNaN(ontVal);
-  const open = allChecked && hasOnt;
+  const fields = activeOntFields();
+  const allOntIn = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
+  const open = allChecked && allOntIn;
   toSubmit.disabled = !open;
   if (open) {
     lockHint.textContent = "Basics done — continue when ready.";
     lockHint.classList.add("clear");
   } else {
-    // diagnostic so we can see exactly what's missing
     lockHint.classList.remove("clear");
-    lockHint.textContent =
-      `Checks ${checkStates.join("")} · ONT="${rOnt.value}" reads ${isNaN(ontVal) ? "—" : ontVal}` +
-      ` · ${allChecked ? "" : "tick all 3 boxes"}${!allChecked && !hasOnt ? " & " : ""}${hasOnt ? "" : "enter ONT"}`;
+    let need = [];
+    if (!allChecked) need.push("tick all 3 boxes");
+    if (!ontType) need.push("pick ONT type");
+    else if (!allOntIn) need.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
+    lockHint.textContent = "To continue: " + need.join(" · ");
   }
 }
 checks.forEach((c) => c.addEventListener("change", evalGate));
 ["input", "change", "blur", "keyup"].forEach((evt) =>
-  [rOnt, rNid].forEach((el) => el.addEventListener(evt, () => { evalReadings(); evalGate(); }))
+  [rNid, r1490, r1550, r1577].forEach((el) => el && el.addEventListener(evt, () => { evalReadings(); evalNid(); evalGate(); }))
 );
 
 // ---- submit ----------------------------------------------------------------
@@ -226,8 +276,15 @@ $("#reqForm").addEventListener("submit", async (e) => {
       router_relocated: $("#c_relocate").checked,
       dual_ssid_attempted: $("#c_ssid").checked,
       no_parallel_networks: $("#c_parallel").checked,
+      ont_type: ontType,
       ont_light_nid: isNaN(readLight(rNid)) ? null : readLight(rNid),
-      ont_light_ont: isNaN(readLight(rOnt)) ? null : readLight(rOnt),
+      ont_light_1490: r1490 && !isNaN(readLight(r1490)) ? readLight(r1490) : null,
+      ont_light_1550: r1550 && !isNaN(readLight(r1550)) ? readLight(r1550) : null,
+      ont_light_1577: r1577 && !isNaN(readLight(r1577)) ? readLight(r1577) : null,
+      // Backward-compatible single value: data channel for the selected ONT type
+      ont_light_ont: ontType === "iphotonix"
+        ? (r1550 && !isNaN(readLight(r1550)) ? readLight(r1550) : null)
+        : (r1577 && !isNaN(readLight(r1577)) ? readLight(r1577) : null),
       overall_health_score: readInt(rHealth),
       resources_opened: [...state.resourcesOpened],
       time_to_submit_secs: Math.round((Date.now() - state.formOpenedAt) / 1000),

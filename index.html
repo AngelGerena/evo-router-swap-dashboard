@@ -76,7 +76,7 @@
             </ul>
 
             <h4>Validate the signal before you judge the hardware</h4>
-            <p>Pull and record your ONT light readings — SOP range is <b>-14 to -19.5 dB</b>, with no more than <b>1 dB of loss from NID to ONT</b>. If the optical levels are out of spec, the issue is upstream of the router and a swap won't solve it. Capture the Frontline health score so we have a documented baseline of where the service actually stands.</p>
+            <p>Pull and record your ONT light readings — iPhotonix runs <b>-13 to -21 dB</b> on the 1490 (RF) and 1550 (data) channels; Adtran runs <b>-10 to -22 dB</b> on the 1577 (data) channel. NID typically falls around <b>-13 to -17 dB</b> but varies with fiber distance. If the optical levels are out of spec, the issue is upstream of the router and a swap won't solve it. Capture the Frontline health score so we have a documented baseline of where the service actually stands.</p>
 
             <h4>If a swap is truly warranted</h4>
             <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline). If the swap is approved, make sure the removed unit carries its <b>account #</b> and is returned to <b>4558 in Orlando</b>.</p>
@@ -122,13 +122,25 @@
 
         <div class="readings">
           <div class="read-head">ONT light readings <span>required</span></div>
-          <p class="read-sub">SOP range: -14 to -19.5 dB. No more than -1 dB loss NID → ONT. Just type the number — we add the minus for you.</p>
-          <div class="read-grid">
-            <label>NID/FCPA CLOSET (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
-            <label>ONT | 1490/1550 or 1577 (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_ont" placeholder="e.g. -17.2"></label>
+          <p class="read-sub">Select the ONT type, then enter the readings. Just type the number — we add the minus for you.</p>
+
+          <div class="ont-type" role="group" aria-label="ONT type">
+            <button type="button" class="ont-pick" data-ont="iphotonix">iPhotonix</button>
+            <button type="button" class="ont-pick" data-ont="adtran">Adtran</button>
+          </div>
+
+          <div class="read-grid" id="readGrid" hidden>
+            <label>NID / FCPA closet (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_nid" placeholder="e.g. -16.4"></label>
+
+            <label class="fld-iphotonix" hidden>1490 · RF (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_1490" placeholder="-13 to -21"></label>
+            <label class="fld-iphotonix" hidden>1550 · Data (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_1550" placeholder="-13 to -21"></label>
+
+            <label class="fld-adtran" hidden>1577 · Data (dB)<input type="text" inputmode="text" autocapitalize="off" autocorrect="off" id="r_1577" placeholder="-10 to -22"></label>
+
             <label>Frontline Health Score<input type="text" inputmode="numeric" id="r_health" placeholder="e.g. 95"></label>
           </div>
           <div id="readingFlag" class="read-flag" hidden></div>
+          <div id="nidNote" class="nid-note" hidden></div>
         </div>
 
         <button class="primary" data-next id="toSubmit" disabled>Continue to request →</button>
