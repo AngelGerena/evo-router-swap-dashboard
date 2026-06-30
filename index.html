@@ -18,6 +18,7 @@
 .rma-text em{font-style:normal;color:#7f1d1d;opacity:.85;font-size:12.5px;margin-top:2px}
 .rma-flag.on{border-color:#b91c1c;box-shadow:0 0 0 2px rgba(185,28,28,.12)}
 .rma-ack{margin-top:10px;padding-top:10px;border-top:1px dashed #fca5a5}
+.rma-text .rma-warn{color:#991b1b;font-weight:600;font-size:12.5px;line-height:1.45;border-top:1px dashed #fca5a5;padding-top:7px;margin-top:5px}
 .return-addr.rma{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
 </style>
 </head>
@@ -178,12 +179,12 @@
           <div class="rma-flag" id="rmaFlag">
             <label class="rma-toggle">
               <input type="checkbox" id="f_rma">
-              <span class="rma-text"><b>⚠ This EVO is defective — return to Evolution Digital (RMA), not 4558 Orlando.</b><em>Tick only if the unit itself is bad and must be RMA'd to Evolution Digital ASAP.</em></span>
+              <span class="rma-text"><b>⚠ This EVO is defective — return to Evolution Digital (RMA), not 4558 Orlando.</b><em>Tick this only when the EVO hardware itself is confirmed defective — you have completed every field guide and best-practice step and the unit is still failing. This is a last resort, not a routine swap.</em><span class="rma-warn">Flagging a unit that has not genuinely failed misrepresents the return and is subject to disciplinary action.</span></span>
             </label>
             <div class="rma-ack" id="rmaAckWrap" hidden>
               <label class="rma-toggle">
                 <input type="checkbox" id="f_rma_ack">
-                <span class="rma-text">I confirm this unit will be returned to Evolution Digital ASAP per RMA process.</span>
+                <span class="rma-text">I confirm this EVO is confirmed defective after completing all required troubleshooting, and will be returned to Evolution Digital ASAP per the RMA process.</span>
               </label>
             </div>
           </div>
