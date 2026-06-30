@@ -20,6 +20,10 @@
 .rma-ack{margin-top:10px;padding-top:10px;border-top:1px dashed #fca5a5}
 .rma-text .rma-warn{color:#991b1b;font-weight:600;font-size:12.5px;line-height:1.45;border-top:1px dashed #fca5a5;padding-top:7px;margin-top:5px}
 .return-addr.rma{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+.frontline-btn.admin-btn{background:#0b2545}
+.app-foot{margin:24px 0 8px;text-align:center}
+.app-foot a{color:#0f766e;font-weight:700;font-size:13.5px;text-decoration:none}
+.app-foot a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -40,6 +44,7 @@
     <div class="ext-btns">
       <a class="frontline-btn" href="https://gamma.noc.plume.com/login" target="_blank" rel="noopener noreferrer">FRONTLINE <span aria-hidden="true">↗</span></a>
       <button class="frontline-btn nrby-btn" id="nrbyBtn" type="button">NRBY <span aria-hidden="true">↗</span></button>
+      <a class="frontline-btn admin-btn" href="admin.html" title="Managers & warehouse — sign in">ADMIN <span aria-hidden="true">↗</span></a>
     </div>
     <button class="tut-launch" id="tutBtn" type="button"><span class="tut-launch-ic">▶</span> How it works — 60-second tutorial</button>
     <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
@@ -91,7 +96,12 @@
             <p>Pull and record your ONT light readings — iPhotonix runs <b>-13 to -21 dB</b> on the 1490 (RF) and 1550 (data) channels; Adtran runs <b>-10 to -22 dB</b> on the 1577 (data) channel. NID typically falls around <b>-13 to -17 dB</b> but varies with fiber distance. If the optical levels are out of spec, the issue is upstream of the router and a swap won't solve it. Capture the Frontline health score so we have a documented baseline of where the service actually stands.</p>
 
             <h4>If a swap is truly warranted</h4>
-            <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline). If the swap is approved, make sure the removed unit carries its <b>account #</b> and is returned to <b>4558 in Orlando</b>.</p>
+            <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline).</p>
+            <p>Once a swap is <b>approved</b>, every removed unit must carry its <b>account #</b> — but its return path depends on the unit's condition:</p>
+            <ul>
+              <li><b>Standard return — 4558 in Orlando.</b> If the EVO was swapped for non-hardware reasons (placement, configuration, or customer request) and the unit still functions, quarantine it with its account # and return it to <b>4558 in Orlando</b>, as usual.</li>
+              <li><b>Defective return — RMA to Evolution Digital.</b> If the EVO hardware itself is confirmed defective, tick the <b>&ldquo;This EVO is defective&rdquo;</b> box on the request. Once approved, the unit is routed back to <b>Evolution Digital under an RMA label</b> — not to Orlando — so the manufacturer can process the warranty return. Follow the RMA instructions shown on your approval confirmation: quarantine the unit, label it with its <b>account #</b> and the <b>RMA number</b>, and ship it back ASAP.</li>
+            </ul>
 
             <h4>The bottom line</h4>
             <p>Swapping an EVO is the easy answer, not the right one. We owe our customers the diligence of doing everything possible to make their service perform before reaching for new hardware. Holding the line on the basics is what separates a real fix from a temporary one.</p>
@@ -207,6 +217,10 @@
     </main>
 
   </div>
+
+  <footer class="app-foot">
+    <a href="admin.html">Manager &amp; warehouse portal — sign in <span aria-hidden="true">↗</span></a>
+  </footer>
 </div>
 
 <!-- ===== NRBY interstitial overlay ===== -->

@@ -40,10 +40,10 @@ window.EVO_CONFIG = {
   EVO_RMA: {
     enabled: true,
     heading: "RMA the defective EVO to Evolution Digital",
-    // TODO: replace with Evolution Digital's real RMA ship-to address.
-    shipTo: "Evolution Digital \u2014 RMA Department\n(Return address is being confirmed \u2014 do NOT ship yet.)\nQuarantine the unit, label it with the customer account #, and hold for your manager's RMA instructions.",
-    // TODO: replace with the real RMA email / phone / portal.
-    contact: "Pending \u2014 your manager / warehouse will confirm the Evolution Digital RMA details.",
+    // Evolution Digital RMA ship-to address (confirmed 2026-06-30).
+    shipTo: "Evolution Digital\nAttn: Support\n7347 S. Revere Pkwy\nBuilding A, Suite B\nCentennial, CO 80112",
+    // RMA number guidance shown to the tech.
+    contact: "RMA #: obtain from your manager / warehouse before shipping.",
     note: "This unit was flagged defective. Do NOT send it to 4558 Orlando. Obtain an RMA number from Evolution Digital first, label the box with the customer account # and the RMA #, then return it per Evolution Digital's RMA process \u2014 ASAP.",
   },
 };
