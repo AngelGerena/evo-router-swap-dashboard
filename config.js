@@ -32,4 +32,18 @@ window.EVO_CONFIG = {
     { id: "evo_log",     title: "Save EVO Log in Frontline",     subtitle: "Required for every swap — Evolution lab log", file: "pdfs/HOW-TO-SAVE-LOG-FRONTLINE.pdf" },
     { id: "nrby_osp",    title: "NRBY & OSP Sequence",           subtitle: "Submit NRBY first, then document", file: "pdfs/NRBY_and_OSP.pdf" },
   ],
+
+  // === EVO RMA (Evolution Digital) ==========================================
+  // Shown on the APPROVED card when a tech flags the removed EVO as defective.
+  // >>> EDIT shipTo / contact with Evolution Digital's REAL RMA details before
+  //     field use. Defective units must NOT go to 4558 Orlando. <<<
+  EVO_RMA: {
+    enabled: true,
+    heading: "RMA the defective EVO to Evolution Digital",
+    // TODO: replace with Evolution Digital's real RMA ship-to address.
+    shipTo: "Evolution Digital \u2014 RMA Department\n(Return address is being confirmed \u2014 do NOT ship yet.)\nQuarantine the unit, label it with the customer account #, and hold for your manager's RMA instructions.",
+    // TODO: replace with the real RMA email / phone / portal.
+    contact: "Pending \u2014 your manager / warehouse will confirm the Evolution Digital RMA details.",
+    note: "This unit was flagged defective. Do NOT send it to 4558 Orlando. Obtain an RMA number from Evolution Digital first, label the box with the customer account # and the RMA #, then return it per Evolution Digital's RMA process \u2014 ASAP.",
+  },
 };

@@ -294,9 +294,32 @@ function normalizeFieldDisplay(el) {
   }))
 );
 
+// ---- RMA (defective EVO) toggle -------------------------------------------
+const rmaCb = $("#f_rma"), rmaAckWrap = $("#rmaAckWrap"), rmaAckCb = $("#f_rma_ack"), rmaFlag = $("#rmaFlag");
+const returnMicro = $("#returnMicro");
+const RETURN_DEFAULT_HTML = 'Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.';
+const RETURN_RMA_HTML = '⚠ Defective unit — do <b>not</b> send to 4558 Orlando. Return to <b>Evolution Digital (RMA)</b>; full instructions appear after approval.';
+function syncRma(){
+  if (!rmaCb) return;
+  const on = rmaCb.checked;
+  if (rmaAckWrap) rmaAckWrap.hidden = !on;
+  if (!on && rmaAckCb) rmaAckCb.checked = false;
+  if (rmaFlag) rmaFlag.classList.toggle("on", on);
+  if (returnMicro) returnMicro.innerHTML = on ? RETURN_RMA_HTML : RETURN_DEFAULT_HTML;
+}
+if (rmaCb) rmaCb.addEventListener("change", syncRma);
+
 // ---- submit ----------------------------------------------------------------
 $("#reqForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  // Defective-EVO flag requires the RMA acknowledgment before sending.
+  if ($("#f_rma") && $("#f_rma").checked && !($("#f_rma_ack") && $("#f_rma_ack").checked)) {
+    alert("Please confirm the Evolution Digital RMA acknowledgment, or untick the defective-EVO box.");
+    if ($("#f_rma_ack")) $("#f_rma_ack").focus();
+    return;
+  }
+
   const btn = $("#submitBtn");
   btn.disabled = true; btn.textContent = "Sending…";
 
@@ -309,6 +332,8 @@ $("#reqForm").addEventListener("submit", async (e) => {
     evo_serial_mac: $("#f_serial").value.trim(),
     removed_from_acct: $("#f_removed").value.trim(),
     swap_reason: $("#f_reason").value.trim() || null,
+    rma_flagged: !!($("#f_rma") && $("#f_rma").checked),
+    rma_acknowledged: !!($("#f_rma_ack") && $("#f_rma_ack").checked),
     checklist: {
       router_relocated: $("#c_relocate").checked,
       dual_ssid_attempted: $("#c_ssid").checked,
@@ -394,6 +419,15 @@ function renderDecision(d) {
   const card = $("#resultCard");
   const approved = d.status === "approved";
   const note = (d.note || "").trim();
+  const rma = (CFG && CFG.EVO_RMA) || {};
+  const isRma = d.rma_flagged === true && rma.enabled !== false;
+  const retHead = isRma ? escHtml(rma.heading || "RMA the defective EVO to Evolution Digital") : "Quarantine &amp; return the old EVO";
+  const shipToHtml = escHtml(rma.shipTo || "Evolution Digital — RMA Department").replace(/\n/g, "<br>");
+  const retBox = isRma
+    ? `<div class="return-addr rma">${shipToHtml}</div>` +
+      (rma.contact ? `<p class="micro">RMA contact: ${escHtml(rma.contact)}</p>` : "") +
+      (rma.note ? `<p class="micro">${escHtml(rma.note)}</p>` : "")
+    : `<div class="return-addr">4558 35th St.<br>Orlando, FL 32811</div>`;
   card.className = "result-card decided " + (approved ? "ok" : "err");
   card.innerHTML = `
     <div class="seal big">${approved ? "✓" : "✕"}</div>
@@ -415,6 +449,7 @@ function renderDecision(d) {
       </div>
     </div>` : ""}
     ${approved ? `
+    ${isRma ? `<div class="mgrnote bad"><span class="mgrnote-h">Defective unit — Evolution Digital RMA</span>Do not send this EVO to 4558 Orlando. Follow the RMA steps below.</div>` : ""}
     <div class="must-wrap">
       <div class="must-head">Required before &amp; after the swap · No exceptions</div>
 
@@ -430,11 +465,9 @@ function renderDecision(d) {
       <div class="must-step">
         <div class="must-num">2</div>
         <div class="must-body">
-          <b>Quarantine &amp; return the old EVO</b>
+          <b>${retHead}</b>
           <p>Quarantine the removed EVO router (and its power supply, if applicable). Label a box with the customer’s <b>account #</b> and ensure it is returned to:</p>
-          <div class="return-addr">
-            4558 35th St.<br>Orlando, FL 32811
-          </div>
+          ${retBox}
         </div>
       </div>
     </div>` : ""}

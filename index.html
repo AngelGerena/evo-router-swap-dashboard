@@ -8,7 +8,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<link rel="stylesheet" href="app.css?v=20260623g" />
+<link rel="stylesheet" href="app.css?v=20260629rma" />
+<style>
+.rma-flag{margin:14px 0 4px;border:1.5px solid #fca5a5;background:#fef2f2;border-radius:12px;padding:12px 14px}
+.rma-toggle{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.rma-toggle input{margin-top:2px;width:18px;height:18px;accent-color:#b91c1c;flex:0 0 auto}
+.rma-text{display:flex;flex-direction:column;font-size:14px;line-height:1.35}
+.rma-text b{color:#991b1b}
+.rma-text em{font-style:normal;color:#7f1d1d;opacity:.85;font-size:12.5px;margin-top:2px}
+.rma-flag.on{border-color:#b91c1c;box-shadow:0 0 0 2px rgba(185,28,28,.12)}
+.rma-ack{margin-top:10px;padding-top:10px;border-top:1px dashed #fca5a5}
+.return-addr.rma{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+</style>
 </head>
 <body>
 <div class="app">
@@ -162,7 +173,20 @@
 
           <label>EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
           <label>Account it's being removed from<input id="f_removed" required inputmode="numeric"></label>
-          <p class="micro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
+          <p class="micro" id="returnMicro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
+
+          <div class="rma-flag" id="rmaFlag">
+            <label class="rma-toggle">
+              <input type="checkbox" id="f_rma">
+              <span class="rma-text"><b>⚠ This EVO is defective — return to Evolution Digital (RMA), not 4558 Orlando.</b><em>Tick only if the unit itself is bad and must be RMA'd to Evolution Digital ASAP.</em></span>
+            </label>
+            <div class="rma-ack" id="rmaAckWrap" hidden>
+              <label class="rma-toggle">
+                <input type="checkbox" id="f_rma_ack">
+                <span class="rma-text">I confirm this unit will be returned to Evolution Digital ASAP per RMA process.</span>
+              </label>
+            </div>
+          </div>
 
           <div class="divider"><span>Your market</span></div>
           <label>Market <select id="f_market" required></select></label>
@@ -256,7 +280,7 @@
 </div>
 
 <script src="config.v4.js"></script>
-<script src="app.v6.js?v=20260623d"></script>
+<script src="app.v6.js?v=20260629rma"></script>
 <script>(function(){var d=document.getElementById("basicsNote");if(d&&window.matchMedia("(min-width:980px)").matches)d.open=true;})();</script>
 </body>
 </html>
