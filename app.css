@@ -93,7 +93,13 @@ body{display:flex;justify-content:center}
 .kick{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 h1{margin:1px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
 .gate-note{margin-top:12px;background:var(--navy);color:#dce9f7;font-size:12.5px;font-weight:600;
-  padding:9px 13px;border-radius:11px;line-height:1.45}
+  padding:9px 13px;border-radius:11px;line-height:1.45;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lang-toggle{flex:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#dce9f7;
+  font:inherit;font-weight:800;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.lang-toggle .lang-opt{opacity:.5;transition:.15s}
+.lang-toggle .lang-opt.active{opacity:1;color:#fff}
+.lang-toggle .lang-sep{opacity:.4}
+.lang-toggle:hover{border-color:rgba(255,255,255,.5)}
 
 /* ---- step rail ---- */
 .rail{display:flex;gap:6px;margin:14px 0 16px}

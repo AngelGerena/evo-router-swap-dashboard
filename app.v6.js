@@ -395,6 +395,7 @@ function showResult(ok, data) {
     <button class="again" onclick="location.reload()">New request</button>`;
   goStep(3);
   if (data.id) startDecisionPoll(data.id);
+  if (window.applyEvoLang) window.applyEvoLang();
 }
 
 let _pollTimer = null, _pollStop = null;
