@@ -8,23 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<link rel="stylesheet" href="app.css?v=20260629rma" />
-<style>
-.rma-flag{margin:14px 0 4px;border:1.5px solid #fca5a5;background:#fef2f2;border-radius:12px;padding:12px 14px}
-.rma-toggle{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-.rma-toggle input{margin-top:2px;width:18px;height:18px;accent-color:#b91c1c;flex:0 0 auto}
-.rma-text{display:flex;flex-direction:column;font-size:14px;line-height:1.35}
-.rma-text b{color:#991b1b}
-.rma-text em{font-style:normal;color:#7f1d1d;opacity:.85;font-size:12.5px;margin-top:2px}
-.rma-flag.on{border-color:#b91c1c;box-shadow:0 0 0 2px rgba(185,28,28,.12)}
-.rma-ack{margin-top:10px;padding-top:10px;border-top:1px dashed #fca5a5}
-.rma-text .rma-warn{color:#991b1b;font-weight:600;font-size:12.5px;line-height:1.45;border-top:1px dashed #fca5a5;padding-top:7px;margin-top:5px}
-.return-addr.rma{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
-.frontline-btn.admin-btn{background:#0b2545}
-.app-foot{margin:24px 0 8px;text-align:center}
-.app-foot a{color:#0f766e;font-weight:700;font-size:13.5px;text-decoration:none}
-.app-foot a:hover{text-decoration:underline}
-</style>
+<link rel="stylesheet" href="app.css?v=20260623g" />
 </head>
 <body>
 <div class="app">
@@ -44,7 +28,6 @@
     <div class="ext-btns">
       <a class="frontline-btn" href="https://gamma.noc.plume.com/login" target="_blank" rel="noopener noreferrer">FRONTLINE <span aria-hidden="true">↗</span></a>
       <button class="frontline-btn nrby-btn" id="nrbyBtn" type="button">NRBY <span aria-hidden="true">↗</span></button>
-      <a class="frontline-btn admin-btn" href="admin.html" title="Managers & warehouse — sign in">ADMIN <span aria-hidden="true">↗</span></a>
     </div>
     <button class="tut-launch" id="tutBtn" type="button"><span class="tut-launch-ic">▶</span> How it works — 60-second tutorial</button>
     <div class="gate-note">Every swap needs approval from Anthony or Peterson. No exceptions.</div>
@@ -96,12 +79,7 @@
             <p>Pull and record your ONT light readings — iPhotonix runs <b>-13 to -21 dB</b> on the 1490 (RF) and 1550 (data) channels; Adtran runs <b>-10 to -22 dB</b> on the 1577 (data) channel. NID typically falls around <b>-13 to -17 dB</b> but varies with fiber distance. If the optical levels are out of spec, the issue is upstream of the router and a swap won't solve it. Capture the Frontline health score so we have a documented baseline of where the service actually stands.</p>
 
             <h4>If a swap is truly warranted</h4>
-            <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline).</p>
-            <p>Once a swap is <b>approved</b>, every removed unit must carry its <b>account #</b> — but its return path depends on the unit's condition:</p>
-            <ul>
-              <li><b>Standard return — 4558 in Orlando.</b> If the EVO was swapped for non-hardware reasons (placement, configuration, or customer request) and the unit still functions, quarantine it with its account # and return it to <b>4558 in Orlando</b>, as usual.</li>
-              <li><b>Defective return — RMA to Evolution Digital.</b> If the EVO hardware itself is confirmed defective, tick the <b>&ldquo;This EVO is defective&rdquo;</b> box on the request. Once approved, the unit is routed back to <b>Evolution Digital under an RMA label</b> — not to Orlando — so the manufacturer can process the warranty return. Follow the RMA instructions shown on your approval confirmation: quarantine the unit, label it with its <b>account #</b> and the <b>RMA number</b>, and ship it back ASAP.</li>
-            </ul>
+            <p>When — and only when — the basics are confirmed and performance still can't be achieved, submit the request for an EVO swap. It <b>must</b> be approved by a manager — <b>Peterson or Anthony</b>. Either way — approved or denied — <b>save the EVO log in Frontline</b> (see Save EVO Log in Frontline). If the swap is approved, make sure the removed unit carries its <b>account #</b> and is returned to <b>4558 in Orlando</b>.</p>
 
             <h4>The bottom line</h4>
             <p>Swapping an EVO is the easy answer, not the right one. We owe our customers the diligence of doing everything possible to make their service perform before reaching for new hardware. Holding the line on the basics is what separates a real fix from a temporary one.</p>
@@ -184,17 +162,29 @@
 
           <label>EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
           <label>Account it's being removed from<input id="f_removed" required inputmode="numeric"></label>
-          <p class="micro" id="returnMicro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
+          <p class="micro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
 
-          <div class="rma-flag" id="rmaFlag">
+          <div class="rma-flag-wrap">
             <label class="rma-toggle">
               <input type="checkbox" id="f_rma">
-              <span class="rma-text"><b>⚠ This EVO is defective — return to Evolution Digital (RMA), not 4558 Orlando.</b><em>Tick this only when the EVO hardware itself is confirmed defective — you have completed every field guide and best-practice step and the unit is still failing. This is a last resort, not a routine swap.</em><span class="rma-warn">Flagging a unit that has not genuinely failed misrepresents the return and is subject to disciplinary action.</span></span>
+              <span class="rma-toggle-box" aria-hidden="true"></span>
+              <span class="rma-toggle-text">
+                <b>Flag this EVO as an RMA to Evolution Digital</b>
+                <em>Use only when nothing fixed it — a genuine defect that needs Evolution &amp; Clay's attention.</em>
+              </span>
             </label>
-            <div class="rma-ack" id="rmaAckWrap" hidden>
-              <label class="rma-toggle">
+            <div class="rma-ack-box" id="rmaAckBox" hidden>
+              <p class="rma-ack-lead">This unit will be tracked as a defective RMA. Confirm you understand the handling:</p>
+              <ul class="rma-ack-list">
+                <li>Box the EVO that is going back.</li>
+                <li>Write the customer's <b>account #</b> on the box.</li>
+                <li>Place the Warehouse-provided <b>RMA return label</b> on the box.</li>
+                <li>Ship it back to <b>Evolution Digital ASAP</b>.</li>
+              </ul>
+              <label class="rma-ack-check">
                 <input type="checkbox" id="f_rma_ack">
-                <span class="rma-text">I confirm this EVO is confirmed defective after completing all required troubleshooting, and will be returned to Evolution Digital ASAP per the RMA process.</span>
+                <span class="rma-ack-checkbox" aria-hidden="true"></span>
+                <span>I understand and will follow the RMA handling steps above.</span>
               </label>
             </div>
           </div>
@@ -203,6 +193,7 @@
           <label>Market <select id="f_market" required></select></label>
 
           <label>Your name<input id="f_tech" required></label>
+          <p class="tech-remembered" id="techRemembered" hidden>Signed in as <b id="techName"></b> on this device · <a href="#" id="techNotYou">Not you?</a></p>
           <label>Reason for swap (optional)<textarea id="f_reason" rows="2" placeholder="What did the basics not fix?"></textarea></label>
 
           <button type="submit" class="primary submit" id="submitBtn">Request approval</button>
@@ -217,10 +208,6 @@
     </main>
 
   </div>
-
-  <footer class="app-foot">
-    <a href="admin.html">Manager &amp; warehouse portal — sign in <span aria-hidden="true">↗</span></a>
-  </footer>
 </div>
 
 <!-- ===== NRBY interstitial overlay ===== -->
@@ -295,7 +282,7 @@
 </div>
 
 <script src="config.v4.js"></script>
-<script src="app.v6.js?v=20260629rma"></script>
+<script src="app.v6.js?v=20260623d"></script>
 <script>(function(){var d=document.getElementById("basicsNote");if(d&&window.matchMedia("(min-width:980px)").matches)d.open=true;})();</script>
 </body>
 </html>

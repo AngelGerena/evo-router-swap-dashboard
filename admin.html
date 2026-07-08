@@ -25,12 +25,17 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .gate{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:40px;max-width:420px;margin:60px auto;text-align:center}
 .gate input{width:100%;margin:14px 0;padding:13px;border:1.5px solid var(--line);border-radius:12px;font:inherit}
 .gate .btn{width:100%;background:var(--navy);color:#fff}
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin:18px 0}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0}
 .kpi{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px}
 .kpi span{color:var(--muted);font-weight:700;font-size:12.5px}
 .kpi b{display:block;font-size:32px;margin-top:5px}
 .kpi.bad b{color:var(--bad)} .kpi.warn b{color:var(--warn)} .kpi.good b{color:var(--good)}
 .panel{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
+.rma-panel{border:2px solid var(--bad);background:linear-gradient(180deg,var(--bad-bg),var(--card) 60px)}
+.rma-panel .phead h2{color:var(--bad)}
+.rma-row{background:var(--bad-bg)}
+.rma-row td{border-bottom-color:#f3c9c9}
+.rma-serial-cell{color:var(--bad);font-weight:800}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .phead h2{margin:0;font-size:17px}
 .phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
@@ -82,15 +87,15 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 
   <div class="kpis" id="kpis"></div>
 
-  <div class="panel" id="rmaPanel" hidden style="border:2px solid var(--bad)">
+  <div class="panel rma-panel" id="rmaPanel">
     <div class="phead">
-      <h2 style="color:var(--bad)">⚠ Return to Evolution Digital — RMA</h2>
-      <span class="sub" id="rmaCount"></span>
+      <h2>⚠ RMA to Evolution Digital</h2>
+      <span class="sub" id="rmaCount">Flagged defective units — shipped back to Evolution</span>
     </div>
-    <p class="muted" style="margin:0 0 10px">Defective units flagged by the tech. These must <b>NOT</b> go to 4558 Orlando — return to Evolution Digital per the RMA process.</p>
-    <div class="wrap" style="max-height:360px">
+    <div class="wrap">
       <table id="rmaTable"><thead><tr>
-        <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th><th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Ack</th>
+        <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
+        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Acknowledged</th><th>Decided by</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -107,7 +112,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     </div>
     <div class="wrap">
       <table id="mainTable"><thead><tr>
-        <th>Submitted</th><th>Status</th><th>RMA</th><th>Tech</th><th>Market</th><th>Customer</th>
+        <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
         <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
       </tr></thead><tbody></tbody></table>
     </div>
@@ -148,7 +153,7 @@ async function loadAll(){
     document.getElementById("dash").hidden = false;
     applyRole();
     fillMarketFilter();
-    renderKpis(); renderTable(); renderTechs(); renderRmaPanel();
+    renderKpis(); renderTable(); renderTechs(); renderRma();
   }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
 }
 
@@ -176,14 +181,12 @@ function renderKpis(){
   const denied = r.filter(x=>x.status==="denied").length;
   const techs = new Set(r.map(x=>x.tech_name.toLowerCase())).size;
   const highRisk = DATA.techStats.filter(t=>t.risk==="high").length;
-  const rmaCount = r.filter(x=>x.rma_flagged).length;
   document.getElementById("kpis").innerHTML = `
     ${kpi("Total requests", r.length)}
     ${kpi("Awaiting decision", pending, "warn")}
     ${kpi("Approved", approved, "good")}
     ${kpi("Denied", denied, "bad")}
-    ${kpi("High-signal techs", highRisk, highRisk?"bad":"good")}
-    ${kpi("RMA — to Evolution", rmaCount, rmaCount?"bad":"good")}`;
+    ${kpi("High-signal techs", highRisk, highRisk?"bad":"good")}`;
 }
 const kpi=(l,v,c="")=>`<div class="kpi ${c}"><span>${l}</span><b>${v}</b></div>`;
 
@@ -207,7 +210,6 @@ function renderTable(){
     return `<tr>
       <td class="mono muted">${fmt(r.submitted_at)}</td>
       <td><span class="badge b-${r.status}">${r.status}</span></td>
-      <td>${r.rma_flagged?'<span class="badge b-denied" title="Return to Evolution Digital — RMA">RMA</span>':'<span class="muted">—</span>'}</td>
       <td>${esc(r.tech_name)}</td>
       <td class="mono">${esc(r.market_code)}</td>
       <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
@@ -219,27 +221,34 @@ function renderTable(){
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
       <td class="muted" style="min-width:200px;white-space:normal" title="${esc(r.decision_note||"")}">${esc(r.decision_note||"—")}</td>
     </tr>`;
-  }).join("") : `<tr><td colspan="13" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+  }).join("") : `<tr><td colspan="12" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
 }
 
-function renderRmaPanel(){
-  const panel=document.getElementById("rmaPanel");
-  const flagged=DATA.rows.filter(r=>r.rma_flagged);
-  if(!flagged.length){ panel.hidden=true; return; }
-  panel.hidden=false;
-  document.getElementById("rmaCount").textContent=`${flagged.length} unit${flagged.length===1?"":"s"} to return`;
-  const tb=document.querySelector("#rmaTable tbody");
-  tb.innerHTML=flagged.map(r=>`<tr>
-    <td class="mono muted">${fmt(r.submitted_at)}</td>
-    <td><span class="badge b-${r.status}">${r.status}</span></td>
-    <td>${esc(r.tech_name)}</td>
-    <td class="mono">${esc(r.market_code)}</td>
-    <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
-    <td class="mono">${esc(r.account_number)}</td>
-    <td class="mono">${esc(r.evo_serial_mac)}</td>
-    <td class="mono">${esc(r.removed_from_acct)}</td>
-    <td>${r.rma_acknowledged?'<span class="badge b-approved">Yes</span>':'<span class="badge b-denied">No</span>'}</td>
-  </tr>`).join("");
+function renderRma(){
+  const panel = document.getElementById("rmaPanel");
+  const tb = document.querySelector("#rmaTable tbody");
+  const rmaRows = DATA.rows.filter(r => r.rma_flagged);
+  document.getElementById("rmaCount").textContent =
+    rmaRows.length
+      ? `${rmaRows.length} flagged defective unit${rmaRows.length===1?"":"s"} — ship back to Evolution Digital`
+      : "No units currently flagged for RMA.";
+  if (!rmaRows.length){
+    tb.innerHTML = `<tr><td colspan="10" class="muted" style="text-align:center;padding:22px">No RMA-flagged units.</td></tr>`;
+    return;
+  }
+  tb.innerHTML = rmaRows.map(r=>`
+    <tr class="rma-row">
+      <td class="mono muted">${fmt(r.submitted_at)}</td>
+      <td><span class="badge b-${r.status}">${r.status}</span></td>
+      <td>${esc(r.tech_name)}</td>
+      <td class="mono">${esc(r.market_code)}</td>
+      <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
+      <td class="mono">${esc(r.account_number)}</td>
+      <td class="mono rma-serial-cell">${esc(r.evo_serial_mac)}</td>
+      <td class="mono">${esc(r.removed_from_acct)}</td>
+      <td class="mono">${r.rma_acknowledged?'<span style="color:var(--good);font-weight:800">Yes</span>':'<span style="color:var(--bad);font-weight:800">No</span>'}</td>
+      <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
+    </tr>`).join("");
 }
 
 function renderTechs(){
@@ -317,13 +326,13 @@ function exportXlsx(){
 
   // 4558 Orlando return tracking — units owed back
   const retHeaders=["EVO S/N or MAC","Removed From Acct","Tech","Market","Submitted","Status"];
-  const retRows=rows.filter(r=>!r.rma_flagged).map(r=>[r.evo_serial_mac,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status]);
+  const retRows=rows.map(r=>[r.evo_serial_mac,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status]);
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([retHeaders,...retRows]), "Return to 4558 Orlando");
 
-  // Defective units flagged for Evolution Digital RMA (NOT 4558 Orlando)
-  const rmaHeaders=["EVO S/N or MAC","Removed From Acct","Customer","Tech","Market","Submitted","Status","Acknowledged"];
-  const rmaExp=rows.filter(r=>r.rma_flagged).map(r=>[r.evo_serial_mac,r.removed_from_acct,`${r.customer_first||""} ${r.customer_last||""}`.trim(),r.tech_name,r.market_code,fmt(r.submitted_at),r.status,yn(r.rma_acknowledged)]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaExp]), "Return to Evolution (RMA)");
+  // RMA to Evolution Digital — flagged defective units
+  const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Submitted","Status","Acknowledged"];
+  const rmaRowsX=DATA.rows.filter(r=>r.rma_flagged).map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "RMA to Evolution Digital");
 
   const stf = document.getElementById("fStatus").value;
   const tag = stf && stf!=="all" ? "_"+stf : "";

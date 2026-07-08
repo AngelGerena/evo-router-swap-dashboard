@@ -263,7 +263,11 @@ function evalNid() {
 }
 
 function evalGate() {
-  const allChecked = checks.every((c) => c && c.checked);
+  const labels = ["Router relocated", "Dual SSID split", "No parallel networks"];
+  const missingChecks = checks
+    .map((c, i) => (c && c.checked ? null : labels[i]))
+    .filter(Boolean);
+  const allChecked = missingChecks.length === 0;
   const fields = activeOntFields();
   const allOntIn = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
   const open = allChecked && allOntIn;
@@ -274,10 +278,10 @@ function evalGate() {
   } else {
     lockHint.classList.remove("clear");
     let need = [];
-    if (!allChecked) need.push("tick all 3 boxes");
+    if (!allChecked) need.push("check: " + missingChecks.join(", "));
     if (!ontType) need.push("pick ONT type");
     else if (!allOntIn) need.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
-    lockHint.textContent = "To continue: " + need.join(" · ");
+    lockHint.textContent = "Still needed → " + need.join("  ·  ");
   }
 }
 checks.forEach((c) => c.addEventListener("change", evalGate));
@@ -294,29 +298,27 @@ function normalizeFieldDisplay(el) {
   }))
 );
 
-// ---- RMA (defective EVO) toggle -------------------------------------------
-const rmaCb = $("#f_rma"), rmaAckWrap = $("#rmaAckWrap"), rmaAckCb = $("#f_rma_ack"), rmaFlag = $("#rmaFlag");
-const returnMicro = $("#returnMicro");
-const RETURN_DEFAULT_HTML = 'Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.';
-const RETURN_RMA_HTML = '⚠ Defective unit — do <b>not</b> send to 4558 Orlando. Return to <b>Evolution Digital (RMA)</b>; full instructions appear after approval.';
-function syncRma(){
-  if (!rmaCb) return;
-  const on = rmaCb.checked;
-  if (rmaAckWrap) rmaAckWrap.hidden = !on;
-  if (!on && rmaAckCb) rmaAckCb.checked = false;
-  if (rmaFlag) rmaFlag.classList.toggle("on", on);
-  if (returnMicro) returnMicro.innerHTML = on ? RETURN_RMA_HTML : RETURN_DEFAULT_HTML;
-}
-if (rmaCb) rmaCb.addEventListener("change", syncRma);
-
 // ---- submit ----------------------------------------------------------------
+// ---- RMA flag ---------------------------------------------------------------
+const fRma = $("#f_rma");
+const fRmaAck = $("#f_rma_ack");
+const rmaAckBox = $("#rmaAckBox");
+const fSerial = $("#f_serial");
+if (fRma) fRma.addEventListener("change", () => {
+  const on = fRma.checked;
+  if (rmaAckBox) rmaAckBox.hidden = !on;
+  if (fSerial) fSerial.classList.toggle("rma-serial", on);
+  if (!on && fRmaAck) fRmaAck.checked = false; // reset ack if un-flagged
+});
+
 $("#reqForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Defective-EVO flag requires the RMA acknowledgment before sending.
-  if ($("#f_rma") && $("#f_rma").checked && !($("#f_rma_ack") && $("#f_rma_ack").checked)) {
-    alert("Please confirm the Evolution Digital RMA acknowledgment, or untick the defective-EVO box.");
-    if ($("#f_rma_ack")) $("#f_rma_ack").focus();
+  // RMA guard: if flagged, the RMA acknowledgment is mandatory.
+  if (fRma && fRma.checked && fRmaAck && !fRmaAck.checked) {
+    if (rmaAckBox) rmaAckBox.classList.add("shake");
+    setTimeout(() => rmaAckBox && rmaAckBox.classList.remove("shake"), 500);
+    alert("This EVO is flagged as an RMA. Please check the RMA acknowledgment before submitting.");
     return;
   }
 
@@ -332,8 +334,8 @@ $("#reqForm").addEventListener("submit", async (e) => {
     evo_serial_mac: $("#f_serial").value.trim(),
     removed_from_acct: $("#f_removed").value.trim(),
     swap_reason: $("#f_reason").value.trim() || null,
-    rma_flagged: !!($("#f_rma") && $("#f_rma").checked),
-    rma_acknowledged: !!($("#f_rma_ack") && $("#f_rma_ack").checked),
+    rma_flagged: !!(fRma && fRma.checked),
+    rma_acknowledged: !!(fRmaAck && fRmaAck.checked),
     checklist: {
       router_relocated: $("#c_relocate").checked,
       dual_ssid_attempted: $("#c_ssid").checked,
@@ -352,6 +354,9 @@ $("#reqForm").addEventListener("submit", async (e) => {
       time_to_submit_secs: Math.round((Date.now() - state.formOpenedAt) / 1000),
     },
   };
+
+  window._lastRmaFlag = !!(fRma && fRma.checked);
+  saveRememberedTech($("#f_tech").value);
 
   try {
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/submit-request`, {
@@ -419,15 +424,7 @@ function renderDecision(d) {
   const card = $("#resultCard");
   const approved = d.status === "approved";
   const note = (d.note || "").trim();
-  const rma = (CFG && CFG.EVO_RMA) || {};
-  const isRma = d.rma_flagged === true && rma.enabled !== false;
-  const retHead = isRma ? escHtml(rma.heading || "RMA the defective EVO to Evolution Digital") : "Quarantine &amp; return the old EVO";
-  const shipToHtml = escHtml(rma.shipTo || "Evolution Digital — RMA Department").replace(/\n/g, "<br>");
-  const retBox = isRma
-    ? `<div class="return-addr rma">${shipToHtml}</div>` +
-      (rma.contact ? `<p class="micro">RMA contact: ${escHtml(rma.contact)}</p>` : "") +
-      (rma.note ? `<p class="micro">${escHtml(rma.note)}</p>` : "")
-    : `<div class="return-addr">4558 35th St.<br>Orlando, FL 32811</div>`;
+  const isRma = !!(d.rma_flagged || window._lastRmaFlag);
   card.className = "result-card decided " + (approved ? "ok" : "err");
   card.innerHTML = `
     <div class="seal big">${approved ? "✓" : "✕"}</div>
@@ -449,7 +446,6 @@ function renderDecision(d) {
       </div>
     </div>` : ""}
     ${approved ? `
-    ${isRma ? `<div class="mgrnote bad"><span class="mgrnote-h">Defective unit — Evolution Digital RMA</span>Do not send this EVO to 4558 Orlando. Follow the RMA steps below.</div>` : ""}
     <div class="must-wrap">
       <div class="must-head">Required before &amp; after the swap · No exceptions</div>
 
@@ -462,12 +458,19 @@ function renderDecision(d) {
         </div>
       </div>
 
-      <div class="must-step">
+      <div class="must-step${isRma ? " rma-step" : ""}">
         <div class="must-num">2</div>
         <div class="must-body">
-          <b>${retHead}</b>
+          ${isRma ? `
+          <b>RMA this EVO to Evolution Digital</b>
+          <p>This unit is flagged as a defective RMA. Box the EVO that is going back, write the customer's <b>account #</b> on the box, place the Warehouse-provided <b>RMA return label</b> on it, and ship it to <b>Evolution Digital ASAP</b>.</p>
+          <div class="return-addr rma">RMA → Evolution Digital · use the Warehouse RMA label</div>
+          ` : `
+          <b>Quarantine &amp; return the old EVO</b>
           <p>Quarantine the removed EVO router (and its power supply, if applicable). Label a box with the customer’s <b>account #</b> and ensure it is returned to:</p>
-          ${retBox}
+          <div class="return-addr">
+            4558 35th St.<br>Orlando, FL 32811
+          </div>`}
         </div>
       </div>
     </div>` : ""}
@@ -542,7 +545,36 @@ if (tutorial) {
   });
 }
 
+// ---- remember the tech on this device --------------------------------------
+// The tech types their name once; every future request pre-fills it, so they
+// never re-type it. A small "not you?" link lets a shared/loaner phone switch.
+const TECH_KEY = "evo_tech_name";
+function loadRememberedTech() {
+  try {
+    const saved = localStorage.getItem(TECH_KEY);
+    const el = $("#f_tech");
+    if (saved && el) {
+      el.value = saved;
+      const hint = $("#techRemembered");
+      if (hint) { hint.hidden = false; $("#techName").textContent = saved; }
+    }
+  } catch (e) { /* storage blocked — form still works, just no pre-fill */ }
+}
+function saveRememberedTech(name) {
+  try { if (name) localStorage.setItem(TECH_KEY, name.trim()); } catch (e) {}
+}
+// "Not you?" clears the remembered name so a different tech can enter theirs.
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "techNotYou") {
+    e.preventDefault();
+    try { localStorage.removeItem(TECH_KEY); } catch (e2) {}
+    const el = $("#f_tech"); if (el) { el.value = ""; el.focus(); }
+    const hint = $("#techRemembered"); if (hint) hint.hidden = true;
+  }
+});
+
 // ---- init ------------------------------------------------------------------
 fillMarkets();
 renderResources();
+loadRememberedTech();
 evalGate();
