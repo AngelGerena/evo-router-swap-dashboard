@@ -160,6 +160,75 @@
       "Este es un registro oficial. Si más adelante se determina que estos pasos no se realizaron, podrías ser responsabilizado. Continúa solo si cada paso de arriba está genuinamente completo.",
     "Cancel": "Cancelar",
     "I affirm — all steps were completed": "Afirmo — todos los pasos fueron completados",
+
+    // switch / NEXGEN panel
+    "SWITCH/NEXGEN": "SWITCH/NEXGEN",
+    "At a switch/NEXGEN property, prove the feed before swapping. The router is only the suspect if a laptop plugged straight into the wall jack still gets internet.":
+      "En una propiedad de switch/NEXGEN, comprueba el feed antes de cambiar. El router solo es sospechoso si una laptop conectada directamente al conector de pared todavía recibe internet.",
+    "Router has power and the feed cable is in the WAN/Internet port.":
+      "El router tiene corriente y el cable del feed está en el puerto WAN/Internet.",
+    "Tested a known-good patch cable from the wall jack.":
+      "Probé un cable patch que sé que funciona desde el conector de pared.",
+    "Checked the wall jack and confirmed the correct active jack.":
+      "Revisé el conector de pared y confirmé el conector activo correcto.",
+    "Direct laptop test at the wall jack": "Prueba directa con laptop en el conector de pared",
+    "Select the result…": "Selecciona el resultado…",
+    "Laptop GETS internet — router is the likely issue": "La laptop SÍ recibe internet — el router es el problema probable",
+    "Laptop gets NO internet": "La laptop NO recibe internet",
+    "No link light at the jack": "Sin luz de enlace en el conector",
+    "169.254 / no valid IP": "169.254 / sin IP válida",
+    "Valid IP but no internet": "IP válida pero sin internet",
+    "Feed tested good — the router is the likely issue. A swap is justified. Continue below.":
+      "Feed comprobado bueno — el router es el problema probable. El cambio se justifica. Continúa abajo.",
+    "Do not swap the router.": "No cambies el router.",
+    "The feed has not been proven good. Escalate to the NOC — a switch or feed issue is likely, and swapping the router will not fix it.":
+      "El feed no se ha comprobado como bueno. Escala al NOC — es probable un problema del switch o del feed, y cambiar el router no lo resolverá.",
+    "Call NOC: 407.998.4611 · Option 3": "Llama al NOC: 407.998.4611 · Opción 3",
+
+    // result cards
+    "Approved — you're cleared": "Aprobado — estás autorizado",
+    "Attestation required": "Declaración requerida",
+    "By checking these boxes, you are formally affirming that you have already completed each of the following required steps on this job:":
+      "Al marcar estas casillas, estás afirmando formalmente que ya completaste cada uno de los siguientes pasos requeridos en este trabajo:",
+    "Relocated the router to a central location and hard-wired it where possible.":
+      "Reubicaste el router a una ubicación central y lo cableaste donde fue posible.",
+    "Attempted the dual-SSID split (separate WPA2 and WPA3 networks) for legacy devices.":
+      "Intentaste la división de SSID doble (redes WPA2 y WPA3 separadas) para equipos antiguos.",
+    "Confirmed there are no parallel, secondary, or old networks active in the home.":
+      "Confirmaste que no hay redes paralelas, secundarias o viejas activas en el hogar.",
+    "This is an official record. If it is later determined that these steps were not actually performed, you may be held accountable. Only proceed if every step above is genuinely complete.":
+      "Este es un registro oficial. Si más adelante se determina que estos pasos no se realizaron, podrías ser responsabilizado. Continúa solo si cada paso de arriba está genuinamente completo.",
+    "Cancel": "Cancelar",
+    "I affirm — all steps were completed": "Afirmo — todos los pasos fueron completados",
+
+    // switch property
+    "This is a switch-based property": "Esta es una propiedad basada en switch",
+    "Lofts at Sodo, The Vue, NEXGEN, and similar switch properties.":
+      "Lofts at Sodo, The Vue, NEXGEN y propiedades de switch similares.",
+    "Switch property · Basic troubleshooting": "Propiedad de switch · Diagnóstico básico",
+    "Complete these steps before requesting a swap":
+      "Completa estos pasos antes de solicitar un cambio",
+    "At a switch-based property, the problem is often at the switch or the port — not the EVO router. Work through each step and confirm it before proceeding.":
+      "En una propiedad basada en switch, el problema suele estar en el switch o el puerto — no en el router EVO. Realiza cada paso y confírmalo antes de continuar.",
+    "Test a spare port": "Prueba un puerto de repuesto",
+    "Move the customer to a known-good spare port and verify.":
+      "Mueve al cliente a un puerto de repuesto que sepas que funciona y verifica.",
+    "Test with your laptop at the port": "Prueba con tu laptop en el puerto",
+    "Confirm the port delivers service by connecting your own laptop.":
+      "Confirma que el puerto entrega servicio conectando tu propia laptop.",
+    "Punch down and activate the correct line": "Poncha y activa la línea correcta",
+    "Verify the correct line is punched down and activated for the customer.":
+      "Verifica que la línea correcta esté ponchada y activada para el cliente.",
+    "If all ports fail: capture switch serial & notify the NOC":
+      "Si todos los puertos fallan: captura el serial del switch y notifica al NOC",
+    "If every port on the switch fails, record the switch serial number below and notify the NOC immediately — a Commercial tech must be dispatched to replace the switch.":
+      "Si todos los puertos del switch fallan, anota el número de serie del switch abajo y notifica al NOC de inmediato — se debe enviar un técnico Comercial para reemplazar el switch.",
+    "Switch serial number": "Número de serie del switch",
+    "Notify the NOC immediately with this serial number so a Commercial tech can be dispatched.":
+      "Notifica al NOC de inmediato con este número de serie para que se pueda enviar un técnico Comercial.",
+    "I confirm I completed all basic switch troubleshooting steps above.":
+      "Confirmo que completé todos los pasos básicos de diagnóstico del switch de arriba.",
+    "Continue to swap request →": "Continuar a la solicitud de cambio →",
     "Denied — do not swap": "Denegado — no hagas el cambio",
     "New request": "Nueva solicitud",
     "Request sent": "Solicitud enviada",

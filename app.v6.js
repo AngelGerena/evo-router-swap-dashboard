@@ -196,13 +196,30 @@ function activeOntFields() {
 
 function selectOnt(type) {
   ontType = type;
-  readGrid.hidden = false;
+  const isSwitch = type === "switch";
+  const switchPanel = $("#switchPanel");
+  readGrid.hidden = isSwitch;                 // hide light-reading grid for switch
+  if (switchPanel) switchPanel.hidden = !isSwitch;
   $$(".ont-pick").forEach((b) => b.classList.toggle("sel", b.dataset.ont === type));
   $$(".fld-iphotonix").forEach((el) => (el.hidden = type !== "iphotonix"));
   $$(".fld-adtran").forEach((el) => (el.hidden = type !== "adtran"));
+  if (isSwitch) { if (flag) flag.hidden = true; if ($("#nidNote")) $("#nidNote").hidden = true; }
   evalReadings(); evalGate();
 }
 $$(".ont-pick").forEach((b) => b.addEventListener("click", () => selectOnt(b.dataset.ont)));
+
+// ---- switch/NEXGEN panel logic ----
+const swLaptop = $("#sw_laptop");
+function evalSwitchPanel() {
+  if (ontType !== "switch") return;
+  const val = swLaptop ? swLaptop.value : "";
+  const good = $("#switchGood"), noc = $("#switchNoc");
+  if (good) good.hidden = val !== "internet";
+  if (noc) noc.hidden = !(val && val !== "internet");
+  evalGate();
+}
+if (swLaptop) swLaptop.addEventListener("change", evalSwitchPanel);
+["#sw_power","#sw_cable","#sw_jack"].forEach((s)=>{ const el=$(s); if(el) el.addEventListener("change", evalGate); });
 const toSubmit = $("#toSubmit"), lockHint = $("#lockHint"), flag = $("#readingFlag");
 
 // Light readings (NID/ONT) are always negative dB. iOS numeric keyboards hide
@@ -243,7 +260,7 @@ function evalReadings() {
     flag.textContent = `Readings are within the ${range.hi} to ${range.lo} dB range for ${ontLabel()}.`;
   }
 }
-function ontLabel() { return ontType === "iphotonix" ? "iPhotonix" : "Adtran"; }
+function ontLabel() { return ontType === "iphotonix" ? "iPhotonix" : ontType === "switch" ? "Switch/NEXGEN" : "Adtran"; }
 
 // NID is informational only — never blocks the gate. Typical -13 to -17,
 // but lower is normal on longer fiber runs, so this is a gentle sanity check.
@@ -268,9 +285,23 @@ function evalGate() {
     .map((c, i) => (c && c.checked ? null : labels[i]))
     .filter(Boolean);
   const allChecked = missingChecks.length === 0;
-  const fields = activeOntFields();
-  const allOntIn = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
-  const open = allChecked && allOntIn;
+
+  let readingsDone, readingsNeed = [];
+  if (ontType === "switch") {
+    // Switch/NEXGEN: require the 3 field checks + a laptop test result.
+    const swChecks = ["#sw_power","#sw_cable","#sw_jack"].every((s)=>{ const el=$(s); return el && el.checked; });
+    const laptopPicked = swLaptop && swLaptop.value !== "";
+    readingsDone = swChecks && laptopPicked;
+    if (!swChecks) readingsNeed.push("confirm the switch field checks");
+    if (!laptopPicked) readingsNeed.push("select the laptop test result");
+  } else {
+    const fields = activeOntFields();
+    readingsDone = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
+    if (!ontType) readingsNeed.push("pick ONT type");
+    else if (!readingsDone) readingsNeed.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
+  }
+
+  const open = allChecked && readingsDone;
   toSubmit.disabled = !open;
   if (open) {
     lockHint.textContent = "Basics done — continue when ready.";
@@ -279,8 +310,7 @@ function evalGate() {
     lockHint.classList.remove("clear");
     let need = [];
     if (!allChecked) need.push("check: " + missingChecks.join(", "));
-    if (!ontType) need.push("pick ONT type");
-    else if (!allOntIn) need.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
+    need = need.concat(readingsNeed);
     lockHint.textContent = "Still needed → " + need.join("  ·  ");
   }
 }
@@ -386,6 +416,13 @@ $("#reqForm").addEventListener("submit", async (e) => {
     customer_last: $("#f_last").value.trim(),
     account_number: $("#f_acct").value.trim(),
     mdu_name: ($("#f_mdu") ? $("#f_mdu").value.trim() : "") || null,
+    switch_property: ontType === "switch",
+    switch_checks: ontType === "switch" ? {
+      power_wan: !!$("#sw_power")?.checked,
+      patch_cable: !!$("#sw_cable")?.checked,
+      wall_jack: !!$("#sw_jack")?.checked,
+    } : null,
+    switch_laptop_result: ontType === "switch" && swLaptop ? (swLaptop.value || null) : null,
     evo_serial_mac: $("#f_serial").value.trim(),
     removed_from_acct: $("#f_removed").value.trim(),
     swap_reason: $("#f_reason").value.trim() || null,

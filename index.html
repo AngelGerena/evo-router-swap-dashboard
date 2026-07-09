@@ -135,6 +135,7 @@
           <div class="ont-type" role="group" aria-label="ONT type">
             <button type="button" class="ont-pick" data-ont="iphotonix">iPhotonix</button>
             <button type="button" class="ont-pick" data-ont="adtran">Adtran</button>
+            <button type="button" class="ont-pick ont-switch" data-ont="switch">SWITCH/NEXGEN</button>
           </div>
 
           <div class="read-grid" id="readGrid" hidden>
@@ -149,6 +150,31 @@
           </div>
           <div id="readingFlag" class="read-flag" hidden></div>
           <div id="nidNote" class="nid-note" hidden></div>
+
+          <div class="switch-panel" id="switchPanel" hidden>
+            <p class="switch-panel-intro" data-i18n-text="At a switch/NEXGEN property, prove the feed before swapping. The router is only the suspect if a laptop plugged straight into the wall jack still gets internet.">At a switch/NEXGEN property, prove the feed before swapping. The router is only the suspect if a laptop plugged straight into the wall jack still gets internet.</p>
+            <label class="sw-line"><input type="checkbox" id="sw_power"><span class="sw-line-box" aria-hidden="true"></span><span data-i18n-text="Router has power and the feed cable is in the WAN/Internet port.">Router has power and the feed cable is in the WAN/Internet port.</span></label>
+            <label class="sw-line"><input type="checkbox" id="sw_cable"><span class="sw-line-box" aria-hidden="true"></span><span data-i18n-text="Tested a known-good patch cable from the wall jack.">Tested a known-good patch cable from the wall jack.</span></label>
+            <label class="sw-line"><input type="checkbox" id="sw_jack"><span class="sw-line-box" aria-hidden="true"></span><span data-i18n-text="Checked the wall jack and confirmed the correct active jack.">Checked the wall jack and confirmed the correct active jack.</span></label>
+
+            <label class="sw-select-label" data-i18n-text="Direct laptop test at the wall jack">Direct laptop test at the wall jack
+              <select id="sw_laptop">
+                <option value="" data-i18n-text="Select the result…">Select the result…</option>
+                <option value="internet" data-i18n-text="Laptop GETS internet — router is the likely issue">Laptop GETS internet — router is the likely issue</option>
+                <option value="no_internet" data-i18n-text="Laptop gets NO internet">Laptop gets NO internet</option>
+                <option value="no_link" data-i18n-text="No link light at the jack">No link light at the jack</option>
+                <option value="no_ip" data-i18n-text="169.254 / no valid IP">169.254 / no valid IP</option>
+                <option value="ip_no_net" data-i18n-text="Valid IP but no internet">Valid IP but no internet</option>
+              </select>
+            </label>
+
+            <div class="switch-good" id="switchGood" hidden data-i18n-text="Feed tested good — the router is the likely issue. A swap is justified. Continue below.">Feed tested good — the router is the likely issue. A swap is justified. Continue below.</div>
+            <div class="switch-noc" id="switchNoc" hidden>
+              <b data-i18n-text="Do not swap the router.">Do not swap the router.</b>
+              <span data-i18n-text="The feed has not been proven good. Escalate to the NOC — a switch or feed issue is likely, and swapping the router will not fix it.">The feed has not been proven good. Escalate to the NOC — a switch or feed issue is likely, and swapping the router will not fix it.</span>
+              <a class="switch-noc-call" href="tel:4079984611" data-i18n-text="Call NOC: 407.998.4611 · Option 3">Call NOC: 407.998.4611 · Option 3</a>
+            </div>
+          </div>
         </div>
 
         <button class="primary" data-next id="toSubmit" disabled>Continue to request →</button>
