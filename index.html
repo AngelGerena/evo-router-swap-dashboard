@@ -195,7 +195,10 @@
 
           <div class="divider"><span>The unit you're swapping</span></div>
 
-          <label>EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
+          <div class="serial-pair">
+            <label class="serial-old">EVO S/N or MAC being removed<input id="f_serial" required placeholder="From OFS or Tech Dashboard"></label>
+            <label class="serial-new">EVO S/N or MAC you want to add<input id="f_serial_new" required placeholder="The new EVO going in"></label>
+          </div>
           <label>Account it's being removed from<input id="f_removed" required inputmode="numeric"></label>
           <p class="micro">Every removed EVO must carry its account # and return to <b>4558 in Orlando</b>.</p>
 

@@ -75,6 +75,10 @@ body{display:flex;justify-content:center}
 .rma-ack-check input:checked + .rma-ack-checkbox::after{opacity:1}
 .rma-serial{border-color:var(--bad) !important;background:var(--bad-bg) !important;color:var(--bad) !important;font-weight:800 !important}
 .field-missing{border-color:var(--bad) !important;box-shadow:0 0 0 3px rgba(185,28,28,.15) !important}
+.serial-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.serial-pair{grid-template-columns:1fr}}
+.serial-old input{border-left:3px solid var(--bad)}
+.serial-new input{border-left:3px solid var(--good)}
 
 /* ---- SWITCH/NEXGEN option + panel ---- */
 .ont-switch{font-size:12.5px;letter-spacing:.02em}

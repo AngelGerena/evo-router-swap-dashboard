@@ -71,6 +71,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .noc-tag{background:var(--bad);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;letter-spacing:.05em}
 .switch-laptop-show{margin-top:10px;font-size:13px;color:var(--ink);font-weight:600}
 .switch-badge{display:inline-block;font-size:10px;font-weight:800;background:var(--teal);color:#fff;padding:2px 6px;border-radius:5px;margin-left:5px;vertical-align:middle}
+.ser-line{display:flex;align-items:center;gap:6px;white-space:nowrap;padding:1px 0}
+.ser-flag{font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:.04em}
+.ser-old{background:var(--bad-bg);color:var(--bad)}
+.ser-new{background:var(--good-bg);color:var(--good)}
 .ont-db-th{white-space:nowrap}
 .db-info{position:relative;display:inline-block;margin-left:3px;color:#9fb3cc;cursor:help;font-size:12px}
 .db-info .db-tip{visibility:hidden;opacity:0;position:absolute;top:130%;left:50%;transform:translateX(-50%);background:var(--navy);color:#eaf2fb;font-weight:600;font-size:11.5px;line-height:1.5;padding:9px 11px;border-radius:9px;width:240px;box-shadow:0 12px 30px rgba(0,0,0,.3);z-index:40;transition:.15s;text-transform:none;letter-spacing:normal}
@@ -301,6 +305,17 @@ function dbCell(val, type) {
   const inSpec = n <= spec.hi && n >= spec.lo;          // e.g. -13 ≥ n ≥ -21
   return `<span class="db-val ${inSpec ? "db-ok" : "db-bad"}" title="${inSpec ? "In spec" : "Out of spec"} for ${type}">${n}</span>`;
 }
+// Shows the removed (old) EVO and the new EVO going in, each flagged.
+// When approved, the removal is confirmed, so the OLD tag reads "REMOVED".
+function serialCell(r){
+  const approved = r.status === "approved";
+  const oldTag = approved ? "REMOVED" : "OLD";
+  const oldSer = r.evo_serial_mac ? esc(r.evo_serial_mac) : "—";
+  const newSer = r.evo_serial_mac_new ? esc(r.evo_serial_mac_new) : "";
+  let html = `<div class="ser-line"><span class="ser-flag ser-old">${oldTag}</span>${oldSer}</div>`;
+  if (newSer) html += `<div class="ser-line"><span class="ser-flag ser-new">NEW</span>${newSer}</div>`;
+  return html;
+}
 const SWITCH_LAPTOP_LABELS = {
   internet: "Laptop GETS internet — router is the likely issue",
   no_internet: "Laptop gets NO internet",
@@ -349,7 +364,7 @@ function renderTable(){
       <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
       <td class="mono">${esc(r.account_number)}</td>
       <td>${r.mdu_name?esc(r.mdu_name):'<span class="muted">—</span>'}${r.switch_property?'<span class="switch-badge">SWITCH</span>':""}</td>
-      <td class="mono">${esc(r.evo_serial_mac)}</td>
+      <td class="mono">${serialCell(r)}</td>
       <td class="mono">${esc(r.removed_from_acct)}</td>
       <td class="mono">${dbCell(cl.ont_light_ont, cl.ont_type)}</td>
       <td>${opened?`<button class="res-link" onclick='event.stopPropagation();showResources(${JSON.stringify(cl.resources_opened||[]).replace(/'/g,"&#39;")}, "${esc(r.tech_name)}", ${cl.time_to_submit_secs??"null"})'>${opened} opened</button>`:'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
@@ -547,10 +562,10 @@ function exportXlsx(){
   if (!DATA || (DATA.role !== "owner" && DATA.role !== "manager")) { alert("Please sign in to export."); return; }
   const wb = XLSX.utils.book_new();
   const rows = getFilteredRows();
-  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","Property/MDU","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
+  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","Property/MDU","EVO S/N or MAC (Removed)","EVO S/N or MAC (New)","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
   const reqRows = rows.map(r=>{const c=r.checklist||{};return [
     fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,r.mdu_name||"",
-    r.evo_serial_mac,r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
+    r.evo_serial_mac,r.evo_serial_mac_new||"",r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
     yn(c.router_relocated),yn(c.dual_ssid_attempted),yn(c.no_parallel_networks),
     (c.resources_opened||[]).join("; "),c.time_to_submit_secs??"",r.decided_by_name||r.decided_by_email||"",r.decided_at?fmt(r.decided_at):"",r.decision_note||""
   ];});

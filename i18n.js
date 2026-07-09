@@ -98,6 +98,7 @@
     "Property / MDU name": "Nombre de la propiedad / MDU",
     "The unit you're swapping": "La unidad que estás cambiando",
     "EVO S/N or MAC being removed": "S/N o MAC del EVO que se remueve",
+    "EVO S/N or MAC you want to add": "S/N o MAC del EVO que quieres agregar",
     "Account it's being removed from": "Cuenta de la que se remueve",
     "Every removed EVO must carry its account # and return to":
       "Todo EVO removido debe llevar su # de cuenta y regresar a",
