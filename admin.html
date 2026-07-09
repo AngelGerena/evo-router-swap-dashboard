@@ -79,6 +79,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .db-val{font-weight:800;padding:2px 8px;border-radius:6px}
 .db-ok{background:var(--good-bg);color:var(--good)}
 .db-bad{background:var(--bad-bg);color:var(--bad)}
+.auto-refresh{align-self:center;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#eaf2fb;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:7px 12px;border-radius:999px;white-space:nowrap}
+.auto-refresh b{color:#fff;font-variant-numeric:tabular-nums;min-width:34px;display:inline-block;text-align:right}
+.ar-dot{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:arpulse 2s infinite}
+@keyframes arpulse{0%{box-shadow:0 0 0 0 rgba(61,220,132,.5)}70%{box-shadow:0 0 0 7px rgba(61,220,132,0)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0)}}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .phead h2{margin:0;font-size:17px}
 .phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
@@ -122,6 +126,9 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div><div class="kick">Summit Broadband · Field Operations</div><h1>EVO Swap Control</h1></div>
     <div class="acts">
       <span id="roleTag" style="align-self:center;font-weight:800;font-size:12px;opacity:.9;padding:0 4px"></span>
+      <span class="auto-refresh" id="autoRefresh" title="The queue refreshes automatically every 5 minutes.">
+        <span class="ar-dot"></span>Auto-refresh in <b id="arCount">5:00</b>
+      </span>
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
       <button class="btn export-xlsx" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters.">Export (XLSX)</button>
       <button class="btn export-pdf" id="exportPdfBtn" onclick="exportPdf()" title="Branded PDF of the rows currently shown — respects your filters.">Export (PDF)</button>
@@ -197,7 +204,26 @@ async function loadAll(){
     applyRole();
     fillMarketFilter();
     renderKpis(); renderTable(); renderTechs(); renderRma();
+    startAutoRefresh();
   }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
+}
+
+// ---- auto-refresh: reloads the queue every 5 minutes, with a live countdown.
+const AUTO_REFRESH_SECS = 300;
+let arRemaining = AUTO_REFRESH_SECS;
+let arTimer = null;
+function fmtCountdown(s){ const m=Math.floor(s/60), ss=s%60; return m+":"+String(ss).padStart(2,"0"); }
+function startAutoRefresh(){
+  arRemaining = AUTO_REFRESH_SECS;
+  const el = document.getElementById("arCount");
+  if (el) el.textContent = fmtCountdown(arRemaining);
+  if (arTimer) clearInterval(arTimer);
+  arTimer = setInterval(() => {
+    arRemaining -= 1;
+    const c = document.getElementById("arCount");
+    if (c) c.textContent = fmtCountdown(Math.max(arRemaining,0));
+    if (arRemaining <= 0) { clearInterval(arTimer); loadAll(); }
+  }, 1000);
 }
 
 function applyRole(){
