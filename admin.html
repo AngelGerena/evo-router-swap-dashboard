@@ -38,6 +38,30 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .rma-row{background:var(--bad-bg)}
 .rma-row td{border-bottom-color:#f3c9c9}
 .rma-serial-cell{color:var(--bad);font-weight:800}
+.res-link{border:0;background:transparent;color:var(--teal);font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0}
+.res-link:hover{filter:brightness(1.2)}
+.res-modal{position:fixed;inset:0;background:rgba(11,37,69,.55);backdrop-filter:blur(3px);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px}
+.res-modal[hidden]{display:none}
+.res-modal-card{background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.3);max-width:440px;width:100%;padding:22px;border-left:5px solid var(--teal)}
+.res-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.res-modal-kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.res-modal-card h3{margin:4px 0 0;font-size:19px;color:var(--navy)}
+.res-modal-x{width:34px;height:34px;flex:none;border:0;background:var(--bg);border-radius:9px;font-size:15px;cursor:pointer;color:var(--muted)}
+.res-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:11px;margin-bottom:8px;font-weight:700;font-size:14px;color:var(--ink)}
+.res-item-ic{width:34px;height:34px;flex:none;border-radius:8px;background:var(--good-bg);color:var(--teal);display:grid;place-items:center;font-weight:800;font-size:12px}
+.res-empty{color:var(--muted);padding:16px;text-align:center}
+.res-modal-note{margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.main-row{cursor:pointer;transition:background .12s}
+.main-row:hover{background:var(--bg)}
+.detail-row > td{background:#f7fafd;padding:0;border-bottom:2px solid var(--line)}
+.detail-wrap{display:flex;gap:18px;padding:16px 20px;flex-wrap:wrap}
+.detail-col{flex:1;min-width:240px}
+.detail-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:6px}
+.detail-box{background:#fff;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5;color:var(--ink);border-left:3px solid var(--teal)}
+.detail-box.appr{border-left-color:var(--good)}
+.detail-box.deny{border-left-color:var(--bad)}
+.detail-box.empty{color:var(--muted);font-style:italic;border-left-color:var(--line)}
+.detail-by{margin-top:6px;font-size:12px;color:var(--muted);font-weight:700;text-align:right}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .phead h2{margin:0;font-size:17px}
 .phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
@@ -115,7 +139,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div class="wrap">
       <table id="mainTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
-        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
+        <th>Account</th><th>Property/MDU</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -202,28 +226,73 @@ function getFilteredRows(){
   });
 }
 
+const RESOURCE_NAMES = {
+  dual_ssid: "Dual SSID Split (WPA2 + WPA3)",
+  install_sop: "Install Process & Procedure",
+  evo_log: "Save EVO Log in Frontline",
+  nrby_osp: "NRBY & OSP Sequence",
+};
+function showResources(ids, tech, secs){
+  const modal = document.getElementById("resModal");
+  document.getElementById("resModalTech").textContent = tech || "Technician";
+  const body = document.getElementById("resModalBody");
+  const list = (ids||[]).map(id=>{
+    const name = RESOURCE_NAMES[id] || id;
+    return `<div class="res-item"><span class="res-item-ic">PDF</span><span>${name}</span></div>`;
+  }).join("");
+  body.innerHTML = list || `<div class="res-empty">No guides were opened.</div>`;
+  const note = document.getElementById("resModalNote");
+  if (secs != null) {
+    const m = Math.floor(secs/60), s = secs%60;
+    const t = m ? `${m}m ${s}s` : `${s}s`;
+    note.textContent = `Time from opening the form to submitting: ${t}.`;
+  } else { note.textContent = ""; }
+  modal.hidden = false;
+}
+function closeResources(){ document.getElementById("resModal").hidden = true; }
+
 function renderTable(){
   const rows = getFilteredRows();
   document.getElementById("rowCount").textContent = `${rows.length} of ${DATA.rows.length}`;
   const tb = document.querySelector("#mainTable tbody");
-  tb.innerHTML = rows.length ? rows.map(r=>{
+  tb.innerHTML = rows.length ? rows.map((r,ri)=>{
     const cl = r.checklist||{};
     const opened = (cl.resources_opened?.length)||0;
-    return `<tr>
+    const rid = r.id || ("row"+ri);
+    return `<tr class="main-row" onclick="toggleDetail('det_${rid}')">
       <td class="mono muted">${fmt(r.submitted_at)}</td>
       <td><span class="badge b-${r.status}">${r.status}</span></td>
       <td>${esc(r.tech_name)}</td>
       <td class="mono">${esc(r.market_code)}</td>
       <td>${esc(r.customer_first)} ${esc(r.customer_last)}</td>
       <td class="mono">${esc(r.account_number)}</td>
+      <td>${r.mdu_name?esc(r.mdu_name):'<span class="muted">—</span>'}</td>
       <td class="mono">${esc(r.evo_serial_mac)}</td>
       <td class="mono">${esc(r.removed_from_acct)}</td>
       <td class="mono">${cl.ont_light_ont??"—"}</td>
-      <td>${opened?opened+" opened":'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
+      <td>${opened?`<button class="res-link" onclick='event.stopPropagation();showResources(${JSON.stringify(cl.resources_opened||[]).replace(/'/g,"&#39;")}, "${esc(r.tech_name)}", ${cl.time_to_submit_secs??"null"})'>${opened} opened</button>`:'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
-      <td class="muted" style="min-width:200px;white-space:normal" title="${esc(r.decision_note||"")}">${esc(r.decision_note||"—")}</td>
-    </tr>`;
-  }).join("") : `<tr><td colspan="12" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+      <td class="muted" style="min-width:200px;white-space:normal">${esc(r.decision_note||"—")}</td>
+    </tr>
+    <tr class="detail-row" id="det_${rid}" hidden><td colspan="13">
+      <div class="detail-wrap">
+        <div class="detail-col">
+          <div class="detail-label">Tech's reason for the swap</div>
+          <div class="detail-box ${r.swap_reason?"":"empty"}">${r.swap_reason?esc(r.swap_reason):"No reason entered by the tech."}</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">${r.status==="denied"?"Manager's note (denial)":"Manager's note"}</div>
+          <div class="detail-box ${r.decision_note?"":"empty"} ${r.status==="denied"?"deny":"appr"}">${r.decision_note?esc(r.decision_note):"No note left by the manager."}</div>
+          ${r.decided_by_name||r.decided_by_email?`<div class="detail-by">— ${esc(r.decided_by_name||r.decided_by_email)}</div>`:""}
+        </div>
+      </div>
+    </td></tr>`;
+  }).join("") : `<tr><td colspan="13" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+}
+
+function toggleDetail(id){
+  const row = document.getElementById(id);
+  if (row) row.hidden = !row.hidden;
 }
 
 function renderRma(){
@@ -313,9 +382,9 @@ function exportXlsx(){
   if (!DATA || (DATA.role !== "owner" && DATA.role !== "manager")) { alert("Please sign in to export."); return; }
   const wb = XLSX.utils.book_new();
   const rows = getFilteredRows();
-  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
+  const reqHeaders = ["Submitted","Status","Tech","Market","Customer First","Customer Last","Account #","Property/MDU","EVO S/N or MAC","Removed From Acct","Tech Reason (swap)","ONT NID dB","ONT dB","Health","Router Relocated","Dual SSID","No Parallel","Resources Opened","Time to Submit (s)","Decided By","Decided At","Manager Reason"];
   const reqRows = rows.map(r=>{const c=r.checklist||{};return [
-    fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,
+    fmt(r.submitted_at),r.status,r.tech_name,r.market_code,r.customer_first,r.customer_last,r.account_number,r.mdu_name||"",
     r.evo_serial_mac,r.removed_from_acct,r.swap_reason||"",c.ont_light_nid??"",c.ont_light_ont??"",c.overall_health_score??"",
     yn(c.router_relocated),yn(c.dual_ssid_attempted),yn(c.no_parallel_networks),
     (c.resources_opened||[]).join("; "),c.time_to_submit_secs??"",r.decided_by_name||r.decided_by_email||"",r.decided_at?fmt(r.decided_at):"",r.decision_note||""
@@ -346,5 +415,19 @@ const yn=b=>b?"Yes":"No";
 const fmt=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
 document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key==="Enter")loadAll();});
 </script>
+<div class="res-modal" id="resModal" hidden onclick="if(event.target===this)closeResources()">
+  <div class="res-modal-card">
+    <div class="res-modal-head">
+      <div>
+        <div class="res-modal-kick">Guides opened before submitting</div>
+        <h3 id="resModalTech">Technician</h3>
+      </div>
+      <button class="res-modal-x" onclick="closeResources()" aria-label="Close">✕</button>
+    </div>
+    <div id="resModalBody"></div>
+    <div class="res-modal-note" id="resModalNote"></div>
+  </div>
+</div>
+
 </body>
 </html>

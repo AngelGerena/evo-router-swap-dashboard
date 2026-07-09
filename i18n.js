@@ -94,6 +94,8 @@
     "Customer first name": "Nombre del cliente",
     "Customer last name": "Apellido del cliente",
     "Account # / Job # (Offer #)": "# de cuenta / # de trabajo (# de oferta)",
+    "Property / MDU name (if applicable)": "Nombre de la propiedad / MDU (si aplica)",
+    "Property / MDU name": "Nombre de la propiedad / MDU",
     "The unit you're swapping": "La unidad que estás cambiando",
     "EVO S/N or MAC being removed": "S/N o MAC del EVO que se remueve",
     "Account it's being removed from": "Cuenta de la que se remueve",
@@ -121,6 +123,7 @@
     "Your name": "Tu nombre",
     "Not you?": "¿No eres tú?",
     "Reason for swap (optional)": "Razón del cambio (opcional)",
+    "Reason for swap": "Razón del cambio",
     "Request approval": "Solicitar aprobación",
     "You'll see a confirmation. The tech screen unlocks when a manager approves.":
       "Verás una confirmación. La pantalla del técnico se desbloquea cuando un gerente aprueba.",
@@ -144,6 +147,19 @@
 
     // result cards
     "Approved — you're cleared": "Aprobado — estás autorizado",
+    "Attestation required": "Declaración requerida",
+    "By checking these boxes, you are formally affirming that you have already completed each of the following required steps on this job:":
+      "Al marcar estas casillas, estás afirmando formalmente que ya completaste cada uno de los siguientes pasos requeridos en este trabajo:",
+    "Relocated the router to a central location and hard-wired it where possible.":
+      "Reubicaste el router a una ubicación central y lo cableaste donde fue posible.",
+    "Attempted the dual-SSID split (separate WPA2 and WPA3 networks) for legacy devices.":
+      "Intentaste la división de SSID doble (redes WPA2 y WPA3 separadas) para equipos antiguos.",
+    "Confirmed there are no parallel, secondary, or old networks active in the home.":
+      "Confirmaste que no hay redes paralelas, secundarias o viejas activas en el hogar.",
+    "This is an official record. If it is later determined that these steps were not actually performed, you may be held accountable. Only proceed if every step above is genuinely complete.":
+      "Este es un registro oficial. Si más adelante se determina que estos pasos no se realizaron, podrías ser responsabilizado. Continúa solo si cada paso de arriba está genuinamente completo.",
+    "Cancel": "Cancelar",
+    "I affirm — all steps were completed": "Afirmo — todos los pasos fueron completados",
     "Denied — do not swap": "Denegado — no hagas el cambio",
     "New request": "Nueva solicitud",
     "Request sent": "Solicitud enviada",

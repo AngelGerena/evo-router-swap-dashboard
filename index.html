@@ -165,6 +165,7 @@
             <label>Customer last name<input id="f_last" required></label>
           </div>
           <label>Account # / Job # (Offer #)<input id="f_acct" required inputmode="numeric"></label>
+          <label data-i18n-text="Property / MDU name">Property / MDU name<input id="f_mdu" required placeholder="Property name, or 'single-family' if not an MDU"></label>
 
           <div class="divider"><span>The unit you're swapping</span></div>
 
@@ -202,7 +203,7 @@
 
           <label>Your name<input id="f_tech" required></label>
           <p class="tech-remembered" id="techRemembered" hidden>Signed in as <b id="techName"></b> on this device · <a href="#" id="techNotYou">Not you?</a></p>
-          <label>Reason for swap (optional)<textarea id="f_reason" rows="2" placeholder="What did the basics not fix?"></textarea></label>
+          <label>Reason for swap<textarea id="f_reason" rows="2" required placeholder="What did the basics not fix? Be specific."></textarea></label>
 
           <button type="submit" class="primary submit" id="submitBtn">Request approval</button>
           <div class="micro center">You'll see a confirmation. The tech screen unlocks when a manager approves.</div>
@@ -215,6 +216,25 @@
       </section>
     </main>
 
+  </div>
+</div>
+
+<!-- ===== Checklist affirmation modal ===== -->
+<div class="affirm-modal" id="affirmModal" hidden role="dialog" aria-modal="true" aria-label="Attestation">
+  <div class="affirm-card">
+    <div class="affirm-icon">!</div>
+    <h2 data-i18n-text="Attestation required">Attestation required</h2>
+    <p data-i18n-text="By checking these boxes, you are formally affirming that you have already completed each of the following required steps on this job:">By checking these boxes, you are formally affirming that you have already completed each of the following required steps on this job:</p>
+    <ul class="affirm-list">
+      <li data-i18n-text="Relocated the router to a central location and hard-wired it where possible.">Relocated the router to a central location and hard-wired it where possible.</li>
+      <li data-i18n-text="Attempted the dual-SSID split (separate WPA2 and WPA3 networks) for legacy devices.">Attempted the dual-SSID split (separate WPA2 and WPA3 networks) for legacy devices.</li>
+      <li data-i18n-text="Confirmed there are no parallel, secondary, or old networks active in the home.">Confirmed there are no parallel, secondary, or old networks active in the home.</li>
+    </ul>
+    <p class="affirm-warn" data-i18n-text="This is an official record. If it is later determined that these steps were not actually performed, you may be held accountable. Only proceed if every step above is genuinely complete.">This is an official record. If it is later determined that these steps were not actually performed, you may be held accountable. Only proceed if every step above is genuinely complete.</p>
+    <div class="affirm-actions">
+      <button class="affirm-cancel" id="affirmCancel" type="button" data-i18n-text="Cancel">Cancel</button>
+      <button class="affirm-ok" id="affirmOk" type="button" data-i18n-text="I affirm — all steps were completed">I affirm — all steps were completed</button>
+    </div>
   </div>
 </div>
 

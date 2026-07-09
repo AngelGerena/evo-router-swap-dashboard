@@ -284,6 +284,39 @@ function evalGate() {
     lockHint.textContent = "Still needed → " + need.join("  ·  ");
   }
 }
+// ---- checklist affirmation gate --------------------------------------------
+// The first time a tech ticks any of the three attestation boxes, show a formal
+// affirmation modal. They must click "I affirm" to proceed. This puts the
+// attestation on record and discourages careless box-ticking.
+let hasAffirmed = false;
+let pendingCheck = null;
+const affirmModal = $("#affirmModal");
+
+checks.forEach((c) => c.addEventListener("change", (e) => {
+  // Only intercept when checking ON, before they've affirmed this session.
+  if (c.checked && !hasAffirmed) {
+    pendingCheck = c;
+    c.checked = false;            // hold it until they affirm
+    if (affirmModal) { affirmModal.hidden = false; document.body.style.overflow = "hidden"; }
+    return;
+  }
+  evalGate();
+}));
+
+if ($("#affirmOk")) $("#affirmOk").addEventListener("click", () => {
+  hasAffirmed = true;
+  if (pendingCheck) { pendingCheck.checked = true; pendingCheck = null; }
+  if (affirmModal) affirmModal.hidden = true;
+  document.body.style.overflow = "";
+  evalGate();
+});
+if ($("#affirmCancel")) $("#affirmCancel").addEventListener("click", () => {
+  if (pendingCheck) { pendingCheck.checked = false; pendingCheck = null; }
+  if (affirmModal) affirmModal.hidden = true;
+  document.body.style.overflow = "";
+  evalGate();
+});
+
 checks.forEach((c) => c.addEventListener("change", evalGate));
 // Show the minus in the box itself once the tech leaves the field.
 function normalizeFieldDisplay(el) {
@@ -314,6 +347,27 @@ if (fRma) fRma.addEventListener("change", () => {
 $("#reqForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Explicit required-field check (preventDefault skips native validation).
+  const required = [
+    ["#f_first", "Customer first name"],
+    ["#f_last", "Customer last name"],
+    ["#f_acct", "Account #"],
+    ["#f_mdu", "Property / MDU name"],
+    ["#f_serial", "EVO S/N or MAC"],
+    ["#f_removed", "Account it's being removed from"],
+    ["#f_market", "Market"],
+    ["#f_tech", "Your name"],
+    ["#f_reason", "Reason for swap"],
+  ];
+  for (const [sel, label] of required) {
+    const el = $(sel);
+    if (!el || el.value.trim() === "") {
+      if (el) { el.classList.add("field-missing"); el.focus(); setTimeout(() => el.classList.remove("field-missing"), 1500); }
+      alert(`Please fill in: ${label}`);
+      return;
+    }
+  }
+
   // RMA guard: if flagged, the RMA acknowledgment is mandatory.
   if (fRma && fRma.checked && fRmaAck && !fRmaAck.checked) {
     if (rmaAckBox) rmaAckBox.classList.add("shake");
@@ -331,6 +385,7 @@ $("#reqForm").addEventListener("submit", async (e) => {
     customer_first: $("#f_first").value.trim(),
     customer_last: $("#f_last").value.trim(),
     account_number: $("#f_acct").value.trim(),
+    mdu_name: ($("#f_mdu") ? $("#f_mdu").value.trim() : "") || null,
     evo_serial_mac: $("#f_serial").value.trim(),
     removed_from_acct: $("#f_removed").value.trim(),
     swap_reason: $("#f_reason").value.trim() || null,
