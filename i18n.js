@@ -107,6 +107,12 @@
       "Marcarlo identifica esta unidad como defectuosa. En lugar de la devolución normal al 4558 Orlando, la empacarás, escribirás el # de cuenta, aplicarás la etiqueta RMA del almacén y la enviarás a Evolution Digital. Marca la casilla para ver los pasos completos de manejo.",
     "Use only when nothing fixed it — a genuine defect that needs Evolution & Clay's attention.":
       "Usar solo cuando nada lo arregló — un defecto genuino que necesita la atención de Evolution y Clay.",
+    "A router goes back to Evolution Digital only for a genuine hardware defect, such as:":
+      "Un router regresa a Evolution Digital solo por un defecto de hardware genuino, como:",
+    "Will no longer power up at all.": "Ya no enciende en absoluto.",
+    "Powers on but will not connect to the internet.": "Enciende pero no se conecta al internet.",
+    "Broadcasts only 2.4 GHz and not 5 GHz.": "Solo transmite 2.4 GHz y no 5 GHz.",
+    "Broadcasts only 5 GHz and not 2.4 GHz.": "Solo transmite 5 GHz y no 2.4 GHz.",
     "This unit will be tracked as a defective RMA. Confirm you understand the handling:":
       "Esta unidad se rastreará como RMA defectuoso. Confirma que entiendes el manejo:",
     "Box the EVO that is going back.": "Empaca el EVO que va de regreso.",

@@ -61,6 +61,10 @@ body{display:flex;justify-content:center}
 .rma-ack-box{margin-top:10px;padding:14px;background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px}
 .rma-ack-box[hidden]{display:none}
 .rma-ack-lead{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--bad)}
+.rma-ack-examples{margin:0 0 12px;padding-left:18px}
+.rma-ack-examples li{font-size:13px;line-height:1.65;color:var(--ink)}
+.rma-ack-psu{margin:0 0 14px;padding:11px 13px;background:#fff8e6;border:1px solid #f0d48a;border-radius:10px;font-size:12.5px;line-height:1.55;color:#7a5a10}
+.rma-ack-psu b{color:#5f4600}
 .rma-ack-list{margin:0 0 12px;padding-left:18px}
 .rma-ack-list li{font-size:13px;line-height:1.6;color:var(--ink)}
 .rma-ack-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink)}
