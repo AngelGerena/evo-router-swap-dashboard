@@ -198,12 +198,17 @@ function selectOnt(type) {
   ontType = type;
   const isSwitch = type === "switch";
   const switchPanel = $("#switchPanel");
-  readGrid.hidden = isSwitch;                 // hide light-reading grid for switch
+  readGrid.hidden = false;                    // grid stays (Frontline health always shown)
   if (switchPanel) switchPanel.hidden = !isSwitch;
   $$(".ont-pick").forEach((b) => b.classList.toggle("sel", b.dataset.ont === type));
   $$(".fld-iphotonix").forEach((el) => (el.hidden = type !== "iphotonix"));
   $$(".fld-adtran").forEach((el) => (el.hidden = type !== "adtran"));
+  $$(".fld-nid").forEach((el) => (el.hidden = isSwitch));   // NID not used at switch props
   if (isSwitch) { if (flag) flag.hidden = true; if ($("#nidNote")) $("#nidNote").hidden = true; }
+  const readSub = $(".read-sub");
+  if (readSub) readSub.hidden = isSwitch;   // switch panel has its own intro
+  const readHead = $(".read-head");
+  if (readHead) readHead.hidden = isSwitch; // "ONT light readings" doesn't apply to switch
   evalReadings(); evalGate();
 }
 $$(".ont-pick").forEach((b) => b.addEventListener("click", () => selectOnt(b.dataset.ont)));
