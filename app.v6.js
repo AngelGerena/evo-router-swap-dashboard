@@ -590,29 +590,37 @@ function escHtml(s) {
 const tutorial = $("#tutorial");
 if (tutorial) {
   const TUTORIAL = [
-    { ic: "▶", badge: "EVO Swap Request", title: "How it works",
-      body: "Every swap needs approval from Anthony or Peterson — no exceptions. Here’s the whole flow in about a minute." },
-    { ic: "1", badge: "Step 1", title: "Run the basics first",
-      body: "Most “swaps” are fixed without one. Relocate the router centrally, attempt a Dual-SSID split for legacy devices, and confirm there’s no second/old network. Tap any Guide to open the SOP at the right page." },
-    { ic: "2", badge: "Step 2", title: "Checklist + ONT readings",
-      body: "Tick all three boxes, then enter your NID and ONT light readings. SOP range is −14 to −19.5 dB, with no more than 1 dB loss NID→ONT. The request button stays locked until the basics and ONT reading are in." },
-    { ic: "3", badge: "Step 3", title: "Submit the request",
-      body: "Add the customer, account / job #, the EVO serial or MAC being removed and its account, your market, and your name — then tap Request approval. Every removed EVO returns to 4558 in Orlando with its account #." },
-    { ic: "⚡", badge: "After you submit", title: "A manager decides — fast",
-      body: "Your market’s manager is pinged instantly and approves or denies in one tap. You’ll see a confirmation; the job stays gated until they decide. No answer in 30 minutes auto-escalates to the backstop." },
-    { ic: "✓", badge: "That’s it", title: "Basics → gate → approved",
-      body: "Run the basics, finish the checklist, submit. Reopen this anytime from the “How it works” button." },
+    { ic: "▶", badge: {en:"EVO Swap Request", es:"Solicitud de Cambio EVO"}, title: {en:"How it works", es:"Cómo funciona"},
+      body: {en:"Every swap needs approval from Anthony or Peterson — no exceptions. Here’s the whole flow in about a minute.",
+             es:"Todo cambio necesita aprobación de Anthony o Peterson — sin excepciones. Aquí está todo el proceso en aproximadamente un minuto."} },
+    { ic: "1", badge: {en:"Step 1", es:"Paso 1"}, title: {en:"Run the basics first", es:"Revisa los fundamentos primero"},
+      body: {en:"Most “swaps” are fixed without one. Relocate the router centrally, attempt a Dual-SSID split for legacy devices, and confirm there’s no second/old network. Tap any Guide to open the SOP at the right page.",
+             es:"La mayoría de los “cambios” se resuelven sin uno. Reubica el router al centro, intenta una división de SSID doble para equipos antiguos y confirma que no haya una segunda red o red vieja. Toca cualquier Guía para abrir el SOP en la página correcta."} },
+    { ic: "2", badge: {en:"Step 2", es:"Paso 2"}, title: {en:"Checklist + ONT readings", es:"Lista de verificación + lecturas del ONT"},
+      body: {en:"Tick all three boxes, then pick your ONT type and enter the readings. iPhotonix runs −13 to −21 dB (1490 + 1550); Adtran runs −10 to −22 dB (1577). At a SWITCH/NEXGEN property, pick that instead — no light readings, just the switch checkpoint. The request button unlocks once the basics and readings are in.",
+             es:"Marca las tres casillas, luego elige tu tipo de ONT e ingresa las lecturas. iPhotonix va de −13 a −21 dB (1490 + 1550); Adtran va de −10 a −22 dB (1577). En una propiedad SWITCH/NEXGEN, elige esa opción — sin lecturas de luz, solo el punto de control del switch. El botón de solicitud se desbloquea cuando los fundamentos y las lecturas estén listos."} },
+    { ic: "3", badge: {en:"Step 3", es:"Paso 3"}, title: {en:"Submit the request", es:"Envía la solicitud"},
+      body: {en:"Add the customer, account / job #, property/MDU, the EVO serial or MAC being removed and its account, your market, your name, and the reason for the swap — then tap Request approval. Every removed EVO returns to 4558 in Orlando with its account #.",
+             es:"Agrega el cliente, # de cuenta / trabajo, propiedad/MDU, el serial o MAC del EVO que se remueve y su cuenta, tu mercado, tu nombre y la razón del cambio — luego toca Solicitar aprobación. Todo EVO removido regresa al 4558 en Orlando con su # de cuenta."} },
+    { ic: "⚡", badge: {en:"After you submit", es:"Después de enviar"}, title: {en:"A manager decides — fast", es:"Un gerente decide — rápido"},
+      body: {en:"Your market’s manager is pinged instantly and approves or denies in one tap. You’ll see a confirmation; the job stays gated until they decide.",
+             es:"Al gerente de tu mercado se le notifica al instante y aprueba o deniega con un toque. Verás una confirmación; el trabajo permanece detenido hasta que decidan."} },
+    { ic: "✓", badge: {en:"That’s it", es:"Eso es todo"}, title: {en:"Basics → gate → approved", es:"Fundamentos → aprobación → autorizado"},
+      body: {en:"Run the basics, finish the checklist, submit. Reopen this anytime from the “How it works” button.",
+             es:"Revisa los fundamentos, completa la lista, envía. Reabre esto en cualquier momento desde el botón “Cómo funciona”."} },
   ];
   const tutStage = $("#tutStage"), tutDots = $("#tutDots"), tutPrev = $("#tutPrev"), tutNext = $("#tutNext");
   let tutIdx = 0;
+  const tutLang = () => (document.documentElement.lang === "es" ? "es" : "en");
   const renderTut = () => {
     const s = TUTORIAL[tutIdx];
+    const L = tutLang();
     tutStage.innerHTML =
       `<div class="tut-slide"><div class="tut-ic">${s.ic}</div>` +
-      `<div class="tut-badge">${s.badge}</div><h2>${s.title}</h2><p>${s.body}</p></div>`;
+      `<div class="tut-badge">${s.badge[L]}</div><h2>${s.title[L]}</h2><p>${s.body[L]}</p></div>`;
     tutDots.innerHTML = TUTORIAL.map((_, i) => `<span class="tut-dot ${i === tutIdx ? "on" : ""}"></span>`).join("");
     tutPrev.disabled = tutIdx === 0;
-    tutNext.textContent = tutIdx === TUTORIAL.length - 1 ? "Done" : "Next ›";
+    tutNext.textContent = tutIdx === TUTORIAL.length - 1 ? (L === "es" ? "Listo" : "Done") : (L === "es" ? "Siguiente ›" : "Next ›");
   };
   const openTut = () => { tutIdx = 0; renderTut(); tutorial.hidden = false; document.body.style.overflow = "hidden"; };
   const closeTut = () => { tutorial.hidden = true; document.body.style.overflow = ""; };

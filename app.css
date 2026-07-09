@@ -48,15 +48,16 @@ body{display:flex;justify-content:center}
 
 /* ---- RMA flag on the request form ---- */
 .rma-flag-wrap{margin:4px 0 14px}
-.rma-toggle{display:flex;align-items:flex-start;gap:11px;padding:13px;background:#fff;border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s}
-.rma-toggle:hover{border-color:var(--bad)}
+.rma-toggle{display:flex;align-items:flex-start;gap:11px;padding:14px;background:var(--bad-bg);border:2px solid var(--bad);border-radius:12px;cursor:pointer;transition:.15s}
+.rma-toggle:hover{filter:brightness(.98)}
 .rma-toggle input{position:absolute;opacity:0;width:0;height:0}
-.rma-toggle-box{width:24px;height:24px;flex:none;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;transition:.15s}
+.rma-toggle-box{width:24px;height:24px;flex:none;border-radius:7px;border:2px solid var(--bad);background:#fff;display:grid;place-items:center;transition:.15s}
 .rma-toggle-box::after{content:"!";color:#fff;font-weight:900;font-size:14px;opacity:0;transition:.15s}
 .rma-toggle input:checked + .rma-toggle-box{background:var(--bad);border-color:var(--bad)}
 .rma-toggle input:checked + .rma-toggle-box::after{opacity:1}
 .rma-toggle-text b{display:block;font-size:14px;color:var(--bad)}
-.rma-toggle-text em{display:block;font-style:normal;color:var(--muted);font-size:12px;margin-top:2px;line-height:1.4}
+.rma-toggle-text em{display:block;font-style:normal;color:var(--bad);font-size:12px;margin-top:3px;line-height:1.45;opacity:.85}
+.rma-toggle-text .rma-more{display:block;color:var(--muted);font-size:11.5px;margin-top:6px;line-height:1.45}
 .rma-ack-box{margin-top:10px;padding:14px;background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px}
 .rma-ack-box[hidden]{display:none}
 .rma-ack-lead{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--bad)}

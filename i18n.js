@@ -103,6 +103,8 @@
       "Todo EVO removido debe llevar su # de cuenta y regresar a",
     "Flag this EVO as an RMA to Evolution Digital":
       "Marcar este EVO como RMA a Evolution Digital",
+    "Flagging marks this unit as defective. Instead of the normal return to 4558 Orlando, you'll box it, write the account # on it, apply the Warehouse RMA label, and ship it to Evolution Digital. Check the flag to see the full handling steps.":
+      "Marcarlo identifica esta unidad como defectuosa. En lugar de la devolución normal al 4558 Orlando, la empacarás, escribirás el # de cuenta, aplicarás la etiqueta RMA del almacén y la enviarás a Evolution Digital. Marca la casilla para ver los pasos completos de manejo.",
     "Use only when nothing fixed it — a genuine defect that needs Evolution & Clay's attention.":
       "Usar solo cuando nada lo arregló — un defecto genuino que necesita la atención de Evolution y Clay.",
     "This unit will be tracked as a defective RMA. Confirm you understand the handling:":

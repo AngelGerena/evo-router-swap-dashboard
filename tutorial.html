@@ -20,6 +20,9 @@
   .bar .logo img{height:26px;width:auto;display:block}
   .bar .count{font-weight:800;font-size:13px;color:#bcd3ee;letter-spacing:.04em}
   .bar .x{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:38px;height:38px;border-radius:10px;font-size:17px;cursor:pointer;flex:none}
+  .tlang{appearance:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#dce6f2;font:inherit;font-weight:800;font-size:12px;padding:8px 11px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .tlang-opt{opacity:.5}.tlang-opt.on{opacity:1;color:#fff}.tlang-sep{opacity:.4}
+  .tlang:hover{border-color:rgba(255,255,255,.5)}
   .stage{flex:1;display:flex;flex-direction:column;align-items:center;min-height:0;padding:4px 14px 0}
   .explain{width:100%;max-width:460px;flex:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
     border-radius:16px;padding:13px 16px;margin-bottom:10px;animation:in .25s ease}
@@ -58,7 +61,12 @@
   <div class="bar">
     <div class="logo"><img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband"></div>
     <div class="count" id="count">1 / 8</div>
-    <button class="x" id="close" type="button" aria-label="Close tutorial">✕</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="tlang" aria-label="Language">
+        <span class="tlang-opt" data-lang="en">EN</span><span class="tlang-sep">·</span><span class="tlang-opt" data-lang="es">ES</span>
+      </button>
+      <button class="x" id="close" type="button" aria-label="Close tutorial">✕</button>
+    </div>
   </div>
   <div class="stage">
     <div class="explain" id="explain" hidden></div>
@@ -77,38 +85,80 @@
 <script>
 const LOGO="https://images.weserv.nl/?url="+encodeURIComponent("https://www.dropbox.com/scl/fi/x4s94tmq5dsayd04yrkt9/30yrs-footer.png?rlkey=53ncalcl2fo0wcpkldm5gii42&raw=1")+"&output=png";
 const SLIDES=[
-  { type:"panel", html:`
+  { type:"panel",
+    html:{en:`
       <div class="logo-lg"><img src="${LOGO}" alt="Summit Broadband"></div>
       <div style="color:var(--cyan);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-bottom:6px">Summit Broadband · Field</div>
       <h2>EVO Swap Request — Walkthrough</h2>
       <p>A tour of the <b>actual screen</b> you'll use, section by section, with a filled-in example.</p>
-      <p style="color:#9fb3cc">Tap <b>Next ›</b>, swipe, or use arrow keys.</p>` },
-  { type:"live", step:0, sel:null, tag:"Home screen", kick:"The screen", title:"This is your EVO Swap screen",
-    text:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. The screen keeps the job locked until a manager decides.`,
-    dtext:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. Your progress and guides stay pinned on the <b>left</b>; the active step shows on the right.` },
-  { type:"live", step:0, sel:".resources", tag:"Step 1 · Basics & Guides", kick:"Step 1", title:"Run the basics first",
-    text:`Tap any <b>Guide</b> to open the SOP at the right page. When you've done the basics, tap <b>“I've reviewed the basics.”</b>`,
-    dtext:`Open any <b>Guide</b> from the left sidebar to read the SOP. When the basics are done, click <b>“I've reviewed the basics.”</b>` },
-  { type:"live", step:1, sel:".checks", tag:"Step 2 · Checklist", kick:"Step 2", title:"Tick all three boxes",
-    text:`Router relocated, Dual-SSID attempted, no parallel network. Each box has its own <b>Guide</b> if you need it.` },
-  { type:"live", step:1, sel:".readings", tag:"Step 2 · ONT readings", kick:"Step 2", title:"Enter your ONT readings",
-    text:`<b>NID/FCPA</b> and <b>ONT</b> — SOP <b>−14 to −19.5 dB</b>, ≤1 dB loss — plus the <b>Frontline Health Score</b>. <b>Continue</b> unlocks once they're in.` },
-  { type:"live", step:2, sel:"#reqForm", tag:"Step 3 · Submit", kick:"Step 3", title:"Submit the request",
-    text:`Customer, account/job #, the <b>EVO S/N or MAC</b> you're removing + its account, your <b>market</b>, your name. Tap <b>Request approval</b>.` },
-  { type:"live", step:3, sel:"#resultCard", tag:"After you submit", kick:"Confirmation", title:"Request sent — and it's gated",
-    text:`The job is <b>locked</b> until your manager decides — they're pinged instantly. Your screen then turns <span class="ok-t">GREEN</span> (approved) or <span class="no-t">RED</span> (denied) with their reason. No answer in 30 min auto-escalates.` },
-  { type:"panel", html:`
+      <p style="color:#9fb3cc">Tap <b>Next ›</b>, swipe, or use arrow keys.</p>`,
+    es:`
+      <div class="logo-lg"><img src="${LOGO}" alt="Summit Broadband"></div>
+      <div style="color:var(--cyan);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-bottom:6px">Summit Broadband · Campo</div>
+      <h2>Solicitud de Cambio EVO — Recorrido</h2>
+      <p>Un recorrido por la <b>pantalla real</b> que usarás, sección por sección, con un ejemplo lleno.</p>
+      <p style="color:#9fb3cc">Toca <b>Siguiente ›</b>, desliza o usa las flechas.</p>`} },
+  { type:"live", step:0, sel:null,
+    tag:{en:"Home screen",es:"Pantalla de inicio"}, kick:{en:"The screen",es:"La pantalla"}, title:{en:"This is your EVO Swap screen",es:"Esta es tu pantalla de Cambio EVO"},
+    text:{en:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. The screen keeps the job locked until a manager decides.`,
+          es:`Todo cambio necesita aprobación de <b>Anthony o Peterson</b> — <span class="hl">sin excepciones</span>. La pantalla mantiene el trabajo bloqueado hasta que un gerente decida.`},
+    dtext:{en:`Every swap needs approval from <b>Anthony or Peterson</b> — <span class="hl">no exceptions</span>. Your progress and guides stay pinned on the <b>left</b>; the active step shows on the right.`,
+           es:`Todo cambio necesita aprobación de <b>Anthony o Peterson</b> — <span class="hl">sin excepciones</span>. Tu progreso y las guías quedan fijos a la <b>izquierda</b>; el paso activo se muestra a la derecha.`} },
+  { type:"live", step:0, sel:".resources",
+    tag:{en:"Step 1 · Basics & Guides",es:"Paso 1 · Fundamentos y Guías"}, kick:{en:"Step 1",es:"Paso 1"}, title:{en:"Run the basics first",es:"Revisa los fundamentos primero"},
+    text:{en:`Tap any <b>Guide</b> to open the SOP at the right page. When you've done the basics, tap <b>“I've reviewed the basics.”</b>`,
+          es:`Toca cualquier <b>Guía</b> para abrir el SOP en la página correcta. Cuando hayas hecho los fundamentos, toca <b>“He revisado los fundamentos.”</b>`},
+    dtext:{en:`Open any <b>Guide</b> from the left sidebar to read the SOP. When the basics are done, click <b>“I've reviewed the basics.”</b>`,
+           es:`Abre cualquier <b>Guía</b> desde la barra izquierda para leer el SOP. Cuando los fundamentos estén listos, haz clic en <b>“He revisado los fundamentos.”</b>`} },
+  { type:"live", step:1, sel:".checks",
+    tag:{en:"Step 2 · Checklist",es:"Paso 2 · Lista de verificación"}, kick:{en:"Step 2",es:"Paso 2"}, title:{en:"Tick all three boxes",es:"Marca las tres casillas"},
+    text:{en:`Router relocated, Dual-SSID attempted, no parallel network. Each box has its own <b>Guide</b> if you need it.`,
+          es:`Router reubicado, SSID doble intentado, sin red paralela. Cada casilla tiene su propia <b>Guía</b> si la necesitas.`} },
+  { type:"live", step:1, sel:".readings",
+    tag:{en:"Step 2 · ONT readings",es:"Paso 2 · Lecturas del ONT"}, kick:{en:"Step 2",es:"Paso 2"}, title:{en:"Pick your ONT type & enter readings",es:"Elige tu tipo de ONT e ingresa lecturas"},
+    text:{en:`Pick <b>iPhotonix</b> (−13 to −21 dB, 1490 + 1550) or <b>Adtran</b> (−10 to −22 dB, 1577), plus the <b>Frontline Health Score</b>. At a <b>SWITCH/NEXGEN</b> property, pick that — no light readings, just the switch checkpoint. <b>Continue</b> unlocks once they're in.`,
+          es:`Elige <b>iPhotonix</b> (−13 a −21 dB, 1490 + 1550) o <b>Adtran</b> (−10 a −22 dB, 1577), más el <b>Puntaje de Salud de Frontline</b>. En una propiedad <b>SWITCH/NEXGEN</b>, elige esa — sin lecturas de luz, solo el punto de control del switch. <b>Continuar</b> se desbloquea cuando estén listas.`} },
+  { type:"live", step:2, sel:"#reqForm",
+    tag:{en:"Step 3 · Submit",es:"Paso 3 · Enviar"}, kick:{en:"Step 3",es:"Paso 3"}, title:{en:"Submit the request",es:"Envía la solicitud"},
+    text:{en:`Customer, account/job #, <b>property/MDU</b>, the <b>EVO S/N or MAC</b> you're removing + its account, your <b>market</b>, your name, and the <b>reason</b> for the swap. Tap <b>Request approval</b>.`,
+          es:`Cliente, # de cuenta/trabajo, <b>propiedad/MDU</b>, el <b>S/N o MAC del EVO</b> que remueves + su cuenta, tu <b>mercado</b>, tu nombre y la <b>razón</b> del cambio. Toca <b>Solicitar aprobación</b>.`} },
+  { type:"live", step:3, sel:"#resultCard",
+    tag:{en:"After you submit",es:"Después de enviar"}, kick:{en:"Confirmation",es:"Confirmación"}, title:{en:"Request sent — and it's gated",es:"Solicitud enviada — y está detenida"},
+    text:{en:`The job is <b>locked</b> until your manager decides — they're pinged instantly. Your screen then turns <span class="ok-t">GREEN</span> (approved) or <span class="no-t">RED</span> (denied) with their reason.`,
+          es:`El trabajo está <b>bloqueado</b> hasta que tu gerente decida — se le notifica al instante. Tu pantalla se pondrá <span class="ok-t">VERDE</span> (aprobado) o <span class="no-t">ROJA</span> (denegado) con su razón.`} },
+  { type:"panel",
+    html:{en:`
       <div class="ic">★</div>
       <h2>That's it</h2>
       <p>Basics → checklist → submit → wait for the <span class="ok-t">green</span>.</p>
       <p>Every removed EVO returns to <b>4558 in Orlando</b> with its account #.</p>
-      <p style="color:#9fb3cc">Reopen this anytime from <b>“How it works.”</b></p>` },
+      <p style="color:#9fb3cc">Reopen this anytime from <b>“How it works.”</b></p>`,
+    es:`
+      <div class="ic">★</div>
+      <h2>Eso es todo</h2>
+      <p>Fundamentos → lista → enviar → espera el <span class="ok-t">verde</span>.</p>
+      <p>Todo EVO removido regresa al <b>4558 en Orlando</b> con su # de cuenta.</p>
+      <p style="color:#9fb3cc">Reabre esto en cualquier momento desde <b>“Cómo funciona.”</b></p>`} },
 ];
 
 const explain=document.getElementById("explain"),device=document.getElementById("device"),panel=document.getElementById("panel"),
       frame=document.getElementById("siteFrame"),deviceTag=document.getElementById("deviceTag"),countEl=document.getElementById("count"),
       dotsEl=document.getElementById("dots"),back=document.getElementById("back"),next=document.getElementById("next");
 let i=0,frameReady=false;
+// language: read the choice the tech made on the main app (localStorage), default EN
+let LANG = "en";
+try { LANG = localStorage.getItem("evo_lang") === "es" ? "es" : "en"; } catch(e){}
+function L(field){ // pick en/es from a slide field that may be a {en,es} object or a plain string
+  if(field==null) return "";
+  return (typeof field==="object") ? (field[LANG]||field.en||"") : field;
+}
+function setLang(lang){
+  LANG = lang==="es" ? "es" : "en";
+  try{ localStorage.setItem("evo_lang", LANG); }catch(e){}
+  document.documentElement.lang = LANG;
+  document.querySelectorAll(".tlang-opt").forEach(o=>o.classList.toggle("on", o.dataset.lang===LANG));
+  render();
+}
 
 // device detection — keys off the SAME breakpoint the dashboard layout uses,
 // so the walkthrough always matches what the tech is actually looking at.
@@ -166,11 +216,12 @@ function render(){
   const s=SLIDES[i];
   countEl.textContent=`${i+1} / ${SLIDES.length}`;
   dotsEl.innerHTML=SLIDES.map((_,n)=>`<span class="dot ${n===i?"on":""}"></span>`).join("");
-  back.disabled=i===0; next.textContent=i===SLIDES.length-1?"Done ✓":"Next ›";
+  back.disabled=i===0; next.textContent=i===SLIDES.length-1?(LANG==="es"?"Listo ✓":"Done ✓"):(LANG==="es"?"Siguiente ›":"Next ›");
+  back.textContent = LANG==="es" ? "‹ Atrás" : "‹ Back";
   explain.hidden=true; device.hidden=true; panel.hidden=true;
-  if(s.type==="panel"){ panel.hidden=false; panel.innerHTML=s.html; }
-  else { const txt=(MQ.matches && s.dtext)?s.dtext:s.text; explain.hidden=false; explain.innerHTML=`<div class="kick">${s.kick}</div><h2>${s.title}</h2><p>${txt}</p>`;
-    device.hidden=false; deviceTag.textContent=s.tag||""; driveLive(s); }
+  if(s.type==="panel"){ panel.hidden=false; panel.innerHTML=L(s.html); }
+  else { const txt=(MQ.matches && s.dtext)?L(s.dtext):L(s.text); explain.hidden=false; explain.innerHTML=`<div class="kick">${L(s.kick)}</div><h2>${L(s.title)}</h2><p>${txt}</p>`;
+    device.hidden=false; deviceTag.textContent=L(s.tag)||""; driveLive(s); }
 }
 function go(d){ const n=i+d; if(n<0)return; if(n>=SLIDES.length){closeTut();return;} i=n; render(); }
 function closeTut(){ if(history.length>1) history.back(); else location.href="index.html"; }
@@ -180,6 +231,10 @@ document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight")go(1); else if(
 let tx=null;
 document.querySelector(".stage").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
 document.querySelector(".stage").addEventListener("touchend",e=>{ if(tx==null)return; const dx=e.changedTouches[0].clientX-tx; tx=null; if(dx<-45)go(1); else if(dx>45)go(-1); });
+// language toggle in the top bar
+document.querySelectorAll(".tlang-opt").forEach(o=>o.addEventListener("click",()=>setLang(o.dataset.lang)));
+document.documentElement.lang = LANG;
+document.querySelectorAll(".tlang-opt").forEach(o=>o.classList.toggle("on", o.dataset.lang===LANG));
 render();
 </script>
 </body>
