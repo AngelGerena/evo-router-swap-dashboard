@@ -71,6 +71,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .noc-tag{background:var(--bad);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;letter-spacing:.05em}
 .switch-laptop-show{margin-top:10px;font-size:13px;color:var(--ink);font-weight:600}
 .switch-badge{display:inline-block;font-size:10px;font-weight:800;background:var(--teal);color:#fff;padding:2px 6px;border-radius:5px;margin-left:5px;vertical-align:middle}
+.ont-db-th{white-space:nowrap}
+.db-info{position:relative;display:inline-block;margin-left:3px;color:#9fb3cc;cursor:help;font-size:12px}
+.db-info .db-tip{visibility:hidden;opacity:0;position:absolute;top:130%;left:50%;transform:translateX(-50%);background:var(--navy);color:#eaf2fb;font-weight:600;font-size:11.5px;line-height:1.5;padding:9px 11px;border-radius:9px;width:240px;box-shadow:0 12px 30px rgba(0,0,0,.3);z-index:40;transition:.15s;text-transform:none;letter-spacing:normal}
+.db-info .db-tip b{color:#fff}
+.db-info:hover .db-tip,.db-info:focus .db-tip{visibility:visible;opacity:1}
+.db-val{font-weight:800;padding:2px 8px;border-radius:6px}
+.db-ok{background:var(--good-bg);color:var(--good)}
+.db-bad{background:var(--bad-bg);color:var(--bad)}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .phead h2{margin:0;font-size:17px}
 .phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
@@ -148,7 +156,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div class="wrap">
       <table id="mainTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
-        <th>Account</th><th>Property/MDU</th><th>EVO S/N/MAC</th><th>Removed from</th><th>ONT dB</th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
+        <th>Account</th><th>Property/MDU</th><th>EVO S/N/MAC</th><th>Removed from</th><th class="ont-db-th">ONT dB <span class="db-info" tabindex="0">ⓘ<span class="db-tip">In-spec ranges — <b>iPhotonix:</b> −13 to −21 dB · <b>Adtran:</b> −10 to −22 dB. Values outside range show red.</span></span></th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -235,6 +243,17 @@ function getFilteredRows(){
   });
 }
 
+// ONT in-spec ranges by type (dB). Values are negative; "hi"/"lo" are bounds.
+const ONT_SPEC = { iphotonix: { hi: -13, lo: -21 }, adtran: { hi: -10, lo: -22 } };
+function dbCell(val, type) {
+  if (val == null || val === "") return "—";
+  const n = Number(val);
+  if (isNaN(n)) return esc(String(val));
+  const spec = ONT_SPEC[type];
+  if (!spec) return `<span>${n}</span>`;               // unknown type → no color
+  const inSpec = n <= spec.hi && n >= spec.lo;          // e.g. -13 ≥ n ≥ -21
+  return `<span class="db-val ${inSpec ? "db-ok" : "db-bad"}" title="${inSpec ? "In spec" : "Out of spec"} for ${type}">${n}</span>`;
+}
 const SWITCH_LAPTOP_LABELS = {
   internet: "Laptop GETS internet — router is the likely issue",
   no_internet: "Laptop gets NO internet",
@@ -285,7 +304,7 @@ function renderTable(){
       <td>${r.mdu_name?esc(r.mdu_name):'<span class="muted">—</span>'}${r.switch_property?'<span class="switch-badge">SWITCH</span>':""}</td>
       <td class="mono">${esc(r.evo_serial_mac)}</td>
       <td class="mono">${esc(r.removed_from_acct)}</td>
-      <td class="mono">${cl.ont_light_ont??"—"}</td>
+      <td class="mono">${dbCell(cl.ont_light_ont, cl.ont_type)}</td>
       <td>${opened?`<button class="res-link" onclick='event.stopPropagation();showResources(${JSON.stringify(cl.resources_opened||[]).replace(/'/g,"&#39;")}, "${esc(r.tech_name)}", ${cl.time_to_submit_secs??"null"})'>${opened} opened</button>`:'<span style="color:var(--bad);font-weight:800">none</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
       <td class="muted" style="min-width:200px;white-space:normal">${esc(r.decision_note||"—")}</td>
