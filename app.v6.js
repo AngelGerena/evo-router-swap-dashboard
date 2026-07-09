@@ -291,20 +291,21 @@ function evalGate() {
     .filter(Boolean);
   const allChecked = missingChecks.length === 0;
 
-  let readingsDone, readingsNeed = [];
+  // Switch/NEXGEN properties are NOT gated — the customer may have their own
+  // (non-EVO) equipment, so the router-optimization checklist and light
+  // readings don't apply. The switch checkpoint is guidance, not a lock.
   if (ontType === "switch") {
-    // Switch/NEXGEN: require the 3 field checks + a laptop test result.
-    const swChecks = ["#sw_power","#sw_cable","#sw_jack"].every((s)=>{ const el=$(s); return el && el.checked; });
-    const laptopPicked = swLaptop && swLaptop.value !== "";
-    readingsDone = swChecks && laptopPicked;
-    if (!swChecks) readingsNeed.push("confirm the switch field checks");
-    if (!laptopPicked) readingsNeed.push("select the laptop test result");
-  } else {
-    const fields = activeOntFields();
-    readingsDone = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
-    if (!ontType) readingsNeed.push("pick ONT type");
-    else if (!readingsDone) readingsNeed.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
+    toSubmit.disabled = false;
+    lockHint.textContent = "Switch/NEXGEN property — continue when ready.";
+    lockHint.classList.add("clear");
+    return;
   }
+
+  const fields = activeOntFields();
+  const readingsDone = ontType && fields.length > 0 && fields.every((el) => !isNaN(readLight(el)));
+  let readingsNeed = [];
+  if (!ontType) readingsNeed.push("pick ONT type");
+  else if (!readingsDone) readingsNeed.push(ontType === "iphotonix" ? "enter 1490 + 1550" : "enter 1577");
 
   const open = allChecked && readingsDone;
   toSubmit.disabled = !open;
