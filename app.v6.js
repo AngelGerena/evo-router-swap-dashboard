@@ -11,6 +11,11 @@ window.addEventListener("error", (e) => {
 
 const CFG = window.EVO_CONFIG;
 
+// EMBED mode: when the app runs inside the tutorial's preview frame
+// (index.html?embed=1), suppress interrupting modals like the attestation
+// prompt so the walkthrough shows the real screen cleanly.
+const EMBED = /[?&]embed=1\b/.test(location.search);
+
 // pdf.js is optional. If it didn't load (slow CDN, offline, blocked), the rest
 // of the app MUST still work. Never let this line crash the script.
 try {
@@ -330,7 +335,9 @@ const affirmModal = $("#affirmModal");
 
 checks.forEach((c) => c.addEventListener("change", (e) => {
   // Only intercept when checking ON, before they've affirmed this session.
-  if (c.checked && !hasAffirmed) {
+  // In EMBED (tutorial preview) mode, never show the modal — it would cover
+  // the walkthrough. Just let the box check.
+  if (c.checked && !hasAffirmed && !EMBED) {
     pendingCheck = c;
     c.checked = false;            // hold it until they affirm
     if (affirmModal) { affirmModal.hidden = false; document.body.style.overflow = "hidden"; }

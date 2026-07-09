@@ -60,7 +60,7 @@
 <div class="wrap">
   <div class="bar">
     <div class="logo"><img src="https://images.weserv.nl/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fx4s94tmq5dsayd04yrkt9%2F30yrs-footer.png%3Frlkey%3D53ncalcl2fo0wcpkldm5gii42%26raw%3D1&amp;output=png" alt="Summit Broadband"></div>
-    <div class="count" id="count">1 / 8</div>
+    <div class="count" id="count">1 / 9</div>
     <div style="display:flex;align-items:center;gap:8px">
       <button class="tlang" aria-label="Language">
         <span class="tlang-opt" data-lang="en">EN</span><span class="tlang-sep">·</span><span class="tlang-opt" data-lang="es">ES</span>
@@ -114,6 +114,17 @@ const SLIDES=[
     tag:{en:"Step 2 · Checklist",es:"Paso 2 · Lista de verificación"}, kick:{en:"Step 2",es:"Paso 2"}, title:{en:"Tick all three boxes",es:"Marca las tres casillas"},
     text:{en:`Router relocated, Dual-SSID attempted, no parallel network. Each box has its own <b>Guide</b> if you need it.`,
           es:`Router reubicado, SSID doble intentado, sin red paralela. Cada casilla tiene su propia <b>Guía</b> si la necesitas.`} },
+  { type:"panel",
+    html:{en:`
+      <div class="ic" style="background:#fbe9cf;color:#b5791f">!</div>
+      <h2>You're affirming the work</h2>
+      <p>The first time you tick a box, an <b>Attestation required</b> prompt appears. Checking these boxes formally affirms you actually did the steps — relocated the router, split the SSIDs, and confirmed no parallel networks.</p>
+      <p style="color:#ffd66b"><b>It's an official record.</b> If it's later found the steps weren't done, you may be held accountable. Tap <b>“I affirm”</b> to continue.</p>`,
+    es:`
+      <div class="ic" style="background:#fbe9cf;color:#b5791f">!</div>
+      <h2>Estás afirmando el trabajo</h2>
+      <p>La primera vez que marques una casilla, aparece un aviso de <b>Declaración requerida</b>. Marcar estas casillas afirma formalmente que sí hiciste los pasos — reubicaste el router, dividiste los SSID y confirmaste que no hay redes paralelas.</p>
+      <p style="color:#ffd66b"><b>Es un registro oficial.</b> Si más adelante se determina que los pasos no se hicieron, podrías ser responsabilizado. Toca <b>“Afirmo”</b> para continuar.</p>`} },
   { type:"live", step:1, sel:".readings",
     tag:{en:"Step 2 · ONT readings",es:"Paso 2 · Lecturas del ONT"}, kick:{en:"Step 2",es:"Paso 2"}, title:{en:"Pick your ONT type & enter readings",es:"Elige tu tipo de ONT e ingresa lecturas"},
     text:{en:`Pick <b>iPhotonix</b> (−13 to −21 dB, 1490 + 1550) or <b>Adtran</b> (−10 to −22 dB, 1577), plus the <b>Frontline Health Score</b>. At a <b>SWITCH/NEXGEN</b> property, pick that — no light readings, just the switch checkpoint. <b>Continue</b> unlocks once they're in.`,
@@ -175,9 +186,11 @@ function fillExample(){
   try{
     const doc=frame.contentDocument;
     setChk(doc,"c_relocate"); setChk(doc,"c_ssid"); setChk(doc,"c_parallel");
-    setVal(doc,"r_nid","-14"); setVal(doc,"r_ont","-15"); setVal(doc,"r_health","90");
+    // pick iPhotonix and fill its fields (r_ont no longer exists)
+    try{ const ip=doc.querySelector('.ont-pick[data-ont="iphotonix"]'); if(ip) ip.click(); }catch(e){}
+    setVal(doc,"r_nid","-16"); setVal(doc,"r_1490","-15"); setVal(doc,"r_1550","-17"); setVal(doc,"r_health","90");
     setVal(doc,"f_first","Angel"); setVal(doc,"f_last","Gerena"); setVal(doc,"f_acct","30049999");
-    setVal(doc,"f_serial","1834AFA99999"); setVal(doc,"f_removed","30049999");
+    setVal(doc,"f_mdu","The Vue"); setVal(doc,"f_serial","1834AFA99999"); setVal(doc,"f_removed","30049999");
     setVal(doc,"f_market","SWFL"); setVal(doc,"f_tech","John Doe");
     setVal(doc,"f_reason","Router won't power up, replaced power supply and moved to different outlet, no change.");
     // build a realistic "Request sent" result card for the confirmation step
