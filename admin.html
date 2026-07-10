@@ -102,6 +102,21 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .rt-hl-k{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .rt-hl b{font-size:22px;color:var(--navy)}
 .rt-hl-who{font-size:12px;color:var(--muted)}
+.manual-panel{border:2px solid var(--teal);}
+.manual-open{background:var(--navy)}
+.manual-collapsed{padding:6px 0}
+.manual-form{padding:6px 0}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:820px){.mf-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.mf-grid{grid-template-columns:1fr}}
+.mf-grid label,.mf-full{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
+.mf-grid input,.mf-grid select,.mf-full textarea{font:inherit;font-weight:600;color:var(--ink);padding:10px;border:1.5px solid var(--line);border-radius:9px;background:#fff}
+.mf-full{margin-bottom:12px}
+.mf-rma{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--bad);margin-bottom:14px}
+.mf-actions{display:flex;gap:10px;justify-content:flex-end}
+.manual-submit{background:linear-gradient(135deg,var(--good),#0f9d58);color:#fff}
+.mf-msg{margin:10px 0 0;font-size:13px;font-weight:600;min-height:18px}
+.mf-msg.ok{color:var(--good)} .mf-msg.err{color:var(--bad)}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .phead h2{margin:0;font-size:17px}
 .phead .sub{color:var(--muted);font-size:12.5px;font-weight:700}
@@ -155,6 +170,44 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
   </div>
 
   <div class="kpis" id="kpis"></div>
+
+  <div class="panel manual-panel" id="manualPanel" hidden>
+    <div class="phead">
+      <h2>Manual swap entry <span class="owner-lock">Owner only</span></h2>
+      <span class="sub">For techs with no cell service — enter the details they give you and record an approved swap</span>
+    </div>
+    <div class="manual-collapsed" id="manualCollapsed">
+      <button class="btn manual-open" id="manualOpenBtn" type="button">+ New manual swap</button>
+    </div>
+    <div class="manual-form" id="manualForm" hidden>
+      <div class="mf-grid">
+        <label>Customer first name<input id="m_first"></label>
+        <label>Customer last name<input id="m_last"></label>
+        <label>Account # / Job #<input id="m_acct"></label>
+        <label>Property / MDU name<input id="m_mdu" placeholder="or 'single-family'"></label>
+        <label>EVO S/N or MAC removed<input id="m_serial"></label>
+        <label>EVO S/N or MAC added (new)<input id="m_serial_new"></label>
+        <label>Account removed from<input id="m_removed"></label>
+        <label>Market
+          <select id="m_market"></select>
+        </label>
+        <label>Tech name<input id="m_tech"></label>
+        <label>ONT type
+          <select id="m_ont"><option value="">—</option><option value="iphotonix">iPhotonix</option><option value="adtran">Adtran</option><option value="switch">SWITCH/NEXGEN</option></select>
+        </label>
+        <label>ONT reading (dB)<input id="m_ont_db" placeholder="e.g. -17"></label>
+        <label>Frontline Health Score<input id="m_health" placeholder="e.g. 90"></label>
+      </div>
+      <label class="mf-full">Tech's reason for the swap<textarea id="m_reason" rows="2" placeholder="What the tech reported"></textarea></label>
+      <label class="mf-full">Your approval note<textarea id="m_note" rows="2" placeholder="Your note — recorded as the manager decision"></textarea></label>
+      <label class="mf-rma"><input type="checkbox" id="m_rma"> Flag this EVO as an RMA to Evolution Digital</label>
+      <div class="mf-actions">
+        <button class="btn ghost" id="manualCancelBtn" type="button">Cancel</button>
+        <button class="btn manual-submit" id="manualSubmitBtn" type="button">Record approved swap</button>
+      </div>
+      <p class="mf-msg" id="manualMsg"></p>
+    </div>
+  </div>
 
   <div class="panel rma-panel" id="rmaPanel">
     <div class="phead">
@@ -228,7 +281,7 @@ async function loadAll(){
     document.getElementById("dash").hidden = false;
     applyRole();
     fillMarketFilter();
-    renderKpis(); renderTable(); renderTechs(); renderRma(); renderResponseReport();
+    renderKpis(); renderTable(); renderTechs(); renderRma(); renderResponseReport(); setupManualEntry();
     startAutoRefresh();
   }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
 }
@@ -426,6 +479,80 @@ function renderRma(){
       <td class="mono">${r.rma_acknowledged?'<span style="color:var(--good);font-weight:800">Yes</span>':'<span style="color:var(--bad);font-weight:800">No</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
     </tr>`).join("");
+}
+
+let manualWired = false;
+function setupManualEntry(){
+  const panel = document.getElementById("manualPanel");
+  if (!panel) return;
+  // OWNER ONLY.
+  if (!DATA || DATA.role !== "owner") { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  // populate market dropdown from known markets in the data (+ standard list)
+  const sel = document.getElementById("m_market");
+  if (sel && !sel.options.length) {
+    const codes = [...new Set([...(DATA.rows||[]).map(r=>r.market_code), "SWFL","CFL","WEST","LAL","CAS","TAMPA","MARCO_FTTH","LEESBURG_FTTH"].filter(Boolean))];
+    sel.innerHTML = `<option value="">—</option>` + codes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  }
+
+  if (manualWired) return;   // wire buttons once
+  manualWired = true;
+  const form = document.getElementById("manualForm");
+  const collapsed = document.getElementById("manualCollapsed");
+  document.getElementById("manualOpenBtn").addEventListener("click", ()=>{ form.hidden=false; collapsed.hidden=true; });
+  document.getElementById("manualCancelBtn").addEventListener("click", ()=>{ form.hidden=true; collapsed.hidden=false; clearManual(); });
+  document.getElementById("manualSubmitBtn").addEventListener("click", submitManual);
+}
+function clearManual(){
+  ["m_first","m_last","m_acct","m_mdu","m_serial","m_serial_new","m_removed","m_tech","m_ont_db","m_health","m_reason","m_note"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
+  ["m_market","m_ont"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
+  const rma=document.getElementById("m_rma"); if(rma) rma.checked=false;
+}
+async function submitManual(){
+  const msg = document.getElementById("manualMsg");
+  const val = id => { const el=document.getElementById(id); return el?el.value.trim():""; };
+  // minimal required set
+  const req = [["m_first","Customer first name"],["m_last","Customer last name"],["m_acct","Account #"],["m_serial","EVO removed"],["m_tech","Tech name"],["m_note","Your approval note"]];
+  for (const [id,label] of req){ if(!val(id)){ msg.className="mf-msg err"; msg.textContent="Please fill in: "+label; document.getElementById(id).focus(); return; } }
+
+  const payload = {
+    customer_first: val("m_first"), customer_last: val("m_last"),
+    account_number: val("m_acct"), mdu_name: val("m_mdu")||null,
+    evo_serial_mac: val("m_serial"), evo_serial_mac_new: val("m_serial_new")||null,
+    removed_from_acct: val("m_removed"), market_code: val("m_market"),
+    tech_name: val("m_tech"), swap_reason: val("m_reason")||null,
+    decision_note: val("m_note"),
+    checklist: {
+      router_relocated:true, dual_ssid_attempted:true, no_parallel_networks:true,
+      ont_type: val("m_ont")||null,
+      ont_light_ont: val("m_ont_db")? Number(val("m_ont_db")) : null,
+      overall_health_score: val("m_health")? Number(val("m_health")) : null,
+    },
+    rma_flagged: !!document.getElementById("m_rma").checked,
+    rma_acknowledged: !!document.getElementById("m_rma").checked,
+    manual_entry: true,        // marks this as an owner manual entry
+    status: "approved",        // recorded as an approved swap
+  };
+
+  msg.className="mf-msg"; msg.textContent="Recording…";
+  try {
+    // Backend endpoint (Code session builds this): creates the request already-approved.
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/manual-swap`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "x-admin-token": TOKEN, "x-admin-user": USER||"" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("HTTP "+res.status);
+    msg.className="mf-msg ok"; msg.textContent="Recorded. Refreshing the queue…";
+    clearManual();
+    document.getElementById("manualForm").hidden=true;
+    document.getElementById("manualCollapsed").hidden=false;
+    loadAll();
+  } catch(e) {
+    msg.className="mf-msg err";
+    msg.textContent="Couldn't record — the manual-swap endpoint may not be deployed yet. ("+e.message+")";
+  }
 }
 
 function renderResponseReport(){
