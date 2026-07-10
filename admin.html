@@ -146,6 +146,11 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 .muted{color:var(--muted)}
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .filters input,.filters select{padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;background:#fff}
+/* owner-only hard-delete controls (bogus/test entry cleanup) */
+.del-th,.del-td{width:34px;text-align:center;padding:8px 6px}
+.del-check,#delAll{width:16px;height:16px;accent-color:var(--bad);cursor:pointer;vertical-align:middle}
+.btn.del-btn{background:var(--bad);color:#fff;margin-left:auto}
+.btn.del-btn:disabled{opacity:.45;cursor:not-allowed}
 .brandbar{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:12px 20px;margin-bottom:14px;display:flex;align-items:center}
 .brandbar[hidden]{display:none!important}
 .brandbar img{height:46px;width:auto;display:block}
@@ -257,10 +262,11 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
         <option value="approved">Approved</option><option value="denied">Denied</option><option value="escalated">Escalated</option>
       </select>
       <select id="fMarket" onchange="renderTable()"><option value="all">All markets</option></select>
+      <button class="btn del-btn" id="deleteBtn" onclick="deleteSelected()" hidden disabled title="Permanently remove the checked entries — owner only">Delete selected (0)</button>
     </div>
     <div class="wrap">
       <table id="mainTable"><thead><tr>
-        <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
+        <th class="del-th" id="delTh" hidden><input type="checkbox" id="delAll" title="Select all shown" onclick="toggleSelectAll(this)"></th><th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
         <th>Account</th><th>Property/MDU</th><th>EVO S/N/MAC</th><th>Removed from</th><th class="ont-db-th">ONT dB <span class="db-info" tabindex="0">ⓘ<span class="db-tip">In-spec ranges — <b>iPhotonix:</b> −13 to −21 dB · <b>Adtran:</b> −10 to −22 dB. Values outside range show red.</span></span></th><th>Resources</th><th>Decided by</th><th>Manager reason</th>
       </tr></thead><tbody></tbody></table>
     </div>
@@ -303,6 +309,9 @@ async function loadAll(){
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/admin-data`, { headers:{ "x-admin-token":TOKEN, "x-admin-user":USER } });
     if(res.status===401){ const j=await res.json().catch(()=>({})); document.getElementById("gateErr").textContent=j.error||"Invalid sign-in."; return; }
     DATA = await res.json();
+    // prune delete-selection to rows that still exist (rows may vanish between refreshes)
+    const liveIds = new Set((DATA.rows||[]).map(r=>r.id));
+    [...DEL_SELECTED].forEach(id => { if (!liveIds.has(id)) DEL_SELECTED.delete(id); });
     document.getElementById("gate").hidden = true;
     document.getElementById("dash").hidden = false;
     applyRole();
@@ -339,6 +348,11 @@ function applyRole(){
   if (expp) expp.style.display = "";
   const tag = document.getElementById("roleTag");
   if (tag) tag.textContent = isOwner ? "Owner" : ("Manager" + (DATA.viewer ? " \u00b7 " + DATA.viewer : ""));
+  // Hard-delete controls: OWNER ONLY. Managers/viewers never see the checkboxes or button.
+  const delTh = document.getElementById("delTh");
+  if (delTh) delTh.hidden = !isOwner;
+  const delBtn = document.getElementById("deleteBtn");
+  if (delBtn) delBtn.hidden = !isOwner;
 }
 
 function fillMarketFilter(){
@@ -430,12 +444,18 @@ function closeResources(){ document.getElementById("resModal").hidden = true; }
 function renderTable(){
   const rows = getFilteredRows();
   document.getElementById("rowCount").textContent = `${rows.length} of ${DATA.rows.length}`;
+  const isOwner = DATA.role === "owner";
+  const COLS = isOwner ? 14 : 13;   // +1 for the owner-only checkbox column
   const tb = document.querySelector("#mainTable tbody");
   tb.innerHTML = rows.length ? rows.map((r,ri)=>{
     const cl = r.checklist||{};
     const opened = (cl.resources_opened?.length)||0;
     const rid = r.id || ("row"+ri);
+    const delCell = isOwner
+      ? `<td class="del-td" onclick="event.stopPropagation()"><input type="checkbox" class="del-check" data-id="${r.id||""}" ${DEL_SELECTED.has(r.id)?"checked":""} ${r.id?"":"disabled"} onchange="toggleDelSel(this)" title="Select for deletion"></td>`
+      : "";
     return `<tr class="main-row" onclick="toggleDetail('det_${rid}')">
+      ${delCell}
       <td class="mono muted">${fmt(r.submitted_at)}</td>
       <td><span class="badge b-${r.status}">${r.status}</span></td>
       <td>${esc(r.tech_name)}</td>
@@ -450,7 +470,7 @@ function renderTable(){
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
       <td class="muted" style="min-width:200px;white-space:normal">${esc(r.decision_note||"—")}</td>
     </tr>
-    <tr class="detail-row" id="det_${rid}" hidden><td colspan="13">
+    <tr class="detail-row" id="det_${rid}" hidden><td colspan="${COLS}">
       <div class="detail-wrap">
         <div class="detail-col">
           <div class="detail-label">Tech's reason for the swap</div>
@@ -472,12 +492,78 @@ function renderTable(){
         ${r.switch_laptop_result?`<div class="switch-laptop-show">Direct laptop test: <b>${esc(SWITCH_LAPTOP_LABELS[r.switch_laptop_result]||r.switch_laptop_result)}</b></div>`:""}
       </div>`:""}
     </td></tr>`;
-  }).join("") : `<tr><td colspan="13" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+  }).join("") : `<tr><td colspan="${COLS}" class="muted" style="text-align:center;padding:26px">No requests match.</td></tr>`;
+  syncDelUI();
 }
 
 function toggleDetail(id){
   const row = document.getElementById(id);
   if (row) row.hidden = !row.hidden;
+}
+
+// ---- owner-only hard delete (bogus/test entry cleanup) ----
+// Selection survives filtering/re-renders; pruned to live rows after each reload.
+let DEL_SELECTED = new Set();
+
+function toggleDelSel(cb){
+  const id = cb.dataset.id;
+  if (!id) return;
+  if (cb.checked) DEL_SELECTED.add(id); else DEL_SELECTED.delete(id);
+  syncDelUI();
+}
+
+function toggleSelectAll(cb){
+  const ids = getFilteredRows().map(r=>r.id).filter(Boolean);
+  if (cb.checked) ids.forEach(id=>DEL_SELECTED.add(id));
+  else ids.forEach(id=>DEL_SELECTED.delete(id));
+  renderTable();   // re-render so every visible checkbox reflects the new state
+}
+
+function syncDelUI(){
+  const btn = document.getElementById("deleteBtn");
+  if (btn){
+    const n = DEL_SELECTED.size;
+    btn.textContent = `Delete selected (${n})`;
+    btn.disabled = n === 0;
+  }
+  const all = document.getElementById("delAll");
+  if (all){
+    const ids = getFilteredRows().map(r=>r.id).filter(Boolean);
+    const sel = ids.filter(id=>DEL_SELECTED.has(id)).length;
+    all.checked = ids.length > 0 && sel === ids.length;
+    all.indeterminate = sel > 0 && sel < ids.length;
+  }
+}
+
+async function deleteSelected(){
+  if (!DATA || DATA.role !== "owner") return;   // belt & suspenders — backend enforces too
+  const ids = [...DEL_SELECTED];
+  if (!ids.length) return;
+  if (ids.length > 50){ alert("Max 50 deletions at a time — please delete in batches."); return; }
+  const ok = confirm(
+    `Permanently delete ${ids.length} entr${ids.length===1?"y":"ies"}?\n\n` +
+    `This is a HARD delete — the request(s) and their event history are removed for good. This cannot be undone.`
+  );
+  if (!ok) return;
+  const btn = document.getElementById("deleteBtn");
+  const prev = btn.textContent;
+  btn.disabled = true; btn.textContent = "Deleting\u2026";
+  try{
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/delete-requests`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "x-admin-token": TOKEN, "x-admin-user": USER||"" },
+      body: JSON.stringify({ ids }),
+    });
+    const j = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(j.error || ("HTTP " + res.status));
+    DEL_SELECTED.clear();
+    btn.textContent = `Deleted ${j.deleted ?? ids.length} \u2713`;
+    setTimeout(()=>{ btn.textContent = prev; }, 1500);
+    loadAll();   // refresh the queue — deleted rows disappear
+  }catch(e){
+    alert("Couldn't delete: " + e.message);
+    btn.disabled = false; btn.textContent = prev;
+  }
 }
 
 function renderRma(){
