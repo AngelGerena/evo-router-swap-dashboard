@@ -115,6 +115,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .mf-rma{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--bad);margin-bottom:14px}
 .mf-actions{display:flex;gap:10px;justify-content:flex-end}
 .manual-submit{background:linear-gradient(135deg,var(--good),#0f9d58);color:#fff}
+.manual-submit.manual-deny{background:linear-gradient(135deg,var(--bad),#991b1b)}
+.mf-decision{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mf-decision-lbl{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.mf-decision-toggle{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.mf-dec{border:0;background:#fff;font:inherit;font-weight:800;font-size:13px;padding:9px 18px;cursor:pointer;color:var(--muted)}
+.mf-dec + .mf-dec{border-left:1.5px solid var(--line)}
+.mf-dec-appr.sel{background:var(--good);color:#fff}
+.mf-dec-deny.sel{background:var(--bad);color:#fff}
 .mf-msg{margin:10px 0 0;font-size:13px;font-weight:600;min-height:18px}
 .mf-msg.ok{color:var(--good)} .mf-msg.err{color:var(--bad)}
 .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
@@ -199,8 +207,17 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
         <label>Frontline Health Score<input id="m_health" placeholder="e.g. 90"></label>
       </div>
       <label class="mf-full">Tech's reason for the swap<textarea id="m_reason" rows="2" placeholder="What the tech reported"></textarea></label>
-      <label class="mf-full">Your approval note<textarea id="m_note" rows="2" placeholder="Your note — recorded as the manager decision"></textarea></label>
-      <label class="mf-rma"><input type="checkbox" id="m_rma"> Flag this EVO as an RMA to Evolution Digital</label>
+
+      <div class="mf-decision">
+        <span class="mf-decision-lbl">Decision</span>
+        <div class="mf-decision-toggle" role="group" aria-label="Decision">
+          <button type="button" class="mf-dec mf-dec-appr sel" data-dec="approved">Approve</button>
+          <button type="button" class="mf-dec mf-dec-deny" data-dec="denied">Deny</button>
+        </div>
+      </div>
+
+      <label class="mf-full"><span id="m_note_label">Your approval note</span><textarea id="m_note" rows="2" placeholder="Your note — recorded as the manager decision"></textarea></label>
+      <label class="mf-rma" id="m_rma_wrap"><input type="checkbox" id="m_rma"> Flag this EVO as an RMA to Evolution Digital</label>
       <div class="mf-actions">
         <button class="btn ghost" id="manualCancelBtn" type="button">Cancel</button>
         <button class="btn manual-submit" id="manualSubmitBtn" type="button">Record approved swap</button>
@@ -482,6 +499,7 @@ function renderRma(){
 }
 
 let manualWired = false;
+let manualDecision = "approved";   // "approved" or "denied"
 // Who may use manual entry: the owner, plus Peterson and Anthony specifically.
 // Warehouse managers (John, Erick) are intentionally excluded.
 const MANUAL_ALLOWED = ["peterson.germain@summitbb.com","anthony.raso@summitbb.com","peterson germain","anthony raso"];
@@ -512,19 +530,39 @@ function setupManualEntry(){
   document.getElementById("manualOpenBtn").addEventListener("click", ()=>{ form.hidden=false; collapsed.hidden=true; });
   document.getElementById("manualCancelBtn").addEventListener("click", ()=>{ form.hidden=true; collapsed.hidden=false; clearManual(); });
   document.getElementById("manualSubmitBtn").addEventListener("click", submitManual);
+  // approve/deny toggle
+  document.querySelectorAll(".mf-dec").forEach(b => b.addEventListener("click", () => {
+    manualDecision = b.dataset.dec;
+    document.querySelectorAll(".mf-dec").forEach(x => x.classList.toggle("sel", x === b));
+    const denying = manualDecision === "denied";
+    document.getElementById("m_note_label").textContent = denying ? "Your denial note" : "Your approval note";
+    const rmaWrap = document.getElementById("m_rma_wrap");
+    if (rmaWrap) rmaWrap.style.display = denying ? "none" : "";  // RMA is approval-only
+    const btn = document.getElementById("manualSubmitBtn");
+    btn.textContent = denying ? "Record denied swap" : "Record approved swap";
+    btn.classList.toggle("manual-deny", denying);
+  }));
 }
 function clearManual(){
   ["m_first","m_last","m_acct","m_mdu","m_serial","m_serial_new","m_removed","m_tech","m_ont_db","m_health","m_reason","m_note"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
   ["m_market","m_ont"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
   const rma=document.getElementById("m_rma"); if(rma) rma.checked=false;
+  // reset decision to Approve
+  manualDecision = "approved";
+  document.querySelectorAll(".mf-dec").forEach(x => x.classList.toggle("sel", x.dataset.dec === "approved"));
+  const nl=document.getElementById("m_note_label"); if(nl) nl.textContent="Your approval note";
+  const rw=document.getElementById("m_rma_wrap"); if(rw) rw.style.display="";
+  const btn=document.getElementById("manualSubmitBtn"); if(btn){ btn.textContent="Record approved swap"; btn.classList.remove("manual-deny"); }
 }
 async function submitManual(){
   const msg = document.getElementById("manualMsg");
   const val = id => { const el=document.getElementById(id); return el?el.value.trim():""; };
-  // minimal required set
-  const req = [["m_first","Customer first name"],["m_last","Customer last name"],["m_acct","Account #"],["m_serial","EVO removed"],["m_tech","Tech name"],["m_note","Your approval note"]];
+  const denying = manualDecision === "denied";
+  // minimal required set — note label depends on decision
+  const req = [["m_first","Customer first name"],["m_last","Customer last name"],["m_acct","Account #"],["m_serial","EVO removed"],["m_tech","Tech name"],["m_note", denying ? "Your denial note" : "Your approval note"]];
   for (const [id,label] of req){ if(!val(id)){ msg.className="mf-msg err"; msg.textContent="Please fill in: "+label; document.getElementById(id).focus(); return; } }
 
+  const rmaOn = !denying && !!document.getElementById("m_rma").checked;   // RMA only applies to approvals
   const payload = {
     customer_first: val("m_first"), customer_last: val("m_last"),
     account_number: val("m_acct"), mdu_name: val("m_mdu")||null,
@@ -538,23 +576,22 @@ async function submitManual(){
       ont_light_ont: val("m_ont_db")? Number(val("m_ont_db")) : null,
       overall_health_score: val("m_health")? Number(val("m_health")) : null,
     },
-    rma_flagged: !!document.getElementById("m_rma").checked,
-    rma_acknowledged: !!document.getElementById("m_rma").checked,
-    manual_entry: true,        // marks this as an owner manual entry
-    entered_by: String(DATA.viewer || USER || "").trim() || null,  // who is recording it
-    status: "approved",        // recorded as an approved swap
+    rma_flagged: rmaOn,
+    rma_acknowledged: rmaOn,
+    manual_entry: true,
+    entered_by: String(DATA.viewer || USER || "").trim() || null,
+    status: manualDecision,     // "approved" or "denied"
   };
 
   msg.className="mf-msg"; msg.textContent="Recording…";
   try {
-    // Backend endpoint (Code session builds this): creates the request already-approved.
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/manual-swap`, {
       method:"POST",
       headers:{ "Content-Type":"application/json", "x-admin-token": TOKEN, "x-admin-user": USER||"" },
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error("HTTP "+res.status);
-    msg.className="mf-msg ok"; msg.textContent="Recorded. Refreshing the queue…";
+    msg.className="mf-msg ok"; msg.textContent = (denying ? "Denial" : "Approval") + " recorded. Refreshing the queue…";
     clearManual();
     document.getElementById("manualForm").hidden=true;
     document.getElementById("manualCollapsed").hidden=false;
