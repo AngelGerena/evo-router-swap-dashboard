@@ -173,7 +173,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
 
   <div class="panel manual-panel" id="manualPanel" hidden>
     <div class="phead">
-      <h2>Manual swap entry <span class="owner-lock">Owner only</span></h2>
+      <h2>Manual swap entry <span class="owner-lock">Approvers only</span></h2>
       <span class="sub">For techs with no cell service — enter the details they give you and record an approved swap</span>
     </div>
     <div class="manual-collapsed" id="manualCollapsed">
@@ -482,11 +482,20 @@ function renderRma(){
 }
 
 let manualWired = false;
+// Who may use manual entry: the owner, plus Peterson and Anthony specifically.
+// Warehouse managers (John, Erick) are intentionally excluded.
+const MANUAL_ALLOWED = ["peterson.germain@summitbb.com","anthony.raso@summitbb.com","peterson germain","anthony raso"];
+function canManualEntry(){
+  if (!DATA) return false;
+  if (DATA.role === "owner") return true;
+  const who = String(DATA.viewer || USER || "").trim().toLowerCase();
+  return MANUAL_ALLOWED.some(a => who.includes(a));
+}
 function setupManualEntry(){
   const panel = document.getElementById("manualPanel");
   if (!panel) return;
-  // OWNER ONLY.
-  if (!DATA || DATA.role !== "owner") { panel.hidden = true; return; }
+  // Owner + Peterson/Anthony only.
+  if (!canManualEntry()) { panel.hidden = true; return; }
   panel.hidden = false;
 
   // populate market dropdown from known markets in the data (+ standard list)
@@ -532,6 +541,7 @@ async function submitManual(){
     rma_flagged: !!document.getElementById("m_rma").checked,
     rma_acknowledged: !!document.getElementById("m_rma").checked,
     manual_entry: true,        // marks this as an owner manual entry
+    entered_by: String(DATA.viewer || USER || "").trim() || null,  // who is recording it
     status: "approved",        // recorded as an approved swap
   };
 
