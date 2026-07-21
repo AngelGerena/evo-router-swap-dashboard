@@ -890,7 +890,7 @@ document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key===
 </div>
 
 <!-- ===== Access & Confidentiality Attestation (leads + GCC) ===== -->
-<div id="attestOverlay" hidden style="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto">
+<div id="attestOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;padding:20px;overflow:auto">
   <div role="dialog" aria-modal="true" aria-labelledby="attestTitle" style="background:#fff;max-width:560px;width:100%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:26px 26px 22px;font-family:system-ui,Arial,sans-serif">
     <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#64748b;text-transform:uppercase">Summit Broadband</div>
     <h2 id="attestTitle" style="margin:6px 0 4px;font-size:20px;color:#0f172a">Access &amp; Confidentiality Acknowledgment</h2>
@@ -924,9 +924,9 @@ document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key===
     try { document.getElementById("gate").hidden = true; } catch(e){}
     try { document.getElementById("dash").hidden = true; } catch(e){}
     cb.checked = false; ok.disabled = true; ok.style.opacity = ".5"; err.textContent = "";
-    ov.hidden = false;
+    ov.style.display = "flex";
   };
-  function hide(){ ov.hidden = true; }
+  function hide(){ ov.style.display = "none"; }
   cb.addEventListener("change", function(){
     ok.disabled = !cb.checked;
     ok.style.opacity = cb.checked ? "1" : ".5";
