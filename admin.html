@@ -309,6 +309,9 @@ async function loadAll(){
     const res = await fetch(`${CFG.FUNCTIONS_BASE}/admin-data`, { headers:{ "x-admin-token":TOKEN, "x-admin-user":USER } });
     if(res.status===401){ const j=await res.json().catch(()=>({})); document.getElementById("gateErr").textContent=j.error||"Invalid sign-in."; return; }
     DATA = await res.json();
+    // Access/confidentiality attestation gate: flagged users (leads + GCC) must
+    // accept before the portal is shown. Server also enforces this.
+    if (DATA.must_attest) { showAttestation(); return; }
     // prune delete-selection to rows that still exist (rows may vanish between refreshes)
     const liveIds = new Set((DATA.rows||[]).map(r=>r.id));
     [...DEL_SELECTED].forEach(id => { if (!liveIds.has(id)) DEL_SELECTED.delete(id); });
@@ -886,5 +889,81 @@ document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key===
   </div>
 </div>
 
+<!-- ===== Access & Confidentiality Attestation (leads + GCC) ===== -->
+<div id="attestOverlay" hidden style="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto">
+  <div role="dialog" aria-modal="true" aria-labelledby="attestTitle" style="background:#fff;max-width:560px;width:100%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:26px 26px 22px;font-family:system-ui,Arial,sans-serif">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#64748b;text-transform:uppercase">Summit Broadband</div>
+    <h2 id="attestTitle" style="margin:6px 0 4px;font-size:20px;color:#0f172a">Access &amp; Confidentiality Acknowledgment</h2>
+    <p style="margin:0 0 14px;color:#475569;font-size:14px">Access to this portal has been granted to you individually. Before continuing, please review and accept the following:</p>
+    <ul style="margin:0 0 16px;padding-left:20px;color:#334155;font-size:14px;line-height:1.5">
+      <li>My login and password are assigned to me personally and are for my sole use.</li>
+      <li>I will not share, disclose, or provide my password or access to anyone else, for any reason.</li>
+      <li>All activity performed under my login is attributed to me, and I am responsible for it.</li>
+      <li>I understand that sharing my credentials, or allowing anyone else to use my access, violates company policy and will result in disciplinary action and the immediate revocation of my access.</li>
+    </ul>
+    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;color:#0f172a;font-size:14px;font-weight:600">
+      <input type="checkbox" id="attestAgree" style="margin-top:2px;width:18px;height:18px;flex:0 0 auto" />
+      <span>I have read and agree to the above.</span>
+    </label>
+    <p id="attestErr" style="color:#b42318;font-size:13px;min-height:18px;margin:10px 0 0"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+      <button type="button" id="attestDecline" style="background:#e2e8f0;color:#0f172a;border:0;padding:11px 18px;border-radius:9px;font-weight:700;cursor:pointer">Decline</button>
+      <button type="button" id="attestSubmit" disabled style="background:#1a7f37;color:#fff;border:0;padding:11px 18px;border-radius:9px;font-weight:700;cursor:pointer;opacity:.5">I Agree and Continue</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const ov = document.getElementById("attestOverlay");
+  const cb = document.getElementById("attestAgree");
+  const ok = document.getElementById("attestSubmit");
+  const err = document.getElementById("attestErr");
+  // Show the blocking modal instead of the dashboard. Called from loadAll() when
+  // the server reports must_attest.
+  window.showAttestation = function(){
+    try { document.getElementById("gate").hidden = true; } catch(e){}
+    try { document.getElementById("dash").hidden = true; } catch(e){}
+    cb.checked = false; ok.disabled = true; ok.style.opacity = ".5"; err.textContent = "";
+    ov.hidden = false;
+  };
+  function hide(){ ov.hidden = true; }
+  cb.addEventListener("change", function(){
+    ok.disabled = !cb.checked;
+    ok.style.opacity = cb.checked ? "1" : ".5";
+  });
+  document.getElementById("attestDecline").addEventListener("click", function(){
+    // Decline = no access. Return to sign-in and clear the session.
+    hide();
+    try { TOKEN = ""; } catch(e){}
+    const t = document.getElementById("adminToken"); if (t) t.value = "";
+    document.getElementById("gate").hidden = false;
+    document.getElementById("dash").hidden = true;
+    const ge = document.getElementById("gateErr");
+    if (ge) ge.textContent = "You must accept the acknowledgment to use this portal.";
+  });
+  ok.addEventListener("click", async function(){
+    if (!cb.checked) return;
+    ok.disabled = true; ok.style.opacity = ".5"; err.textContent = "Recording…";
+    try {
+      const res = await fetch(`${CFG.FUNCTIONS_BASE}/attest`, {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "x-admin-token": TOKEN, "x-admin-user": USER||"" },
+        body: JSON.stringify({ version: (DATA && DATA.attest_version) || "" })
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(()=>({}));
+        err.textContent = j.error || "Couldn't record your acceptance. Please try again.";
+        ok.disabled = false; ok.style.opacity = "1";
+        return;
+      }
+      hide();
+      loadAll(); // re-enter: server now reports must_attest=false and returns the dashboard
+    } catch(e) {
+      err.textContent = "Network error. Please try again.";
+      ok.disabled = false; ok.style.opacity = "1";
+    }
+  });
+})();
+</script>
 </body>
 </html>
