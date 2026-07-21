@@ -915,6 +915,11 @@ document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key===
 <script>
 (function(){
   const ov = document.getElementById("attestOverlay");
+  // The overlay markup parses INSIDE #dash (the dashboard container). showAttestation()
+  // hides #dash to clear the dashboard — which would also hide the modal nested inside it,
+  // giving a blank screen. Hoist the overlay to be a direct child of <body> so its
+  // visibility is independent of the dashboard.
+  if (ov && ov.parentElement !== document.body) document.body.appendChild(ov);
   const cb = document.getElementById("attestAgree");
   const ok = document.getElementById("attestSubmit");
   const err = document.getElementById("attestErr");
