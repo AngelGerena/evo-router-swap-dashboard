@@ -222,6 +222,15 @@
               </ul>
               <p class="rma-ack-psu" data-i18n-text="Before flagging: confirm the router has its correct 3-amp power supply, not a 2-amp. An undersized 2-amp supply starves the unit and mimics a hardware failure — this single check clears more defective routers than anything else."><b>Before flagging:</b> confirm the router has its correct <b>3-amp power supply</b>, not a 2-amp. An undersized 2-amp supply starves the unit and mimics a hardware failure — this single check clears more “defective” routers than anything else.</p>
               <p class="rma-ack-lead" data-i18n-text="This unit will be tracked as a defective RMA. Confirm you understand the handling:">This unit will be tracked as a defective RMA. Confirm you understand the handling:</p>
+              <div class="rma-symptoms">
+                <p class="rma-symptom-lead" data-i18n-text="What's wrong with this unit? (check all that apply)">What's wrong with this unit? (check all that apply)</p>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="Unit does not turn on"><span data-i18n-text="Unit does not turn on">Unit does not turn on</span></label>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="WAN port failure"><span data-i18n-text="WAN port failure">WAN port failure</span></label>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="Ethernet port failure"><span data-i18n-text="Ethernet port failure">Ethernet port failure</span></label>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="No internet connection"><span data-i18n-text="No internet connection">No internet connection</span></label>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" id="f_sym_other" value="Other"><span data-i18n-text="Other">Other</span></label>
+                <input type="text" id="f_sym_other_text" class="rma-symptom-other" placeholder="Describe the issue" data-i18n-ph="Describe the issue" hidden>
+              </div>
               <ul class="rma-ack-list">
                 <li data-i18n-text="Box the EVO that is going back.">Box the EVO that is going back.</li>
                 <li>Write the customer's <b>account #</b> on the box.</li>

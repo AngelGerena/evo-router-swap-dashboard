@@ -114,6 +114,13 @@
     "Powers on but will not connect to the internet.": "Enciende pero no se conecta al internet.",
     "Broadcasts only 2.4 GHz and not 5 GHz.": "Solo transmite 2.4 GHz y no 5 GHz.",
     "Broadcasts only 5 GHz and not 2.4 GHz.": "Solo transmite 5 GHz y no 2.4 GHz.",
+    "What's wrong with this unit? (check all that apply)": "¿Qué le pasa a esta unidad? (marca todas las que apliquen)",
+    "Unit does not turn on": "La unidad no enciende",
+    "WAN port failure": "Falla del puerto WAN",
+    "Ethernet port failure": "Falla del puerto Ethernet",
+    "No internet connection": "Sin conexión a internet",
+    "Other": "Otro",
+    "Describe the issue": "Describe el problema",
     "This unit will be tracked as a defective RMA. Confirm you understand the handling:":
       "Esta unidad se rastreará como RMA defectuoso. Confirma que entiendes el manejo:",
     "Box the EVO that is going back.": "Empaca el EVO que va de regreso.",

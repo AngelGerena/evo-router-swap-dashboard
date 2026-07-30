@@ -385,6 +385,18 @@ if (fRma) fRma.addEventListener("change", () => {
   if (rmaAckBox) rmaAckBox.hidden = !on;
   if (fSerial) fSerial.classList.toggle("rma-serial", on);
   if (!on && fRmaAck) fRmaAck.checked = false; // reset ack if un-flagged
+  if (!on) {
+    // un-flagging clears symptom selections
+    document.querySelectorAll(".rma-sym").forEach(cb => cb.checked = false);
+    const ot = $("#f_sym_other_text"); if (ot) { ot.value = ""; ot.hidden = true; }
+  }
+});
+// "Other" symptom reveals a text box
+const fSymOther = $("#f_sym_other");
+const fSymOtherText = $("#f_sym_other_text");
+if (fSymOther && fSymOtherText) fSymOther.addEventListener("change", () => {
+  fSymOtherText.hidden = !fSymOther.checked;
+  if (fSymOther.checked) fSymOtherText.focus(); else fSymOtherText.value = "";
 });
 
 $("#reqForm").addEventListener("submit", async (e) => {
@@ -443,6 +455,17 @@ $("#reqForm").addEventListener("submit", async (e) => {
     swap_reason: $("#f_reason").value.trim() || null,
     rma_flagged: !!(fRma && fRma.checked),
     rma_acknowledged: !!(fRmaAck && fRmaAck.checked),
+    rma_symptoms: (fRma && fRma.checked) ? (function(){
+      const out = [];
+      document.querySelectorAll(".rma-sym").forEach(cb => {
+        if (!cb.checked) return;
+        if (cb.value === "Other") {
+          const t = ($("#f_sym_other_text") && $("#f_sym_other_text").value.trim()) || "";
+          out.push(t ? "Other: " + t : "Other");
+        } else out.push(cb.value);
+      });
+      return out;
+    })() : [],
     checklist: {
       router_relocated: $("#c_relocate").checked,
       dual_ssid_attempted: $("#c_ssid").checked,

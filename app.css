@@ -63,6 +63,11 @@ body{display:flex;justify-content:center}
 .rma-ack-lead{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--bad)}
 .rma-ack-examples{margin:0 0 12px;padding-left:18px}
 .rma-ack-examples li{font-size:13px;line-height:1.65;color:var(--ink)}
+.rma-symptoms{margin:0 0 14px;padding:12px 14px;background:#fff;border:1.5px solid var(--bad,#b91c1c);border-radius:10px}
+.rma-symptom-lead{margin:0 0 9px;font-size:13px;font-weight:800;color:var(--bad,#b91c1c)}
+.rma-symptom{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.rma-symptom input{width:18px;height:18px;flex:none;accent-color:var(--bad,#b91c1c);cursor:pointer}
+.rma-symptom-other{width:100%;margin-top:8px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font:inherit}
 .rma-ack-psu{margin:0 0 14px;padding:11px 13px;background:#fff8e6;border:1px solid #f0d48a;border-radius:10px;font-size:12.5px;line-height:1.55;color:#7a5a10}
 .rma-ack-psu b{color:#5f4600}
 .rma-ack-list{margin:0 0 12px;padding-left:18px}

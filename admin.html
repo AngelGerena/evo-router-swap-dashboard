@@ -38,6 +38,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .rma-row{background:var(--bad-bg)}
 .rma-row td{border-bottom-color:#f3c9c9}
 .rma-serial-cell{color:var(--bad);font-weight:800}
+.sym-tag{display:inline-block;background:var(--bad-bg,#fde8e8);color:var(--bad,#b91c1c);font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;margin:1px 0;white-space:nowrap}
 .res-link{border:0;background:transparent;color:var(--teal);font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0}
 .res-link:hover{filter:brightness(1.2)}
 .res-modal{position:fixed;inset:0;background:rgba(11,37,69,.55);backdrop-filter:blur(3px);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -248,7 +249,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
     <div class="wrap">
       <table id="rmaTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
-        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Acknowledged</th><th>Decided by</th>
+        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Symptoms</th><th>Acknowledged</th><th>Decided by</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -578,7 +579,7 @@ function renderRma(){
       ? `${rmaRows.length} flagged defective unit${rmaRows.length===1?"":"s"} — ship back to Evolution Digital`
       : "No units currently flagged for RMA.";
   if (!rmaRows.length){
-    tb.innerHTML = `<tr><td colspan="10" class="muted" style="text-align:center;padding:22px">No RMA-flagged units.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="11" class="muted" style="text-align:center;padding:22px">No RMA-flagged units.</td></tr>`;
     return;
   }
   tb.innerHTML = rmaRows.map(r=>`
@@ -591,6 +592,7 @@ function renderRma(){
       <td class="mono">${esc(r.account_number)}</td>
       <td class="mono rma-serial-cell">${esc(r.evo_serial_mac)}</td>
       <td class="mono">${esc(r.removed_from_acct)}</td>
+      <td>${Array.isArray(r.rma_symptoms)&&r.rma_symptoms.length?r.rma_symptoms.map(s=>`<span class="sym-tag">${esc(s)}</span>`).join(" "):'<span class="muted">—</span>'}</td>
       <td class="mono">${r.rma_acknowledged?'<span style="color:var(--good);font-weight:800">Yes</span>':'<span style="color:var(--bad);font-weight:800">No</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
     </tr>`).join("");
@@ -861,8 +863,8 @@ function exportXlsx(){
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([retHeaders,...retRows]), "Return to 4558 Orlando");
 
   // RMA to Evolution Digital — flagged defective units
-  const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Submitted","Status","Acknowledged"];
-  const rmaRowsX=DATA.rows.filter(r=>r.rma_flagged).map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
+  const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Symptoms","Submitted","Status","Acknowledged"];
+  const rmaRowsX=DATA.rows.filter(r=>r.rma_flagged).map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,(Array.isArray(r.rma_symptoms)?r.rma_symptoms.join("; "):""),fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "RMA to Evolution Digital");
 
   const stf = document.getElementById("fStatus").value;
