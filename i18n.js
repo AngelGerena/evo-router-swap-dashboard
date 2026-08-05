@@ -121,6 +121,8 @@
     "No internet connection": "Sin conexión a internet",
     "Other": "Otro",
     "Describe the issue": "Describe el problema",
+    "Ensure to quarantine the EVO and do not reuse.": "Asegúrate de poner el EVO en cuarentena y no reutilizarlo.",
+    "Make sure to hand to your supervisor/manager or directly drop off at warehouse.": "Asegúrate de entregarlo a tu supervisor/gerente o déjalo directamente en el almacén.",
     "This unit will be tracked as a defective RMA. Confirm you understand the handling:":
       "Esta unidad se rastreará como RMA defectuoso. Confirma que entiendes el manejo:",
     "Box the EVO that is going back.": "Empaca el EVO que va de regreso.",
