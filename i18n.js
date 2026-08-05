@@ -121,6 +121,7 @@
     "No internet connection": "Sin conexión a internet",
     "Other": "Otro",
     "Describe the issue": "Describe el problema",
+    "I understand and will follow the RMA handling steps above. I confirm this flag is reserved solely for EVO routers with a genuine hardware defect that must be returned to Evolution Digital, and is not to be selected for routine swaps.": "Entiendo y seguiré los pasos de manejo de RMA anteriores. Confirmo que esta marca es exclusivamente para routers EVO con un defecto de hardware genuino que deben devolverse a Evolution Digital, y no debe seleccionarse para cambios de rutina.",
     "Ensure to quarantine the EVO and do not reuse.": "Asegúrate de poner el EVO en cuarentena y no reutilizarlo.",
     "Make sure to hand to your supervisor/manager or directly drop off at warehouse.": "Asegúrate de entregarlo a tu supervisor/gerente o déjalo directamente en el almacén.",
     "This unit will be tracked as a defective RMA. Confirm you understand the handling:":
