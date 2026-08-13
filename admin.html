@@ -35,6 +35,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .panel{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
 .rma-panel{border:2px solid var(--bad);background:linear-gradient(180deg,var(--bad-bg),var(--card) 60px)}
 .rma-panel .phead h2{color:var(--bad)}
+.rma-phead{cursor:pointer;user-select:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rma-phead:hover .rma-collapse-hint{opacity:1}
+.rma-chevron{display:inline-block;font-size:14px;transition:transform .15s;vertical-align:middle}
+.rma-collapse-hint{font-size:11px;font-weight:700;color:var(--bad);opacity:.6;white-space:nowrap;align-self:center;text-transform:uppercase;letter-spacing:.04em}
 .rma-row{background:var(--bad-bg)}
 .rma-row td{border-bottom-color:#f3c9c9}
 .rma-serial-cell{color:var(--bad);font-weight:800}
@@ -242,11 +246,14 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
   </div>
 
   <div class="panel rma-panel" id="rmaPanel">
-    <div class="phead">
-      <h2>⚠ RMA to Evolution Digital</h2>
-      <span class="sub" id="rmaCount">Flagged defective units — shipped back to Evolution</span>
+    <div class="phead rma-phead" id="rmaToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="rmaBody">
+      <div>
+        <h2>⚠ RMA to Evolution Digital <span class="rma-chevron" id="rmaChevron">▾</span></h2>
+        <span class="sub" id="rmaCount">Flagged defective units — shipped back to Evolution</span>
+      </div>
+      <span class="rma-collapse-hint" id="rmaHint">click to collapse</span>
     </div>
-    <div class="wrap">
+    <div class="wrap" id="rmaBody">
       <table id="rmaTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
         <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Symptoms</th><th>Acknowledged</th><th>Decided by</th>
@@ -320,7 +327,7 @@ async function loadAll(){
     document.getElementById("dash").hidden = false;
     applyRole();
     fillMarketFilter();
-    renderKpis(); renderTable(); renderTechs(); renderRma(); renderResponseReport(); setupManualEntry();
+    renderKpis(); renderTable(); renderTechs(); renderRma(); renderResponseReport(); setupManualEntry(); setupRmaToggle();
     startAutoRefresh();
   }catch(e){ document.getElementById("gateErr").textContent="Couldn't load. Check the function is deployed."; }
 }
@@ -568,6 +575,25 @@ async function deleteSelected(){
     alert("Couldn't delete: " + e.message);
     btn.disabled = false; btn.textContent = prev;
   }
+}
+
+let rmaWired = false;
+function setupRmaToggle(){
+  if (rmaWired) return;
+  rmaWired = true;
+  const head = document.getElementById("rmaToggle");
+  const body = document.getElementById("rmaBody");
+  const chev = document.getElementById("rmaChevron");
+  const hint = document.getElementById("rmaHint");
+  if (!head || !body) return;
+  const toggle = () => {
+    const collapsed = body.hidden = !body.hidden;
+    head.setAttribute("aria-expanded", String(!collapsed));
+    if (chev) chev.textContent = collapsed ? "▸" : "▾";
+    if (hint) hint.textContent = collapsed ? "click to expand" : "click to collapse";
+  };
+  head.addEventListener("click", toggle);
+  head.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
 }
 
 function renderRma(){
