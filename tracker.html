@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVO Tracker — Summit Broadband</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#123c69;--teal:#0f766e;--ink:#16202e;--muted:#5b6b80;
+  --line:#e2e8f1;--bg:#eef2f7;--card:#fff;--good:#166534;--good-bg:#e6f4ea;
+  --bad:#b91c1c;--bad-bg:#fdeaea;--warn:#b45309;--warn-bg:#fdf2dd;--shadow:0 10px 30px rgba(15,40,75,.08)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif}
+.wrapper{max-width:1200px;margin:0 auto;padding:20px}
+.hero{background:linear-gradient(135deg,var(--navy),var(--navy2) 60%,var(--teal));color:#fff;border-radius:18px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.hero .kick{color:#bfe3e0;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+.hero h1{margin:4px 0 0;font-size:26px}
+.hero .acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:0;font:inherit;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn.primary{background:var(--teal);color:#fff}
+.btn.light{background:#fff;color:var(--navy)}
+.btn:hover{filter:brightness(1.08)}
+.gate{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:40px;max-width:420px;margin:60px auto;text-align:center}
+.gate input{width:100%;margin:12px 0;padding:13px;border:1.5px solid var(--line);border-radius:12px;font:inherit}
+.gate .btn{width:100%;background:var(--navy);color:#fff;justify-content:center}
+.gate .err{color:var(--bad);font-weight:700;font-size:13px;min-height:18px}
+.panel{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.phead h2{margin:0;font-size:18px}
+.phead .sub{color:var(--muted);font-size:13px}
+/* explainer */
+.explainer{background:linear-gradient(180deg,#f0f7ff,var(--card) 80px);border:1px solid var(--line)}
+.explainer h2{color:var(--navy)}
+.explainer ol{margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.7}
+.explainer .chain{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.chain-step{background:var(--bg);border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:700;color:var(--navy)}
+.chain-arrow{align-self:center;color:var(--muted);font-weight:800}
+/* form */
+.mf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:820px){.mf-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.mf-grid{grid-template-columns:1fr}}
+label.fld,.full{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.fld input,.fld select,.full textarea,.full input{font:inherit;font-weight:600;color:var(--ink);padding:10px;border:1.5px solid var(--line);border-radius:9px;background:#fff;text-transform:none;letter-spacing:normal}
+.full{margin-bottom:14px}
+.section-lead{font-size:13px;font-weight:800;color:var(--navy);margin:6px 0 10px;padding-top:14px;border-top:1px dashed var(--line);text-transform:uppercase;letter-spacing:.04em}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:560px){.checks{grid-template-columns:1fr}}
+.chk{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;cursor:pointer;padding:4px 0}
+.chk input{width:17px;height:17px;flex:none;accent-color:var(--teal);cursor:pointer}
+.vet-box{background:var(--warn-bg);border:1px solid #f0d48a;border-radius:10px;padding:14px;margin-bottom:14px}
+.vet-box .vlabel{font-size:14px;font-weight:800;color:#7a5a10;margin-bottom:8px}
+.wh-box{background:#eef6ff;border:1px solid #cfe0f5;border-radius:10px;padding:14px;margin-bottom:14px}
+.wh-box .vlabel{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.mf-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.mf-msg{margin:10px 0 0;font-size:13px;font-weight:700;min-height:18px}
+.mf-msg.ok{color:var(--good)} .mf-msg.err{color:var(--bad)}
+.collapsed-bar{display:flex;justify-content:space-between;align-items:center}
+/* table */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.filters input,.filters select{font:inherit;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px}
+.wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:820px}
+th{background:var(--navy);color:#eaf2fb;text-align:left;padding:10px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;position:sticky;top:0}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:hover td{background:#f8fafc;cursor:pointer}
+.tag{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap;margin:1px}
+.tag.rma{background:var(--bad-bg);color:var(--bad)}
+.tag.kept{background:var(--good-bg);color:var(--good)}
+.tag.scrap{background:#eee;color:#555}
+.tag.pending{background:var(--warn-bg);color:var(--warn)}
+.tag.vet-y{background:var(--good-bg);color:var(--good)}
+.tag.vet-n{background:var(--bad-bg);color:var(--bad)}
+.status-pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--bg);color:var(--navy)}
+.muted{color:var(--muted)}
+.count-note{color:var(--muted);font-size:13px;font-weight:700}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- SIGN-IN GATE -->
+  <div class="gate" id="gate">
+    <div class="kick" style="color:var(--teal);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:11px">Summit Broadband · Field Operations</div>
+    <h2 style="margin:6px 0 2px">EVO Tracker</h2>
+    <p class="muted" style="font-size:14px;margin:0 0 6px">Managers &amp; warehouse: sign in with your Summit email + password. Owner: leave email blank + owner password.</p>
+    <input type="text" id="gUser" placeholder="Summit email (managers/warehouse)" autocomplete="username">
+    <input type="password" id="gToken" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="gBtn">Open EVO Tracker</button>
+    <p class="err" id="gErr"></p>
+    <p style="margin-top:10px"><a href="admin.html" style="color:var(--muted);font-size:13px">← Back to Swap Control</a></p>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main" class="hidden">
+    <div class="hero">
+      <div>
+        <div class="kick">Summit Broadband · Field Operations</div>
+        <h1>EVO Tracker</h1>
+      </div>
+      <div class="acts">
+        <span id="whoTag" style="align-self:center;font-weight:800;font-size:12px;opacity:.9"></span>
+        <button class="btn ghost" id="refreshBtn">Refresh</button>
+        <a class="btn light" href="admin.html">← Swap Control</a>
+      </div>
+    </div>
+
+    <!-- EXPLAINER -->
+    <div class="panel explainer">
+      <div class="phead"><h2>What this tracker is for</h2></div>
+      <p style="font-size:14px;margin:0;line-height:1.6">A shared, living record of every EVO router that comes back from the field — why it was swapped, whether the market manager vetted it, and what ultimately happened to it. It follows each unit through the whole chain so the warehouse can reconcile returns and everyone has clear visibility on which routers went back to Evolution Digital and which did not.</p>
+      <div class="chain">
+        <span class="chain-step">1 · Swapped in field</span><span class="chain-arrow">→</span>
+        <span class="chain-step">2 · Vetted by market manager</span><span class="chain-arrow">→</span>
+        <span class="chain-step">3 · Delivered to warehouse</span><span class="chain-arrow">→</span>
+        <span class="chain-step">4 · RMA'd to Evolution (or kept/scrapped)</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:12px 0 0">How to use it: add a unit when it comes back (link it to an existing swap if there is one, or log it standalone). Managers record their vetting + findings; warehouse records what was received and the final disposition. Update an entry as it moves along — every change is saved and audit-logged.</p>
+    </div>
+
+    <!-- ADD / EDIT FORM -->
+    <div class="panel">
+      <div class="collapsed-bar" id="formCollapsed">
+        <div class="phead" style="margin:0"><h2>Log a returned EVO</h2></div>
+        <button class="btn primary" id="openFormBtn">+ New entry</button>
+      </div>
+      <div id="trackForm" class="hidden">
+        <div class="phead">
+          <h2 id="formTitle">New EVO return</h2>
+          <button class="btn ghost" id="collapseFormBtn" style="background:#eef2f7;color:var(--navy)">Collapse ▲</button>
+        </div>
+
+        <!-- optional link to a hub swap -->
+        <label class="full">Link to an existing swap (optional)
+          <select id="t_link"><option value="">— standalone (not linked) —</option></select>
+        </label>
+
+        <div class="mf-grid">
+          <label class="fld">EVO S/N or MAC<input id="t_serial"></label>
+          <label class="fld">Account #<input id="t_acct"></label>
+          <label class="fld">Customer<input id="t_customer"></label>
+          <label class="fld">Market
+            <select id="t_market"><option value="">—</option><option>SWFL</option><option>CFL</option><option>MARCO_FTTH</option><option>LEESBURG_FTTH</option><option>TAMPA</option><option>WEST</option><option>LAL/CAS</option></select>
+          </label>
+        </div>
+
+        <!-- swap reason -->
+        <div class="section-lead">Why was it swapped? (field reason)</div>
+        <div class="checks" id="swapReasons"></div>
+        <label class="full" id="swapOtherWrap" style="margin-top:4px">Other swap reason / details<textarea id="t_swap_other" rows="2" placeholder="Anything not covered above"></textarea></label>
+
+        <!-- hardware symptom (warehouse) -->
+        <div class="section-lead">Hardware symptom (warehouse-observed)</div>
+        <div class="checks" id="hwSymptoms"></div>
+        <label class="full" id="hwOtherWrap" style="margin-top:4px">Hardware symptom details<textarea id="t_hw_details" rows="2" placeholder="Warehouse notes on the physical symptom"></textarea></label>
+
+        <!-- vetting (market-tied) -->
+        <div class="section-lead">Manager vetting</div>
+        <div class="vet-box">
+          <div class="vlabel" id="vetQuestion">Vetted by the market manager?</div>
+          <label class="chk"><input type="checkbox" id="t_vetted"> Yes — vetted by the market manager</label>
+          <label class="full" style="margin:10px 0 0">Vetting findings / details<textarea id="t_vet_findings" rows="2" placeholder="Manager's findings — why it should or should not go back"></textarea></label>
+        </div>
+
+        <!-- disposition -->
+        <div class="section-lead">Disposition — what happens to it</div>
+        <label class="full">Outcome
+          <select id="t_disposition">
+            <option value="">— choose —</option>
+            <option value="rma_evolution">RMA to Evolution Digital (genuine defect)</option>
+            <option value="kept_stock">Kept in stock (still good)</option>
+            <option value="scrapped">Scrapped / disposed (beyond repair, not RMA)</option>
+            <option value="pending_inspection">Pending inspection</option>
+          </select>
+        </label>
+        <label class="full">Disposition reason / details<textarea id="t_disp_reason" rows="2" placeholder="Why this outcome"></textarea></label>
+
+        <!-- warehouse -->
+        <div class="section-lead">Warehouse handling</div>
+        <div class="wh-box">
+          <label class="chk"><input type="checkbox" id="t_delivered"> Delivered to warehouse</label>
+          <label class="chk"><input type="checkbox" id="t_received"> Received by warehouse</label>
+          <label class="chk"><input type="checkbox" id="t_rmad"> RMA'd to Evolution Digital</label>
+          <label class="full" style="margin:10px 0 0">Warehouse notes<textarea id="t_wh_notes" rows="2"></textarea></label>
+        </div>
+
+        <div class="mf-actions">
+          <button class="btn ghost" id="cancelFormBtn" style="background:#eef2f7;color:var(--navy)">Cancel</button>
+          <button class="btn primary" id="saveFormBtn">Save entry</button>
+        </div>
+        <p class="mf-msg" id="formMsg"></p>
+      </div>
+    </div>
+
+    <!-- LIVE TABLE -->
+    <div class="panel">
+      <div class="phead">
+        <h2>All tracked returns <span class="count-note" id="rowCount"></span></h2>
+      </div>
+      <div class="filters">
+        <input id="fSearch" placeholder="Search serial, account, customer…">
+        <select id="fDisp"><option value="">All dispositions</option><option value="rma_evolution">RMA to Evolution</option><option value="kept_stock">Kept in stock</option><option value="scrapped">Scrapped</option><option value="pending_inspection">Pending inspection</option></select>
+        <select id="fMarket"><option value="">All markets</option></select>
+        <select id="fVet"><option value="">Vetted: any</option><option value="y">Vetted: yes</option><option value="n">Vetted: no</option></select>
+      </div>
+      <div class="wrap">
+        <table id="trackTable"><thead><tr>
+          <th>Logged</th><th>Serial</th><th>Account</th><th>Customer</th><th>Market</th>
+          <th>Swap reason</th><th>HW symptom</th><th>Vetted</th><th>Disposition</th><th>Status</th><th>Updated by</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const CFG = window.EVO_CONFIG;
+let TOKEN = "", USER = "", DATA = { rows: [], swaps: [], me: {} }, editingId = null;
+
+const SWAP_REASONS = ["Storm damage","Lightning-fried port","Won't power on (after PSU swap)","WAN port failure","Ethernet port failure","No internet connection"];
+const HW_SYMPTOMS = ["Won't power on (after PSU swap)","Port damage (WAN / Ethernet / coax)","Physical or water damage","Burn / surge damage (lightning)","No internet / no Wi-Fi","No fault found (tests OK)","Other"];
+const DISP_LABELS = { rma_evolution:"RMA to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped", pending_inspection:"Pending inspection" };
+const DISP_CLASS = { rma_evolution:"rma", kept_stock:"kept", scrapped:"scrap", pending_inspection:"pending" };
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const fmt = (d) => d ? new Date(d).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+
+// ---- build checkbox lists ----
+function buildChecks(container, values, cls){
+  container.innerHTML = values.map((v,i) =>
+    `<label class="chk"><input type="checkbox" class="${cls}" value="${esc(v)}"> ${esc(v)}</label>`
+  ).join("");
+}
+buildChecks($("#swapReasons"), SWAP_REASONS, "swap-chk");
+buildChecks($("#hwSymptoms"), HW_SYMPTOMS, "hw-chk");
+
+// ---- sign in ----
+async function signIn(){
+  TOKEN = $("#gToken").value.trim();
+  USER = $("#gUser").value.trim();
+  if (!TOKEN) { $("#gErr").textContent = "Enter your password."; return; }
+  $("#gErr").textContent = "Loading…";
+  const ok = await loadAll();
+  if (ok) { $("#gate").classList.add("hidden"); $("#main").classList.remove("hidden"); }
+  else { $("#gErr").textContent = "Couldn't sign in. Check your password/email."; }
+}
+$("#gBtn").addEventListener("click", signIn);
+$("#gToken").addEventListener("keydown", e => { if (e.key === "Enter") signIn(); });
+
+// ---- load data ----
+async function loadAll(){
+  try {
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/returns-tracker`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "x-admin-token":TOKEN, "x-admin-user":USER },
+      body: JSON.stringify({ action:"list" })
+    });
+    if (!res.ok) return false;
+    DATA = await res.json();
+    $("#whoTag").textContent = DATA.me && DATA.me.name ? ("Signed in · " + DATA.me.name) : "";
+    fillLinkOptions(); fillMarketFilter(); renderTable();
+    return true;
+  } catch(e){ return false; }
+}
+$("#refreshBtn").addEventListener("click", loadAll);
+
+function fillLinkOptions(){
+  const sel = $("#t_link");
+  const opts = (DATA.swaps||[]).map(s =>
+    `<option value="${s.id}" data-serial="${esc(s.evo_serial_mac||"")}" data-acct="${esc(s.account_number||"")}" data-cust="${esc((s.customer_first||"")+' '+(s.customer_last||''))}" data-mkt="${esc(s.market_code||"")}">${esc(s.evo_serial_mac||"(no serial)")} · ${esc(s.account_number||"")} · ${esc((s.customer_first||"")+' '+(s.customer_last||''))}</option>`
+  ).join("");
+  sel.innerHTML = `<option value="">— standalone (not linked) —</option>` + opts;
+}
+function fillMarketFilter(){
+  const codes = [...new Set((DATA.rows||[]).map(r=>r.market_code).filter(Boolean))];
+  $("#fMarket").innerHTML = `<option value="">All markets</option>` + codes.map(c=>`<option>${esc(c)}</option>`).join("");
+}
+
+// auto-fill when linking to a swap
+$("#t_link").addEventListener("change", () => {
+  const o = $("#t_link").selectedOptions[0];
+  if (!o || !o.value) return;
+  $("#t_serial").value = o.dataset.serial || "";
+  $("#t_acct").value = o.dataset.acct || "";
+  $("#t_customer").value = (o.dataset.cust || "").trim();
+  $("#t_market").value = o.dataset.mkt || "";
+  updateVetQuestion();
+});
+
+// market-tied vetting question
+$("#t_market").addEventListener("change", updateVetQuestion);
+function updateVetQuestion(){
+  const m = $("#t_market").value;
+  let who = "the market manager";
+  if (m === "SWFL" || m === "MARCO_FTTH") who = "SWFL Manager (Peterson)";
+  else if (m === "CFL" || m === "LAL/CAS" || m === "LEESBURG_FTTH" || m === "TAMPA" || m === "WEST") who = "CFL Manager (Anthony)";
+  $("#vetQuestion").textContent = `Was this vetted by ${who}?`;
+}
+
+// ---- form open/close ----
+function openForm(){ $("#trackForm").classList.remove("hidden"); $("#formCollapsed").classList.add("hidden"); }
+function collapseForm(){ $("#trackForm").classList.add("hidden"); $("#formCollapsed").classList.remove("hidden"); }
+function clearForm(){
+  editingId = null; $("#formTitle").textContent = "New EVO return"; $("#formMsg").textContent = "";
+  ["t_serial","t_acct","t_customer","t_swap_other","t_hw_details","t_vet_findings","t_disp_reason","t_wh_notes"].forEach(id=>$("#"+id).value="");
+  ["t_link","t_market","t_disposition"].forEach(id=>$("#"+id).value="");
+  ["t_vetted","t_delivered","t_received","t_rmad"].forEach(id=>$("#"+id).checked=false);
+  document.querySelectorAll(".swap-chk,.hw-chk").forEach(c=>c.checked=false);
+  updateVetQuestion();
+}
+$("#openFormBtn").addEventListener("click", () => { clearForm(); openForm(); });
+$("#collapseFormBtn").addEventListener("click", collapseForm);
+$("#cancelFormBtn").addEventListener("click", () => { clearForm(); collapseForm(); });
+
+// ---- save ----
+$("#saveFormBtn").addEventListener("click", saveEntry);
+async function saveEntry(){
+  const msg = $("#formMsg");
+  const swapReasons = [...document.querySelectorAll(".swap-chk:checked")].map(c=>c.value);
+  const hwSymptoms = [...document.querySelectorAll(".hw-chk:checked")].map(c=>c.value);
+  const vetted = $("#t_vetted").checked;
+  const entry = {
+    linked_request_id: $("#t_link").value || null,
+    evo_serial_mac: $("#t_serial").value.trim() || null,
+    account_number: $("#t_acct").value.trim() || null,
+    customer_name: $("#t_customer").value.trim() || null,
+    market_code: $("#t_market").value || null,
+    swap_reasons: swapReasons,
+    swap_reason_other: $("#t_swap_other").value.trim() || null,
+    hardware_symptoms: hwSymptoms,
+    hardware_symptom_details: $("#t_hw_details").value.trim() || null,
+    vetted,
+    vetted_by: vetted ? (DATA.me && DATA.me.name) : null,
+    vetted_findings: $("#t_vet_findings").value.trim() || null,
+    vetted_at: vetted ? new Date().toISOString() : null,
+    disposition: $("#t_disposition").value || null,
+    disposition_reason: $("#t_disp_reason").value.trim() || null,
+    delivered_to_warehouse: $("#t_delivered").checked,
+    received_by_warehouse: $("#t_received").checked,
+    rma_to_evolution: $("#t_rmad").checked,
+    rma_shipped_at: $("#t_rmad").checked ? new Date().toISOString() : null,
+    warehouse_notes: $("#t_wh_notes").value.trim() || null,
+    status: computeStatus($("#t_rmad").checked, $("#t_received").checked, vetted),
+  };
+  if (!entry.evo_serial_mac && !entry.account_number) { msg.className="mf-msg err"; msg.textContent="Enter at least a serial or an account #."; return; }
+
+  msg.className="mf-msg"; msg.textContent="Saving…";
+  try {
+    const action = editingId ? "update" : "create";
+    const payload = editingId ? { action, id: editingId, patch: entry } : { action, entry };
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/returns-tracker`, {
+      method:"POST", headers:{ "Content-Type":"application/json", "x-admin-token":TOKEN, "x-admin-user":USER },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("HTTP "+res.status);
+    msg.className="mf-msg ok"; msg.textContent="Saved. Refreshing…";
+    clearForm(); collapseForm(); loadAll();
+  } catch(e){ msg.className="mf-msg err"; msg.textContent="Couldn't save. ("+e.message+")"; }
+}
+function computeStatus(rmad, received, vetted){
+  if (rmad) return "rmad";
+  if (received) return "at_warehouse";
+  if (vetted) return "vetted";
+  return "logged";
+}
+
+// ---- edit existing (click a row) ----
+function editEntry(r){
+  clearForm();
+  editingId = r.id; $("#formTitle").textContent = "Edit entry"; 
+  $("#t_serial").value = r.evo_serial_mac||""; $("#t_acct").value = r.account_number||"";
+  $("#t_customer").value = r.customer_name||""; $("#t_market").value = r.market_code||"";
+  $("#t_swap_other").value = r.swap_reason_other||""; $("#t_hw_details").value = r.hardware_symptom_details||"";
+  $("#t_vetted").checked = !!r.vetted; $("#t_vet_findings").value = r.vetted_findings||"";
+  $("#t_disposition").value = r.disposition||""; $("#t_disp_reason").value = r.disposition_reason||"";
+  $("#t_delivered").checked = !!r.delivered_to_warehouse; $("#t_received").checked = !!r.received_by_warehouse; $("#t_rmad").checked = !!r.rma_to_evolution;
+  $("#t_wh_notes").value = r.warehouse_notes||"";
+  (r.swap_reasons||[]).forEach(v=>{const c=[...document.querySelectorAll(".swap-chk")].find(x=>x.value===v); if(c)c.checked=true;});
+  (r.hardware_symptoms||[]).forEach(v=>{const c=[...document.querySelectorAll(".hw-chk")].find(x=>x.value===v); if(c)c.checked=true;});
+  updateVetQuestion(); openForm();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---- render table ----
+["fSearch","fDisp","fMarket","fVet"].forEach(id=>$("#"+id).addEventListener("input", renderTable));
+function renderTable(){
+  const q = $("#fSearch").value.trim().toLowerCase();
+  const fd = $("#fDisp").value, fm = $("#fMarket").value, fv = $("#fVet").value;
+  const rows = (DATA.rows||[]).filter(r=>{
+    if (fd && r.disposition !== fd) return false;
+    if (fm && r.market_code !== fm) return false;
+    if (fv === "y" && !r.vetted) return false;
+    if (fv === "n" && r.vetted) return false;
+    if (q){ const hay = `${r.evo_serial_mac||""} ${r.account_number||""} ${r.customer_name||""}`.toLowerCase(); if (!hay.includes(q)) return false; }
+    return true;
+  });
+  $("#rowCount").textContent = `${rows.length} of ${(DATA.rows||[]).length}`;
+  const tb = $("#trackTable tbody");
+  if (!rows.length){ tb.innerHTML = `<tr><td colspan="11" class="muted" style="text-align:center;padding:22px">No entries yet — add one with “+ New entry”.</td></tr>`; return; }
+  tb.innerHTML = rows.map(r=>{
+    const swap = [...(r.swap_reasons||[]), r.swap_reason_other?("Other: "+r.swap_reason_other):null].filter(Boolean).map(s=>`<span class="tag" style="background:#eef2f7;color:#334">${esc(s)}</span>`).join(" ") || "—";
+    const hw = (r.hardware_symptoms||[]).map(s=>`<span class="tag" style="background:var(--warn-bg);color:var(--warn)">${esc(s)}</span>`).join(" ") || "—";
+    const vet = r.vetted ? `<span class="tag vet-y">YES</span>` : `<span class="tag vet-n">NO</span>`;
+    const disp = r.disposition ? `<span class="tag ${DISP_CLASS[r.disposition]||''}">${esc(DISP_LABELS[r.disposition]||r.disposition)}</span>` : '<span class="muted">—</span>';
+    return `<tr data-id="${r.id}">
+      <td class="muted">${fmt(r.created_at)}</td>
+      <td style="font-family:monospace">${esc(r.evo_serial_mac||"—")}</td>
+      <td style="font-family:monospace">${esc(r.account_number||"—")}</td>
+      <td>${esc(r.customer_name||"—")}</td>
+      <td>${esc(r.market_code||"—")}</td>
+      <td>${swap}</td>
+      <td>${hw}</td>
+      <td>${vet}</td>
+      <td>${disp}</td>
+      <td><span class="status-pill">${esc(r.status||"logged")}</span></td>
+      <td class="muted">${esc(r.updated_by||r.logged_by||"—")}</td>
+    </tr>`;
+  }).join("");
+  tb.querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click",()=>{
+    const r = (DATA.rows||[]).find(x=>x.id===tr.dataset.id); if(r) editEntry(r);
+  }));
+}
+</script>
+</body>
+</html>

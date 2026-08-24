@@ -23,6 +23,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .btn{border:0;font:inherit;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer}
 .btn.light{background:#fff;color:var(--navy)} .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
 .btn.export-xlsx{background:#166534;color:#fff} .btn.export-xlsx:hover{filter:brightness(1.1)}
+.btn.evo-tracker-btn{background:var(--teal,#0d7a8a);color:#fff;text-decoration:none;display:inline-flex;align-items:center}
+.btn.evo-tracker-btn:hover{filter:brightness(1.1)}
 .btn.export-pdf{background:#b91c1c;color:#fff} .btn.export-pdf:hover{filter:brightness(1.1)}
 .gate{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:40px;max-width:420px;margin:60px auto;text-align:center}
 .gate input{width:100%;margin:14px 0;padding:13px;border:1.5px solid var(--line);border-radius:12px;font:inherit}
@@ -187,6 +189,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
         <span class="ar-dot"></span>Auto-refresh in <b id="arCount">5:00</b>
       </span>
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
+      <a class="btn evo-tracker-btn" href="tracker.html" title="Open the EVO Tracker — log & track returned/RMA'd units">EVO Tracker →</a>
       <button class="btn export-xlsx" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters.">Export (XLSX)</button>
       <button class="btn export-pdf" id="exportPdfBtn" onclick="exportPdf()" title="Branded PDF of the rows currently shown — respects your filters.">Export (PDF)</button>
     </div>
