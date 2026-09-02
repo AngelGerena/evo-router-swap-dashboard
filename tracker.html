@@ -6,6 +6,8 @@
 <title>EVO Tracker — Summit Broadband</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--navy:#0b2545;--navy2:#123c69;--teal:#0f766e;--ink:#16202e;--muted:#5b6b80;
   --line:#e2e8f1;--bg:#eef2f7;--card:#fff;--good:#166534;--good-bg:#e6f4ea;
@@ -198,6 +200,11 @@ tr:hover td{background:#f8fafc;cursor:pointer}
     <div class="panel">
       <div class="phead">
         <h2>All tracked returns <span class="count-note" id="rowCount"></span></h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" id="expLifecycleXlsx" style="background:#166534">Lifecycle report (XLSX)</button>
+          <button class="btn primary" id="expLifecyclePdf" style="background:#b45309">Lifecycle report (PDF)</button>
+          <button class="btn primary" id="expChartsPdf" style="background:var(--navy)">Charts (PDF)</button>
+        </div>
       </div>
       <div class="filters">
         <input id="fSearch" placeholder="Search serial, account, customer…">
@@ -439,6 +446,148 @@ function renderTable(){
     const r = (DATA.rows||[]).find(x=>x.id===tr.dataset.id); if(r) editEntry(r);
   }));
 }
+
+// ================= EXPORTS =================
+const DISP_TXT = { rma_evolution:"RMA to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped/disposed", pending_inspection:"Pending inspection" };
+function fmtFull(d){ return d ? new Date(d).toLocaleString() : ""; }
+function rowSwap(r){ return [...(r.swap_reasons||[]), r.swap_reason_other?("Other: "+r.swap_reason_other):null].filter(Boolean).join("; "); }
+function rowHw(r){ return [...(r.hardware_symptoms||[]), r.hardware_symptom_details?("Details: "+r.hardware_symptom_details):null].filter(Boolean).join("; "); }
+function logsFor(id){ return (DATA.log||[]).filter(l=>l.tracker_id===id); }
+
+// ---- #2 Lifecycle / audit report — XLSX ----
+document.getElementById("expLifecycleXlsx").addEventListener("click", ()=>{
+  const rows = DATA.rows||[];
+  if(!rows.length){ alert("No entries to export."); return; }
+  const wb = XLSX.utils.book_new();
+  const headers = ["Logged","Serial","Account","Customer","Market","Swap reason","HW symptom","Vetted","Vetted by","Vetting findings","Disposition","Disposition reason","RMA'd to Evolution","Warehouse notes","Status","Logged by","Updated by"];
+  const toRow = r => [fmtFull(r.created_at), r.evo_serial_mac||"", r.account_number||"", r.customer_name||"", r.market_code||"", rowSwap(r), rowHw(r), r.vetted?"Yes":"No", r.vetted_by||"", r.vetted_findings||"", DISP_TXT[r.disposition]||r.disposition||"", r.disposition_reason||"", r.rma_to_evolution?"Yes":"No", r.warehouse_notes||"", r.status||"", r.logged_by||"", r.updated_by||""];
+  // All units
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows.map(toRow)]), "All units");
+  // NOT sent back — own emphasized sheet
+  const notBack = rows.filter(r=> r.disposition && r.disposition!=="rma_evolution" && !r.rma_to_evolution);
+  const nbHeaders = ["Serial","Account","Customer","Market","Swap reason","HW symptom","Disposition","Why not sent back","Status"];
+  const nbRows = notBack.map(r=>[r.evo_serial_mac||"", r.account_number||"", r.customer_name||"", r.market_code||"", rowSwap(r), rowHw(r), DISP_TXT[r.disposition]||r.disposition||"", r.disposition_reason||"", r.status||""]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["NOT SENT BACK TO EVOLUTION — kept, scrapped, or held"],[], nbHeaders, ...nbRows]), "Not sent back");
+  // Full audit trail
+  const auHeaders = ["When","Unit serial","Action","Changed by","Detail"];
+  const serialFor = id => { const r = rows.find(x=>x.id===id); return r? (r.evo_serial_mac||r.account_number||id) : id; };
+  const auRows = (DATA.log||[]).map(l=>[fmtFull(l.created_at), serialFor(l.tracker_id), l.action||"", l.changed_by||"", l.detail||""]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([auHeaders, ...auRows]), "Audit trail");
+  XLSX.writeFile(wb, `EVO_Tracker_Lifecycle_${new Date().toISOString().slice(0,10)}.xlsx`);
+});
+
+// ---- #2 Lifecycle / audit report — PDF ----
+document.getElementById("expLifecyclePdf").addEventListener("click", ()=>{
+  const rows = DATA.rows||[];
+  if(!rows.length){ alert("No entries to export."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"letter" });
+  const M=40; let y=54; const W=doc.internal.pageSize.getWidth();
+  const nl=(h)=>{ y+=h; if(y>doc.internal.pageSize.getHeight()-40){ doc.addPage(); y=54; } };
+  doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor("#0b2545");
+  doc.text("EVO Tracker — Lifecycle & Audit Report", M, y); nl(22);
+  doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor("#5b6b80");
+  doc.text(`Generated ${new Date().toLocaleString()} · ${rows.length} unit(s)`, M, y); nl(24);
+
+  rows.forEach((r,i)=>{
+    doc.setDrawColor("#e2e8f1"); doc.line(M,y,W-M,y); nl(14);
+    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor("#16202e");
+    doc.text(`${i+1}. ${r.evo_serial_mac||"(no serial)"}  ·  Acct ${r.account_number||"—"}  ·  ${r.market_code||"—"}`, M, y); nl(14);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor("#334");
+    const lines = [
+      `Customer: ${r.customer_name||"—"}    Status: ${r.status||"—"}`,
+      `Swap reason: ${rowSwap(r)||"—"}`,
+      `Hardware symptom: ${rowHw(r)||"—"}`,
+      `Vetted: ${r.vetted?"YES":"NO"}${r.vetted_by?(" by "+r.vetted_by):""}${r.vetted_findings?("  —  "+r.vetted_findings):""}`,
+      `Disposition: ${DISP_TXT[r.disposition]||r.disposition||"—"}${r.disposition_reason?("  —  "+r.disposition_reason):""}`,
+      `RMA'd to Evolution: ${r.rma_to_evolution?"YES":"NO"}${r.warehouse_notes?("    Notes: "+r.warehouse_notes):""}`,
+    ];
+    lines.forEach(t=>{ doc.splitTextToSize(t, W-2*M).forEach(s=>{ doc.text(s,M+10,y); nl(12); }); });
+    const lg = logsFor(r.id);
+    if(lg.length){
+      doc.setTextColor("#5b6b80"); doc.text("Audit trail:", M+10, y); nl(11);
+      lg.forEach(l=>{ doc.text(`• ${fmtFull(l.created_at)} — ${l.action} — ${l.changed_by||""} ${l.detail?("— "+l.detail):""}`, M+18, y); nl(11); });
+    }
+    nl(6);
+  });
+
+  // NOT SENT BACK — own emphasized section
+  const notBack = rows.filter(r=> r.disposition && r.disposition!=="rma_evolution" && !r.rma_to_evolution);
+  doc.addPage(); y=54;
+  doc.setFillColor("#fdeaea"); doc.rect(M-8, y-18, W-2*M+16, 30, "F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor("#b91c1c");
+  doc.text("Units NOT sent back to Evolution Digital", M, y); nl(26);
+  doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor("#5b6b80");
+  doc.text(`${notBack.length} unit(s) kept, scrapped, or held — what happened and why.`, M, y); nl(20);
+  if(!notBack.length){ doc.text("None — every tracked unit is going back to Evolution.", M, y); nl(14); }
+  notBack.forEach((r,i)=>{
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor("#16202e");
+    doc.text(`${i+1}. ${r.evo_serial_mac||"(no serial)"} · ${r.market_code||"—"} · ${DISP_TXT[r.disposition]||r.disposition}`, M, y); nl(13);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor("#334");
+    doc.splitTextToSize(`Swap reason: ${rowSwap(r)||"—"}    Why not sent back: ${r.disposition_reason||"—"}`, W-2*M).forEach(s=>{ doc.text(s,M+10,y); nl(12); });
+    nl(4);
+  });
+
+  doc.save(`EVO_Tracker_Lifecycle_${new Date().toISOString().slice(0,10)}.pdf`);
+});
+
+// ---- #3 Charts PDF (pie + bars drawn on canvas) ----
+document.getElementById("expChartsPdf").addEventListener("click", ()=>{
+  const rows = DATA.rows||[];
+  if(!rows.length){ alert("No entries to export."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"letter" });
+  const M=40; const W=doc.internal.pageSize.getWidth();
+  doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor("#0b2545");
+  doc.text("EVO Tracker — Charts", M, 54);
+  doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor("#5b6b80");
+  doc.text(`Generated ${new Date().toLocaleString()} · ${rows.length} unit(s)`, M, 72);
+
+  const PALETTE = ["#0f766e","#123c69","#b45309","#166534","#b91c1c","#6b7280","#7c3aed","#0891b2"];
+  function tally(fn){ const m={}; rows.forEach(r=>{ const k=fn(r)||"—"; if(Array.isArray(k)){ k.forEach(v=>m[v]=(m[v]||0)+1);} else m[k]=(m[k]||0)+1; }); return m; }
+
+  function pie(cx,cy,rad,data){
+    const total = Object.values(data).reduce((a,b)=>a+b,0)||1;
+    let a=-Math.PI/2, i=0; const c=document.createElement("canvas"); c.width=520;c.height=300; const g=c.getContext("2d");
+    const CX=140,CY=150,R=110; const keys=Object.keys(data);
+    keys.forEach(k=>{ const slice=data[k]/total*Math.PI*2; g.beginPath(); g.moveTo(CX,CY); g.arc(CX,CY,R,a,a+slice); g.closePath(); g.fillStyle=PALETTE[i%PALETTE.length]; g.fill(); a+=slice; i++; });
+    // legend
+    g.font="13px Arial"; i=0; let ly=40;
+    keys.forEach(k=>{ g.fillStyle=PALETTE[i%PALETTE.length]; g.fillRect(280,ly,14,14); g.fillStyle="#222"; g.fillText(`${k} (${data[k]})`,300,ly+12); ly+=22; i++; });
+    return c;
+  }
+  function bars(data){
+    const c=document.createElement("canvas"); c.width=520;c.height=300; const g=c.getContext("2d");
+    const keys=Object.keys(data); const max=Math.max(1,...Object.values(data)); const bw=Math.min(70,(460/keys.length)-14);
+    g.font="12px Arial"; let x=50;
+    keys.forEach((k,i)=>{ const h=data[k]/max*200; g.fillStyle=PALETTE[i%PALETTE.length]; g.fillRect(x,240-h,bw,h); g.fillStyle="#222"; g.fillText(String(data[k]),x+bw/2-4,240-h-6); g.save(); g.translate(x+bw/2,258); g.rotate(-0.5); g.fillText(String(k).slice(0,14),0,0); g.restore(); x+=bw+18; });
+    return c;
+  }
+
+  // Chart 1: disposition (pie)
+  const dispData={}; rows.forEach(r=>{ const k=DISP_TXT[r.disposition]||"(none)"; dispData[k]=(dispData[k]||0)+1; });
+  doc.setFontSize(12); doc.setTextColor("#0b2545"); doc.setFont("helvetica","bold"); doc.text("Disposition breakdown", M, 100);
+  doc.addImage(pie(0,0,0,dispData).toDataURL("image/png"), "PNG", M, 110, 320, 185);
+
+  // Chart 2: RMA vs not (pie)
+  const rmaData={"RMA to Evolution":0,"Not sent back":0};
+  rows.forEach(r=>{ if(r.rma_to_evolution||r.disposition==="rma_evolution") rmaData["RMA to Evolution"]++; else rmaData["Not sent back"]++; });
+  doc.text("RMA vs not sent back", M, 320);
+  doc.addImage(pie(0,0,0,rmaData).toDataURL("image/png"), "PNG", M, 330, 320, 185);
+
+  // Chart 3: swap reasons (bar)
+  doc.addPage();
+  doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor("#0b2545"); doc.text("Swap reasons", M, 60);
+  const swapData=tally(r=>[...(r.swap_reasons||[]), (r.swap_reason_other?"Other":null)].filter(Boolean));
+  doc.addImage(bars(swapData).toDataURL("image/png"), "PNG", M, 72, 460, 265);
+
+  // Chart 4: by market (bar)
+  doc.text("Returns by market", M, 380);
+  const mktData=tally(r=>r.market_code||"—");
+  doc.addImage(bars(mktData).toDataURL("image/png"), "PNG", M, 392, 460, 265);
+
+  doc.save(`EVO_Tracker_Charts_${new Date().toISOString().slice(0,10)}.pdf`);
+});
 </script>
 </body>
 </html>

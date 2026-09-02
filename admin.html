@@ -42,6 +42,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .rma-chevron{display:inline-block;font-size:14px;transition:transform .15s;vertical-align:middle}
 .rma-collapse-hint{font-size:11px;font-weight:700;color:var(--bad);opacity:.6;white-space:nowrap;align-self:center;text-transform:uppercase;letter-spacing:.04em}
 .rma-export-bar{display:flex;justify-content:flex-end;padding:0 0 10px}
+.rma-del-cell{text-align:center}
+.rma-trash{background:transparent;border:0;cursor:pointer;font-size:16px;opacity:.55;transition:opacity .12s,transform .12s;padding:4px 8px;border-radius:6px}
+.rma-trash:hover{opacity:1;transform:scale(1.15);background:var(--bad-bg,#fde8e8)}
 .rma-row{background:var(--bad-bg)}
 .rma-row td{border-bottom-color:#f3c9c9}
 .rma-serial-cell{color:var(--bad);font-weight:800}
@@ -263,7 +266,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
       </div>
       <table id="rmaTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
-        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Symptoms</th><th>Acknowledged</th><th>Decided by</th>
+        <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Symptoms</th><th>Acknowledged</th><th>Decided by</th><th id="rmaDelTh" hidden></th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -373,6 +376,8 @@ function applyRole(){
   if (delTh) delTh.hidden = !isOwner;
   const delBtn = document.getElementById("deleteBtn");
   if (delBtn) delBtn.hidden = !isOwner;
+  const rmaDelTh = document.getElementById("rmaDelTh");
+  if (rmaDelTh) rmaDelTh.hidden = !isOwner;
 }
 
 function fillMarketFilter(){
@@ -630,7 +635,33 @@ function renderRma(){
       <td>${Array.isArray(r.rma_symptoms)&&r.rma_symptoms.length?r.rma_symptoms.map(s=>`<span class="sym-tag">${esc(s)}</span>`).join(" "):'<span class="muted">—</span>'}</td>
       <td class="mono">${r.rma_acknowledged?'<span style="color:var(--good);font-weight:800">Yes</span>':'<span style="color:var(--bad);font-weight:800">No</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
+      ${DATA.role==="owner"?`<td class="rma-del-cell"><button class="rma-trash" title="Remove from RMA list (keeps the swap record)" onclick="removeFromRma('${r.id}', this)">🗑</button></td>`:""}
     </tr>`).join("");
+}
+
+async function removeFromRma(id, btn){
+  if (!DATA || DATA.role !== "owner") return;   // belt & suspenders — backend enforces too
+  const row = DATA.rows.find(r=>r.id===id);
+  const label = row ? `${row.customer_first||""} ${row.customer_last||""} (S/N ${row.evo_serial_mac||"—"})`.trim() : "this unit";
+  const ok = confirm(
+    `Remove ${label} from the RMA list?\n\n` +
+    `This clears the RMA flag only — the swap record stays in the queue and history. It just no longer shows as going to Evolution Digital.`
+  );
+  if (!ok) return;
+  if (btn){ btn.disabled = true; btn.textContent = "…"; }
+  try{
+    const res = await fetch(`${CFG.FUNCTIONS_BASE}/rma-remove`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "x-admin-token": TOKEN, "x-admin-user": USER||"" },
+      body: JSON.stringify({ id }),
+    });
+    const j = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(j.error || ("HTTP " + res.status));
+    loadAll();   // refresh — the unit drops off the RMA list
+  }catch(e){
+    alert("Couldn't remove from RMA list: " + e.message);
+    if (btn){ btn.disabled = false; btn.textContent = "🗑"; }
+  }
 }
 
 let manualWired = false;
