@@ -41,6 +41,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-u
 .rma-phead:hover .rma-collapse-hint{opacity:1}
 .rma-chevron{display:inline-block;font-size:14px;transition:transform .15s;vertical-align:middle}
 .rma-collapse-hint{font-size:11px;font-weight:700;color:var(--bad);opacity:.6;white-space:nowrap;align-self:center;text-transform:uppercase;letter-spacing:.04em}
+.rma-export-bar{display:flex;justify-content:flex-end;padding:0 0 10px}
 .rma-row{background:var(--bad-bg)}
 .rma-row td{border-bottom-color:#f3c9c9}
 .rma-serial-cell{color:var(--bad);font-weight:800}
@@ -257,6 +258,9 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
       <span class="rma-collapse-hint" id="rmaHint">click to collapse</span>
     </div>
     <div class="wrap" id="rmaBody">
+      <div class="rma-export-bar">
+        <button class="btn export-xlsx" id="rmaExportBtn" onclick="exportRmaXlsx()" title="Exports ONLY the RMA-to-Evolution units, on their own.">Export RMA list (XLSX)</button>
+      </div>
       <table id="rmaTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
         <th>Account</th><th>EVO S/N/MAC</th><th>Removed from</th><th>Symptoms</th><th>Acknowledged</th><th>Decided by</th>
@@ -328,6 +332,8 @@ async function loadAll(){
     [...DEL_SELECTED].forEach(id => { if (!liveIds.has(id)) DEL_SELECTED.delete(id); });
     document.getElementById("gate").hidden = true;
     document.getElementById("dash").hidden = false;
+    // Hand the session to sibling pages (EVO Tracker) so they open without a second sign-in.
+    try { sessionStorage.setItem("evo_admin_session", JSON.stringify({ t: TOKEN, u: USER || "" })); } catch(e){}
     applyRole();
     fillMarketFilter();
     renderKpis(); renderTable(); renderTechs(); renderRma(); renderResponseReport(); setupManualEntry(); setupRmaToggle();
@@ -901,6 +907,17 @@ function exportXlsx(){
   XLSX.writeFile(wb, `EVO_Swap_Control${tag}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
+// Standalone export of ONLY the RMA-to-Evolution units (separate from the full export).
+function exportRmaXlsx(){
+  const rmaRows = DATA.rows.filter(r=>r.rma_flagged);
+  if(!rmaRows.length){ alert("No RMA-flagged units to export."); return; }
+  const wb = XLSX.utils.book_new();
+  const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Symptoms","Submitted","Status","Acknowledged"];
+  const rmaRowsX=rmaRows.map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,(Array.isArray(r.rma_symptoms)?r.rma_symptoms.join("; "):""),fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "RMA to Evolution Digital");
+  XLSX.writeFile(wb, `EVO_RMA_to_Evolution_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const yn=b=>b?"Yes":"No";
 const fmt=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
@@ -971,6 +988,7 @@ document.getElementById("adminToken").addEventListener("keydown",e=>{if(e.key===
     // Decline = no access. Return to sign-in and clear the session.
     hide();
     try { TOKEN = ""; } catch(e){}
+    try { sessionStorage.removeItem("evo_admin_session"); } catch(e){}
     const t = document.getElementById("adminToken"); if (t) t.value = "";
     document.getElementById("gate").hidden = false;
     document.getElementById("dash").hidden = true;

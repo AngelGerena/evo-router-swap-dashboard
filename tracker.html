@@ -238,7 +238,19 @@ function buildChecks(container, values, cls){
 buildChecks($("#swapReasons"), SWAP_REASONS, "swap-chk");
 buildChecks($("#hwSymptoms"), HW_SYMPTOMS, "hw-chk");
 
-// ---- sign in ----
+// ---- seamless entry: use the admin portal's session if present ----
+async function trySeamless(){
+  let s = null;
+  try { s = JSON.parse(sessionStorage.getItem("evo_admin_session") || "null"); } catch(e){ s = null; }
+  if (s && s.t) {
+    TOKEN = s.t; USER = s.u || "";
+    const ok = await loadAll();
+    if (ok) { $("#gate").classList.add("hidden"); $("#main").classList.remove("hidden"); return true; }
+  }
+  return false;
+}
+
+// ---- sign in (fallback if opened directly, not from the admin portal) ----
 async function signIn(){
   TOKEN = $("#gToken").value.trim();
   USER = $("#gUser").value.trim();
@@ -250,6 +262,9 @@ async function signIn(){
 }
 $("#gBtn").addEventListener("click", signIn);
 $("#gToken").addEventListener("keydown", e => { if (e.key === "Enter") signIn(); });
+
+// on load, try the shared session first; only show the gate if that fails
+trySeamless();
 
 // ---- load data ----
 async function loadAll(){
