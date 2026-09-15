@@ -56,6 +56,21 @@
       <div class="resources">
         <div class="res-label">Field resources — tap to read</div>
         <div id="resourceList"></div>
+        <div class="quickref">
+          <div class="quickref-title" data-i18n-text="Before you swap or flag — remember:">Before you swap or flag — remember:</div>
+          <div class="quickref-item quickref-frontline">
+            <span class="quickref-ico" aria-hidden="true">📋</span>
+            <span data-i18n-text="On an approved swap, you MUST pull the logs in Frontline BEFORE removing the EVO. Once it's removed, the logs are gone.">On an approved swap, you <b>MUST pull the logs in Frontline</b> before removing the EVO. Once it's removed, the logs are gone.</span>
+          </div>
+          <div class="quickref-item quickref-psu">
+            <span class="quickref-ico" aria-hidden="true">🔌</span>
+            <span data-i18n-text="Confirm the correct 3-amp power supply (not a 2-amp). An undersized supply mimics a hardware failure.">Confirm the correct <b>3-amp power supply</b> (not a 2-amp). An undersized supply mimics a hardware failure.</span>
+          </div>
+          <div class="quickref-item quickref-lightning">
+            <span class="quickref-ico" aria-hidden="true">⚡</span>
+            <span data-i18n-text="Never RMA lightning or surge damage (fried WAN/LAN port, burn marks). It is not a warranty defect.">Never RMA <b>lightning or surge damage</b> (fried WAN/LAN port, burn marks). It is not a warranty defect.</span>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -212,14 +227,15 @@
               </span>
             </label>
             <div class="rma-ack-box" id="rmaAckBox" hidden>
+              <p class="rma-ack-frontline" data-i18n-text="STOP — before you remove the EVO on an approved swap, you MUST pull the logs in Frontline first. Once the unit is removed, those logs are gone for good."><b>STOP — before you remove the EVO on an approved swap, you MUST pull the logs in Frontline first.</b> Once the unit is removed, those logs are gone for good.</p>
               <p class="rma-ack-lead" data-i18n-text="A router goes back to Evolution Digital only for a genuine hardware defect, such as:">A router goes back to Evolution Digital only for a genuine hardware defect, such as:</p>
               <ul class="rma-ack-examples">
                 <li data-i18n-text="Will no longer power up at all.">Will no longer power up at all.</li>
                 <li data-i18n-text="Powers on but will not connect to the internet.">Powers on but will not connect to the internet.</li>
-                <li data-i18n-text="Broadcasts only 2.4 GHz and not 5 GHz.">Broadcasts only 2.4 GHz and not 5 GHz.</li>
-                <li data-i18n-text="Broadcasts only 5 GHz and not 2.4 GHz.">Broadcasts only 5 GHz and not 2.4 GHz.</li>
+                <li data-i18n-text="Will not broadcast one or more Wi-Fi bands (2.4, 5, or 6 GHz).">Will not broadcast one or more Wi-Fi bands (2.4, 5, or 6 GHz).</li>
               </ul>
               <p class="rma-ack-psu" data-i18n-text="Before flagging: confirm the router has its correct 3-amp power supply, not a 2-amp. An undersized 2-amp supply starves the unit and mimics a hardware failure — this single check clears more defective routers than anything else."><b>Before flagging:</b> confirm the router has its correct <b>3-amp power supply</b>, not a 2-amp. An undersized 2-amp supply starves the unit and mimics a hardware failure — this single check clears more “defective” routers than anything else.</p>
+              <p class="rma-ack-lightning" data-i18n-text="Do NOT RMA lightning or surge damage. If the EVO was damaged by lightning or a power surge (fried WAN port, fried LAN/Ethernet port, burn or surge marks), it is NOT a warranty defect and must NOT be sent back to Evolution Digital. Handle it as damaged equipment, not an RMA."><b>⚡ Do NOT RMA lightning or surge damage.</b> If the EVO was damaged by lightning or a power surge (fried WAN port, fried LAN/Ethernet port, burn or surge marks), it is <b>NOT</b> a warranty defect and must <b>NOT</b> be sent back to Evolution Digital. Handle it as damaged equipment, not an RMA.</p>
               <p class="rma-ack-lead" data-i18n-text="This unit will be tracked as a defective RMA. Confirm you understand the handling:">This unit will be tracked as a defective RMA. Confirm you understand the handling:</p>
               <div class="rma-symptoms">
                 <p class="rma-symptom-lead" data-i18n-text="What's wrong with this unit? (check all that apply)">What's wrong with this unit? (check all that apply)</p>
@@ -227,6 +243,7 @@
                 <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="WAN port failure"><span data-i18n-text="WAN port failure">WAN port failure</span></label>
                 <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="Ethernet port failure"><span data-i18n-text="Ethernet port failure">Ethernet port failure</span></label>
                 <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="No internet connection"><span data-i18n-text="No internet connection">No internet connection</span></label>
+                <label class="rma-symptom"><input type="checkbox" class="rma-sym" value="Won't broadcast a Wi-Fi band (2.4 / 5 / 6 GHz)"><span data-i18n-text="Won't broadcast a Wi-Fi band (2.4 / 5 / 6 GHz)">Won't broadcast a Wi-Fi band (2.4 / 5 / 6 GHz)</span></label>
                 <label class="rma-symptom"><input type="checkbox" class="rma-sym" id="f_sym_other" value="Other"><span data-i18n-text="Other">Other</span></label>
                 <input type="text" id="f_sym_other_text" class="rma-symptom-other" placeholder="Describe the issue" data-i18n-ph="Describe the issue" hidden>
               </div>
@@ -236,6 +253,13 @@
                 <li data-i18n-text="Ensure to quarantine the EVO and do not reuse.">Ensure to quarantine the EVO and do not reuse.</li>
                 <li data-i18n-text="Make sure to hand to your supervisor/manager or directly drop off at warehouse.">Make sure to hand to your supervisor/manager or directly drop off at warehouse.</li>
               </ul>
+              <div class="rma-ack-psu-box">
+                <p class="rma-psu-box-lead" data-i18n-text="Every RMA'd EVO must go back complete:">Every RMA'd EVO must go back complete:</p>
+                <ul class="rma-ack-list">
+                  <li data-i18n-text="Send the power supply back WITH the EVO — do not keep or reuse it.">Send the power supply back <b>WITH</b> the EVO — do not keep or reuse it.</li>
+                  <li data-i18n-text="Install a NEW EVO router AND a new power supply in its place.">Install a <b>NEW EVO router AND a new power supply</b> in its place.</li>
+                </ul>
+              </div>
               <label class="rma-ack-check">
                 <input type="checkbox" id="f_rma_ack">
                 <span class="rma-ack-checkbox" aria-hidden="true"></span>
