@@ -102,10 +102,10 @@
     "Account it's being removed from": "Cuenta de la que se remueve",
     "Every removed EVO must carry its account # and return to":
       "Todo EVO removido debe llevar su # de cuenta y regresar a",
-    "Flag this EVO as an RMA to Evolution Digital":
-      "Marcar este EVO como RMA a Evolution Digital",
-    "Flagging marks this unit as defective. Instead of the normal return to 4558 Orlando, you'll box it, write the account # on it, apply the Warehouse RMA label, and ship it to Evolution Digital. Check the flag to see the full handling steps.":
-      "Marcarlo identifica esta unidad como defectuosa. En lugar de la devolución normal al 4558 Orlando, la empacarás, escribirás el # de cuenta, aplicarás la etiqueta RMA del almacén y la enviarás a Evolution Digital. Marca la casilla para ver los pasos completos de manejo.",
+    "Report this EVO as defective":
+      "Reportar este EVO como defectuoso",
+    "Flagging marks this unit as defective. Instead of the normal return to 4558 Orlando, you'll box it, write the account # on it, apply the Warehouse return label, and ship it to Evolution Digital. Check the flag to see the full handling steps.":
+      "Marcarlo identifica esta unidad como defectuosa. En lugar de la devolución normal al 4558 Orlando, la empacarás, escribirás el # de cuenta, aplicarás la etiqueta de devolución del almacén y la enviarás a Evolution Digital. Marca la casilla para ver los pasos completos de manejo.",
     "Use only when nothing fixed it — a genuine defect that needs Evolution & Clay's attention.":
       "Usar solo cuando nada lo arregló — un defecto genuino que necesita la atención de Evolution y Clay.",
     "A router goes back to Evolution Digital only for a genuine hardware defect, such as:":
@@ -114,13 +114,13 @@
     "Powers on but will not connect to the internet.": "Enciende pero no se conecta al internet.",
     "Will not broadcast one or more Wi-Fi bands (2.4, 5, or 6 GHz).": "No transmite una o más bandas Wi-Fi (2.4, 5 o 6 GHz).",
     "Won't broadcast a Wi-Fi band (2.4 / 5 / 6 GHz)": "No transmite una banda Wi-Fi (2.4 / 5 / 6 GHz)",
-    "Do NOT RMA lightning or surge damage. If the EVO was damaged by lightning or a power surge (fried WAN port, fried LAN/Ethernet port, burn or surge marks), it is NOT a warranty defect and must NOT be sent back to Evolution Digital. Handle it as damaged equipment, not an RMA.": "NO envíes por RMA daños por rayos o sobretensión. Si el EVO fue dañado por un rayo o una sobretensión (puerto WAN quemado, puerto LAN/Ethernet quemado, marcas de quemadura o sobretensión), NO es un defecto de garantía y NO debe devolverse a Evolution Digital. Trátalo como equipo dañado, no como RMA.",
-    "Every RMA'd EVO must go back complete:": "Cada EVO enviado por RMA debe regresar completo:",
+    "Do NOT report lightning or surge damage as defective. If the EVO was damaged by lightning or a power surge (fried WAN port, fried LAN/Ethernet port, burn or surge marks), it is NOT a warranty defect and must NOT be sent back to Evolution Digital. Handle it as damaged equipment, not a defect report.": "NO reportes como defectuoso un daño por rayos o sobretensión. Si el EVO fue dañado por un rayo o una sobretensión (puerto WAN quemado, puerto LAN/Ethernet quemado, marcas de quemadura o sobretensión), NO es un defecto de garantía y NO debe devolverse a Evolution Digital. Trátalo como equipo dañado, no como reporte de defecto.",
+    "Every EVO reported defective must go back complete:": "Cada EVO reportado como defectuoso debe regresar completo:",
     "Before you swap or flag — remember:": "Antes de reemplazar o marcar — recuerda:",
     "STOP — before you remove the EVO on an approved swap, you MUST pull the logs in Frontline first. Once the unit is removed, those logs are gone for good.": "ALTO — antes de retirar el EVO en un reemplazo aprobado, DEBES extraer los registros en Frontline primero. Una vez retirada la unidad, esos registros se pierden para siempre.",
     "On an approved swap, you MUST pull the logs in Frontline BEFORE removing the EVO. Once it's removed, the logs are gone.": "En un reemplazo aprobado, DEBES extraer los registros en Frontline ANTES de retirar el EVO. Una vez retirado, los registros se pierden.",
     "Confirm the correct 3-amp power supply (not a 2-amp). An undersized supply mimics a hardware failure.": "Confirma la fuente de poder correcta de 3 amperios (no de 2). Una fuente insuficiente imita una falla de hardware.",
-    "Never RMA lightning or surge damage (fried WAN/LAN port, burn marks). It is not a warranty defect.": "Nunca envíes por RMA daños por rayos o sobretensión (puerto WAN/LAN quemado, marcas de quemadura). No es un defecto de garantía.",
+    "Never report lightning or surge damage as defective (fried WAN/LAN port, burn marks). It is not a warranty defect.": "Nunca reportes como defectuoso un daño por rayos o sobretensión (puerto WAN/LAN quemado, marcas de quemadura). No es un defecto de garantía.",
     "Send the power supply back WITH the EVO — do not keep or reuse it.": "Envía la fuente de poder JUNTO con el EVO — no la guardes ni la reutilices.",
     "Install a NEW EVO router AND a new power supply in its place.": "Instala un EVO NUEVO Y una fuente de poder nueva en su lugar.",
     "Broadcasts only 2.4 GHz and not 5 GHz.": "Solo transmite 2.4 GHz y no 5 GHz.",
@@ -132,22 +132,22 @@
     "No internet connection": "Sin conexión a internet",
     "Other": "Otro",
     "Describe the issue": "Describe el problema",
-    "I understand and will follow the RMA handling steps above. I confirm this flag is reserved solely for EVO routers with a genuine hardware defect that must be returned to Evolution Digital, and is not to be selected for routine swaps.": "Entiendo y seguiré los pasos de manejo de RMA anteriores. Confirmo que esta marca es exclusivamente para routers EVO con un defecto de hardware genuino que deben devolverse a Evolution Digital, y no debe seleccionarse para cambios de rutina.",
+    "I understand and will follow the defective-unit handling steps above. I confirm this report is reserved solely for EVO routers with a genuine hardware defect that must be returned to Evolution Digital, and is not to be selected for routine swaps.": "Entiendo y seguiré los pasos de manejo de unidad defectuosa anteriores. Confirmo que este reporte es exclusivamente para routers EVO con un defecto de hardware genuino que deben devolverse a Evolution Digital, y no debe seleccionarse para cambios de rutina.",
     "Ensure to quarantine the EVO and do not reuse.": "Asegúrate de poner el EVO en cuarentena y no reutilizarlo.",
     "Make sure to hand to your supervisor/manager or directly drop off at warehouse.": "Asegúrate de entregarlo a tu supervisor/gerente o déjalo directamente en el almacén.",
-    "This unit will be tracked as a defective RMA. Confirm you understand the handling:":
-      "Esta unidad se rastreará como RMA defectuoso. Confirma que entiendes el manejo:",
+    "This unit will be tracked as a defective unit. Confirm you understand the handling:":
+      "Esta unidad se rastreará como unidad defectuosa. Confirma que entiendes el manejo:",
     "Box the EVO that is going back.": "Empaca el EVO que va de regreso.",
     "Write the customer's": "Escribe el",
     "account #": "# de cuenta del cliente",
     "on the box.": "en la caja.",
     "Place the Warehouse-provided": "Coloca la",
-    "RMA return label": "etiqueta de devolución RMA provista por el almacén",
+    "return label": "etiqueta de devolución provista por el almacén",
     "on the box.": "en la caja.",
     "Ship it back to": "Envíalo de regreso a",
     "Evolution Digital ASAP": "Evolution Digital lo antes posible",
-    "I understand and will follow the RMA handling steps above.":
-      "Entiendo y seguiré los pasos de manejo de RMA de arriba.",
+    "I understand and will follow the defective-unit handling steps above.":
+      "Entiendo y seguiré los pasos de manejo de unidad defectuosa de arriba.",
     "Your market": "Tu mercado",
     "Market": "Mercado",
     "Your name": "Tu nombre",

@@ -193,7 +193,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
         <span class="ar-dot"></span>Auto-refresh in <b id="arCount">5:00</b>
       </span>
       <button class="btn ghost" onclick="loadAll()">Refresh</button>
-      <a class="btn evo-tracker-btn" href="tracker.html" title="Open the EVO Tracker — log & track returned/RMA'd units">EVO Tracker →</a>
+      <a class="btn evo-tracker-btn" href="tracker.html" title="Open the EVO Tracker — log & track returned/defective units">EVO Tracker →</a>
       <button class="btn export-xlsx" id="exportBtn" onclick="exportXlsx()" title="Exports the rows currently shown — respects your status, market &amp; search filters.">Export (XLSX)</button>
       <button class="btn export-pdf" id="exportPdfBtn" onclick="exportPdf()" title="Branded PDF of the rows currently shown — respects your filters.">Export (PDF)</button>
     </div>
@@ -243,7 +243,7 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
       </div>
 
       <label class="mf-full"><span id="m_note_label">Your approval note</span><textarea id="m_note" rows="2" placeholder="Your note — recorded as the manager decision"></textarea></label>
-      <label class="mf-rma" id="m_rma_wrap"><input type="checkbox" id="m_rma"> Flag this EVO as an RMA to Evolution Digital</label>
+      <label class="mf-rma" id="m_rma_wrap"><input type="checkbox" id="m_rma"> Report this EVO as defective (return to Evolution Digital)</label>
       <div class="mf-actions">
         <button class="btn ghost" id="manualCancelBtn" type="button">Cancel</button>
         <button class="btn manual-submit" id="manualSubmitBtn" type="button">Record approved swap</button>
@@ -255,14 +255,14 @@ th{position:sticky;top:0;background:var(--navy);color:#fff;font-size:11px;letter
   <div class="panel rma-panel" id="rmaPanel">
     <div class="phead rma-phead" id="rmaToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="rmaBody">
       <div>
-        <h2>⚠ RMA to Evolution Digital <span class="rma-chevron" id="rmaChevron">▾</span></h2>
+        <h2>⚠&#xFE0E; Defective units: return to Evolution Digital <span class="rma-chevron" id="rmaChevron">▾</span></h2>
         <span class="sub" id="rmaCount">Flagged defective units — shipped back to Evolution</span>
       </div>
       <span class="rma-collapse-hint" id="rmaHint">click to collapse</span>
     </div>
     <div class="wrap" id="rmaBody">
       <div class="rma-export-bar">
-        <button class="btn export-xlsx" id="rmaExportBtn" onclick="exportRmaXlsx()" title="Exports ONLY the RMA-to-Evolution units, on their own.">Export RMA list (XLSX)</button>
+        <button class="btn export-xlsx" id="rmaExportBtn" onclick="exportRmaXlsx()" title="Exports ONLY the defective units going back to Evolution, on their own.">Export defective list (XLSX)</button>
       </div>
       <table id="rmaTable"><thead><tr>
         <th>Submitted</th><th>Status</th><th>Tech</th><th>Market</th><th>Customer</th>
@@ -617,9 +617,9 @@ function renderRma(){
   document.getElementById("rmaCount").textContent =
     rmaRows.length
       ? `${rmaRows.length} flagged defective unit${rmaRows.length===1?"":"s"} — ship back to Evolution Digital`
-      : "No units currently flagged for RMA.";
+      : "No units currently reported defective.";
   if (!rmaRows.length){
-    tb.innerHTML = `<tr><td colspan="11" class="muted" style="text-align:center;padding:22px">No RMA-flagged units.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="11" class="muted" style="text-align:center;padding:22px">No defective units reported.</td></tr>`;
     return;
   }
   tb.innerHTML = rmaRows.map(r=>`
@@ -635,7 +635,7 @@ function renderRma(){
       <td>${Array.isArray(r.rma_symptoms)&&r.rma_symptoms.length?r.rma_symptoms.map(s=>`<span class="sym-tag">${esc(s)}</span>`).join(" "):'<span class="muted">—</span>'}</td>
       <td class="mono">${r.rma_acknowledged?'<span style="color:var(--good);font-weight:800">Yes</span>':'<span style="color:var(--bad);font-weight:800">No</span>'}</td>
       <td class="muted">${esc(r.decided_by_name||r.decided_by_email||"—")}</td>
-      ${DATA.role==="owner"?`<td class="rma-del-cell"><button class="rma-trash" title="Remove from RMA list (keeps the swap record)" onclick="removeFromRma('${r.id}', this)">🗑</button></td>`:""}
+      ${DATA.role==="owner"?`<td class="rma-del-cell"><button class="rma-trash" title="Remove from defective list (keeps the swap record)" onclick="removeFromRma('${r.id}', this)">🗑</button></td>`:""}
     </tr>`).join("");
 }
 
@@ -644,8 +644,8 @@ async function removeFromRma(id, btn){
   const row = DATA.rows.find(r=>r.id===id);
   const label = row ? `${row.customer_first||""} ${row.customer_last||""} (S/N ${row.evo_serial_mac||"—"})`.trim() : "this unit";
   const ok = confirm(
-    `Remove ${label} from the RMA list?\n\n` +
-    `This clears the RMA flag only — the swap record stays in the queue and history. It just no longer shows as going to Evolution Digital.`
+    `Remove ${label} from the defective list?\n\n` +
+    `This clears the defective report only — the swap record stays in the queue and history. It just no longer shows as going to Evolution Digital.`
   );
   if (!ok) return;
   if (btn){ btn.disabled = true; btn.textContent = "…"; }
@@ -659,7 +659,7 @@ async function removeFromRma(id, btn){
     if (!res.ok) throw new Error(j.error || ("HTTP " + res.status));
     loadAll();   // refresh — the unit drops off the RMA list
   }catch(e){
-    alert("Couldn't remove from RMA list: " + e.message);
+    alert("Couldn't remove from defective list: " + e.message);
     if (btn){ btn.disabled = false; btn.textContent = "🗑"; }
   }
 }
@@ -931,7 +931,7 @@ function exportXlsx(){
   // RMA to Evolution Digital — flagged defective units
   const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Symptoms","Submitted","Status","Acknowledged"];
   const rmaRowsX=DATA.rows.filter(r=>r.rma_flagged).map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,(Array.isArray(r.rma_symptoms)?r.rma_symptoms.join("; "):""),fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "RMA to Evolution Digital");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "Defective to Evolution Digital");
 
   const stf = document.getElementById("fStatus").value;
   const tag = stf && stf!=="all" ? "_"+stf : "";
@@ -941,12 +941,12 @@ function exportXlsx(){
 // Standalone export of ONLY the RMA-to-Evolution units (separate from the full export).
 function exportRmaXlsx(){
   const rmaRows = DATA.rows.filter(r=>r.rma_flagged);
-  if(!rmaRows.length){ alert("No RMA-flagged units to export."); return; }
+  if(!rmaRows.length){ alert("No defective units to export."); return; }
   const wb = XLSX.utils.book_new();
   const rmaHeaders=["EVO S/N or MAC","Customer","Account #","Removed From Acct","Tech","Market","Symptoms","Submitted","Status","Acknowledged"];
   const rmaRowsX=rmaRows.map(r=>[r.evo_serial_mac,`${r.customer_first} ${r.customer_last}`,r.account_number,r.removed_from_acct,r.tech_name,r.market_code,(Array.isArray(r.rma_symptoms)?r.rma_symptoms.join("; "):""),fmt(r.submitted_at),r.status,r.rma_acknowledged?"Yes":"No"]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "RMA to Evolution Digital");
-  XLSX.writeFile(wb, `EVO_RMA_to_Evolution_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([rmaHeaders,...rmaRowsX]), "Defective to Evolution Digital");
+  XLSX.writeFile(wb, `EVO_Defective_to_Evolution_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

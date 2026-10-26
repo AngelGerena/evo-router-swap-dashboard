@@ -117,7 +117,7 @@ tr:hover td{background:#f8fafc;cursor:pointer}
         <span class="chain-step">1 · Swapped in field</span><span class="chain-arrow">→</span>
         <span class="chain-step">2 · Vetted by market manager</span><span class="chain-arrow">→</span>
         <span class="chain-step">3 · Delivered to warehouse</span><span class="chain-arrow">→</span>
-        <span class="chain-step">4 · RMA'd to Evolution (or kept/scrapped)</span>
+        <span class="chain-step">4 · Sent to Evolution as defective (or kept/scrapped)</span>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:12px 0 0">How to use it: add a unit when it comes back (link it to an existing swap if there is one, or log it standalone). Managers record their vetting + findings; warehouse records what was received and the final disposition. Update an entry as it moves along — every change is saved and audit-logged.</p>
     </div>
@@ -171,9 +171,9 @@ tr:hover td{background:#f8fafc;cursor:pointer}
         <label class="full">Outcome
           <select id="t_disposition">
             <option value="">— choose —</option>
-            <option value="rma_evolution">RMA to Evolution Digital (genuine defect)</option>
+            <option value="rma_evolution">Sent to Evolution Digital (genuine defect)</option>
             <option value="kept_stock">Kept in stock (still good)</option>
-            <option value="scrapped">Scrapped / disposed (beyond repair, not RMA)</option>
+            <option value="scrapped">Scrapped / disposed (beyond repair, not sent to Evolution)</option>
             <option value="pending_inspection">Pending inspection</option>
           </select>
         </label>
@@ -184,7 +184,7 @@ tr:hover td{background:#f8fafc;cursor:pointer}
         <div class="wh-box">
           <label class="chk"><input type="checkbox" id="t_delivered"> Delivered to warehouse</label>
           <label class="chk"><input type="checkbox" id="t_received"> Received by warehouse</label>
-          <label class="chk"><input type="checkbox" id="t_rmad"> RMA'd to Evolution Digital</label>
+          <label class="chk"><input type="checkbox" id="t_rmad"> Sent to Evolution Digital (defective)</label>
           <label class="full" style="margin:10px 0 0">Warehouse notes<textarea id="t_wh_notes" rows="2"></textarea></label>
         </div>
 
@@ -208,7 +208,7 @@ tr:hover td{background:#f8fafc;cursor:pointer}
       </div>
       <div class="filters">
         <input id="fSearch" placeholder="Search serial, account, customer…">
-        <select id="fDisp"><option value="">All dispositions</option><option value="rma_evolution">RMA to Evolution</option><option value="kept_stock">Kept in stock</option><option value="scrapped">Scrapped</option><option value="pending_inspection">Pending inspection</option></select>
+        <select id="fDisp"><option value="">All dispositions</option><option value="rma_evolution">Sent to Evolution</option><option value="kept_stock">Kept in stock</option><option value="scrapped">Scrapped</option><option value="pending_inspection">Pending inspection</option></select>
         <select id="fMarket"><option value="">All markets</option></select>
         <select id="fVet"><option value="">Vetted: any</option><option value="y">Vetted: yes</option><option value="n">Vetted: no</option></select>
       </div>
@@ -229,7 +229,7 @@ let TOKEN = "", USER = "", DATA = { rows: [], swaps: [], me: {} }, editingId = n
 
 const SWAP_REASONS = ["Storm damage","Lightning-fried port","Won't power on (after PSU swap)","WAN port failure","Ethernet port failure","No internet connection"];
 const HW_SYMPTOMS = ["Won't power on (after PSU swap)","Port damage (WAN / Ethernet / coax)","Physical or water damage","Burn / surge damage (lightning)","No internet / no Wi-Fi","No fault found (tests OK)","Other"];
-const DISP_LABELS = { rma_evolution:"RMA to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped", pending_inspection:"Pending inspection" };
+const DISP_LABELS = { rma_evolution:"Sent to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped", pending_inspection:"Pending inspection" };
 const DISP_CLASS = { rma_evolution:"rma", kept_stock:"kept", scrapped:"scrap", pending_inspection:"pending" };
 
 const $ = (s) => document.querySelector(s);
@@ -448,7 +448,7 @@ function renderTable(){
 }
 
 // ================= EXPORTS =================
-const DISP_TXT = { rma_evolution:"RMA to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped/disposed", pending_inspection:"Pending inspection" };
+const DISP_TXT = { rma_evolution:"Sent to Evolution", kept_stock:"Kept in stock", scrapped:"Scrapped/disposed", pending_inspection:"Pending inspection" };
 function fmtFull(d){ return d ? new Date(d).toLocaleString() : ""; }
 function rowSwap(r){ return [...(r.swap_reasons||[]), r.swap_reason_other?("Other: "+r.swap_reason_other):null].filter(Boolean).join("; "); }
 function rowHw(r){ return [...(r.hardware_symptoms||[]), r.hardware_symptom_details?("Details: "+r.hardware_symptom_details):null].filter(Boolean).join("; "); }
@@ -459,7 +459,7 @@ document.getElementById("expLifecycleXlsx").addEventListener("click", ()=>{
   const rows = DATA.rows||[];
   if(!rows.length){ alert("No entries to export."); return; }
   const wb = XLSX.utils.book_new();
-  const headers = ["Logged","Serial","Account","Customer","Market","Swap reason","HW symptom","Vetted","Vetted by","Vetting findings","Disposition","Disposition reason","RMA'd to Evolution","Warehouse notes","Status","Logged by","Updated by"];
+  const headers = ["Logged","Serial","Account","Customer","Market","Swap reason","HW symptom","Vetted","Vetted by","Vetting findings","Disposition","Disposition reason","Sent to Evolution","Warehouse notes","Status","Logged by","Updated by"];
   const toRow = r => [fmtFull(r.created_at), r.evo_serial_mac||"", r.account_number||"", r.customer_name||"", r.market_code||"", rowSwap(r), rowHw(r), r.vetted?"Yes":"No", r.vetted_by||"", r.vetted_findings||"", DISP_TXT[r.disposition]||r.disposition||"", r.disposition_reason||"", r.rma_to_evolution?"Yes":"No", r.warehouse_notes||"", r.status||"", r.logged_by||"", r.updated_by||""];
   // All units
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows.map(toRow)]), "All units");
@@ -500,7 +500,7 @@ document.getElementById("expLifecyclePdf").addEventListener("click", ()=>{
       `Hardware symptom: ${rowHw(r)||"—"}`,
       `Vetted: ${r.vetted?"YES":"NO"}${r.vetted_by?(" by "+r.vetted_by):""}${r.vetted_findings?("  —  "+r.vetted_findings):""}`,
       `Disposition: ${DISP_TXT[r.disposition]||r.disposition||"—"}${r.disposition_reason?("  —  "+r.disposition_reason):""}`,
-      `RMA'd to Evolution: ${r.rma_to_evolution?"YES":"NO"}${r.warehouse_notes?("    Notes: "+r.warehouse_notes):""}`,
+      `Sent to Evolution: ${r.rma_to_evolution?"YES":"NO"}${r.warehouse_notes?("    Notes: "+r.warehouse_notes):""}`,
     ];
     lines.forEach(t=>{ doc.splitTextToSize(t, W-2*M).forEach(s=>{ doc.text(s,M+10,y); nl(12); }); });
     const lg = logsFor(r.id);
@@ -570,9 +570,9 @@ document.getElementById("expChartsPdf").addEventListener("click", ()=>{
   doc.addImage(pie(0,0,0,dispData).toDataURL("image/png"), "PNG", M, 110, 320, 185);
 
   // Chart 2: RMA vs not (pie)
-  const rmaData={"RMA to Evolution":0,"Not sent back":0};
-  rows.forEach(r=>{ if(r.rma_to_evolution||r.disposition==="rma_evolution") rmaData["RMA to Evolution"]++; else rmaData["Not sent back"]++; });
-  doc.text("RMA vs not sent back", M, 320);
+  const rmaData={"Sent to Evolution":0,"Not sent back":0};
+  rows.forEach(r=>{ if(r.rma_to_evolution||r.disposition==="rma_evolution") rmaData["Sent to Evolution"]++; else rmaData["Not sent back"]++; });
+  doc.text("Sent to Evolution vs not sent back", M, 320);
   doc.addImage(pie(0,0,0,rmaData).toDataURL("image/png"), "PNG", M, 330, 320, 185);
 
   // Chart 3: swap reasons (bar)

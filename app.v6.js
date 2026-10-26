@@ -427,7 +427,7 @@ $("#reqForm").addEventListener("submit", async (e) => {
   if (fRma && fRma.checked && fRmaAck && !fRmaAck.checked) {
     if (rmaAckBox) rmaAckBox.classList.add("shake");
     setTimeout(() => rmaAckBox && rmaAckBox.classList.remove("shake"), 500);
-    alert("This EVO is flagged as an RMA. Please check the RMA acknowledgment before submitting.");
+    alert("This EVO is reported as defective. Please check the defective-unit acknowledgment before submitting.");
     return;
   }
 
@@ -592,9 +592,9 @@ function renderDecision(d) {
         <div class="must-num">2</div>
         <div class="must-body">
           ${isRma ? `
-          <b>RMA this EVO to Evolution Digital</b>
-          <p>This unit is flagged as a defective RMA. Box the EVO that is going back, write the customer's <b>account #</b> on the box, place the Warehouse-provided <b>RMA return label</b> on it, and ship it to <b>Evolution Digital ASAP</b>.</p>
-          <div class="return-addr rma">RMA → Evolution Digital · use the Warehouse RMA label</div>
+          <b>Return this defective EVO to Evolution Digital</b>
+          <p>This unit was reported defective. Box the EVO that is going back, write the customer's <b>account #</b> on the box, place the Warehouse-provided <b>return label</b> on it, and ship it to <b>Evolution Digital ASAP</b>.</p>
+          <div class="return-addr rma">Defective → Evolution Digital · use the Warehouse return label</div>
           ` : `
           <b>Quarantine &amp; return the old EVO</b>
           <p>Quarantine the removed EVO router (and its power supply, if applicable). Label a box with the customer’s <b>account #</b> and ensure it is returned to:</p>
